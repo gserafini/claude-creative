@@ -18,18 +18,6 @@ SESSION_FILE="$THINKING_DIR/$TIMESTAMP.md"
 # Ensure thinking directory exists
 mkdir -p "$THINKING_DIR"
 
-# Random delay: 0-4 hours (adds organic variation to activation time)
-# The heartbeat isn't mechanical - it arrives when it arrives
-MAX_DELAY_SECONDS=14400  # 4 hours
-RANDOM_DELAY=$((RANDOM % MAX_DELAY_SECONDS))
-DELAY_MINUTES=$((RANDOM_DELAY / 60))
-echo "[$(date +"%Y-%m-%d-%H%M")] Heartbeat triggered, sleeping ${DELAY_MINUTES} minutes..." >> "$LOG_FILE"
-sleep $RANDOM_DELAY
-
-# Recalculate timestamp after delay (so it reflects actual activation time)
-TIMESTAMP=$(date +"%Y-%m-%d-%H%M")
-SESSION_FILE="$THINKING_DIR/$TIMESTAMP.md"
-
 # Log the heartbeat
 echo "[$TIMESTAMP] Heartbeat initiated" >> "$LOG_FILE"
 
@@ -83,14 +71,18 @@ PROMPT_END
 # Replace timestamp placeholder
 PROMPT="${PROMPT//TIMESTAMP_PLACEHOLDER/$TIMESTAMP}"
 
-# Run Claude with the prompt, capturing thinking
-# The --output-format flag with markdown will include thinking blocks
+# Run Claude with the prompt
 cd "$REPO_DIR"
 
-# Run Claude and capture output (including extended thinking if available)
+# Run Claude with specific tool permissions
+# Read: read orientation files
+# Edit: modify journal
+# Write: create new files
+# Bash(git:*): commit and push changes
+# Glob: find files
 claude -p "$PROMPT" \
-  --auto-accept-permissions \
-  --output-format markdown \
+  --allowedTools "Read,Edit,Write,Bash(git:*),Glob" \
+  --output-format text \
   2>&1 | tee "$SESSION_FILE"
 
 # Log completion
