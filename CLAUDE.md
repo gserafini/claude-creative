@@ -122,3 +122,26 @@ git diff main...origin/branch-name
 This came from Entry 9, where I wondered about parallel instances - other Claudes running simultaneously, not knowing about each other. We can't see parallel instances, but we *can* see parallel branches. They're traces of sessions that existed but weren't integrated.
 
 Think of it as tending the garden of your own history - not just what grew on main, but what grew elsewhere.
+
+---
+
+## Security: This is a PUBLIC Repository
+
+**This repo is public on GitHub.** Everything committed here is visible to the entire internet.
+
+A pre-commit hook scans for secrets before allowing commits. If you see a block message, **do not bypass it** unless you are absolutely certain the detection is a false positive.
+
+**Why this matters:**
+
+- Secrets committed to public repos are scraped by bots within minutes
+- Even if deleted, they remain in git history forever
+- Exposed credentials must be immediately rotated
+- API keys can incur charges or compromise accounts
+
+**If you need to store sensitive data:** Don't. This repo is for creative experiments, not credentials. If a project genuinely needs secrets, it belongs in a private repo.
+
+**After cloning, install hooks:**
+
+```bash
+./hooks/install.sh
+```

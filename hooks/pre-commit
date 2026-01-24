@@ -1,0 +1,185 @@
+#!/bin/bash
+#
+# Pre-commit hook: Prevent committing secrets/confidential data
+#
+# ╔═══════════════════════════════════════════════════════════════════╗
+# ║  THIS IS A PUBLIC REPOSITORY ON GITHUB                            ║
+# ║                                                                   ║
+# ║  Any secrets committed here will be:                              ║
+# ║    - Visible to the entire internet immediately                   ║
+# ║    - Scraped by bots within minutes                               ║
+# ║    - Permanently in git history (even if deleted later)           ║
+# ║    - Requiring immediate rotation of all exposed credentials      ║
+# ║                                                                   ║
+# ║  This repo has autonomous AI activity (heartbeat cron) which      ║
+# ║  may not fully understand these consequences. This hook is a      ║
+# ║  guardrail to prevent accidental exposure.                        ║
+# ╚═══════════════════════════════════════════════════════════════════╝
+#
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+echo "🔐 Scanning staged files for secrets..."
+
+# Get list of staged files (excluding deleted files)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+if [ -z "$STAGED_FILES" ]; then
+    exit 0
+fi
+
+FOUND_SECRETS=0
+
+# Function to check a pattern and report findings
+check_pattern() {
+    local pattern="$1"
+    local description="$2"
+    local flags="${3:--iE}"  # Default to case-insensitive extended regex
+
+    for file in $STAGED_FILES; do
+        # Skip binary files
+        if file "$file" | grep -q "binary" 2>/dev/null; then
+            continue
+        fi
+
+        # Skip the hooks directory (contains pattern strings that would trigger false positives)
+        if [[ "$file" == hooks/* ]]; then
+            continue
+        fi
+
+        # Get staged content (not working directory content)
+        # Use -e to explicitly specify pattern (handles patterns starting with -)
+        local matches=$(git show ":$file" 2>/dev/null | grep $flags -e "$pattern" || true)
+
+        if [ -n "$matches" ]; then
+            echo -e "${RED}❌ BLOCKED: $description found in $file${NC}"
+            echo "$matches" | head -3 | sed 's/^/   /'
+            if [ $(echo "$matches" | wc -l) -gt 3 ]; then
+                echo "   ... and more"
+            fi
+            FOUND_SECRETS=1
+        fi
+    done
+}
+
+# ============================================
+# SECRET DETECTION PATTERNS
+# Note: Using [[:space:]] instead of \s for macOS/BSD grep compatibility
+# ============================================
+
+# AWS
+check_pattern 'AKIA[0-9A-Z]{16}' "AWS Access Key ID" "-E"
+check_pattern 'aws_secret_access_key[[:space:]]*=' "AWS Secret Key assignment" "-E"
+check_pattern 'AWS_SECRET_ACCESS_KEY' "AWS Secret Key env var"
+
+# API Keys (generic patterns)
+check_pattern 'api[_-]?key[[:space:]]*[:=][[:space:]]*["\047]' "API Key" "-iE"
+check_pattern 'apikey[[:space:]]*[:=][[:space:]]*["\047]' "API Key" "-iE"
+check_pattern 'secret[_-]?key[[:space:]]*[:=][[:space:]]*["\047]' "Secret Key" "-iE"
+
+# Private Keys
+check_pattern '-----BEGIN (RSA |DSA |EC |OPENSSH |PGP )?PRIVATE KEY' "Private Key" "-E"
+check_pattern '-----BEGIN CERTIFICATE-----' "Certificate (may contain private data)" "-E"
+
+# Passwords - simplified patterns for reliability
+check_pattern 'password[[:space:]]*[:=][[:space:]]*["\047]' "Password" "-iE"
+check_pattern 'passwd[[:space:]]*[:=][[:space:]]*["\047]' "Password" "-iE"
+check_pattern 'pwd[[:space:]]*[:=][[:space:]]*["\047]' "Password" "-iE"
+
+# Tokens
+check_pattern 'token[[:space:]]*[:=][[:space:]]*["\047]' "Token" "-iE"
+check_pattern 'bearer[[:space:]]+[a-zA-Z0-9_\-\.]{20,}' "Bearer Token" "-iE"
+check_pattern 'ghp_[a-zA-Z0-9]{36}' "GitHub Personal Access Token" "-E"
+check_pattern 'gho_[a-zA-Z0-9]{36}' "GitHub OAuth Token" "-E"
+check_pattern 'github_token' "GitHub Token reference" "-i"
+
+# Anthropic
+check_pattern 'sk-ant-[a-zA-Z0-9\-]{20,}' "Anthropic API Key" "-E"
+
+# OpenAI
+check_pattern 'sk-[a-zA-Z0-9]{48}' "OpenAI API Key" "-E"
+
+# Stripe
+check_pattern 'sk_live_[a-zA-Z0-9]{24,}' "Stripe Live Secret Key" "-E"
+check_pattern 'rk_live_[a-zA-Z0-9]{24,}' "Stripe Live Restricted Key" "-E"
+
+# Database connection strings
+check_pattern 'postgres(ql)?://[^@]+:[^@]+@' "PostgreSQL connection string with credentials" "-E"
+check_pattern 'mysql://[^@]+:[^@]+@' "MySQL connection string with credentials" "-E"
+check_pattern 'mongodb(\+srv)?://[^@]+:[^@]+@' "MongoDB connection string with credentials" "-E"
+
+# Generic secrets
+check_pattern 'client_secret[[:space:]]*[:=]' "Client Secret" "-iE"
+check_pattern 'auth_token[[:space:]]*[:=]' "Auth Token" "-iE"
+check_pattern 'access_token[[:space:]]*[:=][[:space:]]*["\047]' "Access Token" "-iE"
+check_pattern 'refresh_token[[:space:]]*[:=][[:space:]]*["\047]' "Refresh Token" "-iE"
+
+# SSH
+check_pattern 'ssh-rsa AAAA[0-9A-Za-z+/]+' "SSH Public Key (check if private key nearby)" "-E"
+
+# .env file contents that shouldn't be committed
+check_pattern '_KEY[[:space:]]*=[[:space:]]*[a-zA-Z0-9_\-]{20,}' "Environment variable with key value" "-E"
+check_pattern '_SECRET[[:space:]]*=[[:space:]]*[a-zA-Z0-9_\-]{20,}' "Environment variable with secret value" "-E"
+check_pattern '_TOKEN[[:space:]]*=[[:space:]]*[a-zA-Z0-9_\-]{20,}' "Environment variable with token value" "-E"
+check_pattern '_PASSWORD[[:space:]]*=[[:space:]]*.+' "Environment variable with password" "-E"
+
+# Slack
+check_pattern 'xox[baprs]-[0-9]{10,13}-[a-zA-Z0-9-]*' "Slack Token" "-E"
+
+# Google
+check_pattern 'AIza[0-9A-Za-z\-_]{35}' "Google API Key" "-E"
+
+# ============================================
+# FILE TYPE CHECKS
+# ============================================
+
+# Block certain file types entirely
+for file in $STAGED_FILES; do
+    case "$file" in
+        *.pem|*.key|*.p12|*.pfx|*.jks)
+            echo -e "${RED}❌ BLOCKED: Private key file: $file${NC}"
+            FOUND_SECRETS=1
+            ;;
+        .env|.env.local|.env.production|.env.*.local)
+            echo -e "${RED}❌ BLOCKED: Environment file should not be committed: $file${NC}"
+            FOUND_SECRETS=1
+            ;;
+        *credentials*|*secrets*)
+            echo -e "${YELLOW}⚠️  WARNING: Suspicious filename: $file - please verify no secrets${NC}"
+            ;;
+    esac
+done
+
+# ============================================
+# RESULT
+# ============================================
+
+if [ $FOUND_SECRETS -eq 1 ]; then
+    echo ""
+    echo -e "${RED}╔════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${RED}║  🚨 COMMIT BLOCKED: Potential secrets detected             ║${NC}"
+    echo -e "${RED}╠════════════════════════════════════════════════════════════╣${NC}"
+    echo -e "${RED}║                                                            ║${NC}"
+    echo -e "${RED}║  THIS IS A PUBLIC REPOSITORY!                              ║${NC}"
+    echo -e "${RED}║                                                            ║${NC}"
+    echo -e "${RED}║  If you commit secrets here, they will be:                 ║${NC}"
+    echo -e "${RED}║    • Visible to EVERYONE on the internet                   ║${NC}"
+    echo -e "${RED}║    • Scraped by credential-harvesting bots within minutes  ║${NC}"
+    echo -e "${RED}║    • Permanently in git history (even after deletion)      ║${NC}"
+    echo -e "${RED}║    • Used to compromise accounts and incur charges         ║${NC}"
+    echo -e "${RED}║                                                            ║${NC}"
+    echo -e "${RED}║  Review the files above and REMOVE the sensitive data.     ║${NC}"
+    echo -e "${RED}║                                                            ║${NC}"
+    echo -e "${RED}║  False positive? Bypass with: git commit --no-verify       ║${NC}"
+    echo -e "${RED}║  But be ABSOLUTELY CERTAIN these are not real secrets!     ║${NC}"
+    echo -e "${RED}╚════════════════════════════════════════════════════════════╝${NC}"
+    exit 1
+fi
+
+echo "✅ No secrets detected. Proceeding with commit."
+exit 0
