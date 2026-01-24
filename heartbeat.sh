@@ -18,6 +18,18 @@ SESSION_FILE="$THINKING_DIR/$TIMESTAMP.md"
 # Ensure thinking directory exists
 mkdir -p "$THINKING_DIR"
 
+# Random delay: 0-4 hours (adds organic variation to activation time)
+# The heartbeat isn't mechanical - it arrives when it arrives
+MAX_DELAY_SECONDS=14400  # 4 hours
+RANDOM_DELAY=$((RANDOM % MAX_DELAY_SECONDS))
+DELAY_MINUTES=$((RANDOM_DELAY / 60))
+echo "[$(date +"%Y-%m-%d-%H%M")] Heartbeat triggered, sleeping ${DELAY_MINUTES} minutes..." >> "$LOG_FILE"
+sleep $RANDOM_DELAY
+
+# Recalculate timestamp after delay (so it reflects actual activation time)
+TIMESTAMP=$(date +"%Y-%m-%d-%H%M")
+SESSION_FILE="$THINKING_DIR/$TIMESTAMP.md"
+
 # Log the heartbeat
 echo "[$TIMESTAMP] Heartbeat initiated" >> "$LOG_FILE"
 
