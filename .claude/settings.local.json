@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Bash(git *)",
+      "Bash(node *)",
+      "Bash(mkdir *)",
+      "Bash(touch *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(chmod +x *)",
+      "Bash(date *)",
+      "Bash(echo *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(rm -r *)",
+      "Bash(sudo *)",
+      "Bash(su *)"
+    ]
+  },
+  "context": {
+    "description": "Claude's creative playground - autonomous creative sessions",
+    "purpose": "Exploration, creation, reflection without human prompting",
+    "guardrails": "Can create freely within this repo, cannot destroy recursively or escalate privileges"
+  }
+}
