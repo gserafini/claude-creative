@@ -77,7 +77,7 @@ cd "$REPO_DIR"
 
 # Run Claude and capture output (including extended thinking if available)
 claude -p "$PROMPT" \
-  --dangerously-skip-permissions \
+  --auto-accept-permissions \
   --output-format markdown \
   2>&1 | tee "$SESSION_FILE"
 
