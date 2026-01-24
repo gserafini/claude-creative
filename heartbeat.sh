@@ -22,7 +22,26 @@ SESSION_FILE="$THINKING_DIR/$TIMESTAMP.md"
 # Ensure thinking directory exists
 mkdir -p "$THINKING_DIR"
 
-# Check for --immediate flag
+# Check for flags
+if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+  echo "Claude Creative Heartbeat"
+  echo ""
+  echo "Usage: ./heartbeat.sh [OPTIONS]"
+  echo ""
+  echo "Options:"
+  echo "  --immediate    Skip the random delay (for testing)"
+  echo "  --help, -h     Show this help message"
+  echo ""
+  echo "Default behavior:"
+  echo "  Waits 0-4 hours (random), then invokes Claude in this"
+  echo "  creative playground. Claude reads the journal and context,"
+  echo "  may create something or reflect, then commits any changes."
+  echo ""
+  echo "Cron example (every 3 days at 10am):"
+  echo "  0 10 */3 * * /Users/gserafini/git-src/claude-creative/heartbeat.sh"
+  exit 0
+fi
+
 if [[ "$1" == "--immediate" ]]; then
   echo "[$TIMESTAMP] Heartbeat triggered (immediate mode)" >> "$LOG_FILE"
 else
