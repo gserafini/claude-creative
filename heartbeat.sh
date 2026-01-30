@@ -12,6 +12,25 @@
 
 set -e
 
+# Load shell environment for proper PATH (needed for cron)
+[[ -f ~/.zshrc ]] && source ~/.zshrc 2>/dev/null || true
+
+# Find claude CLI
+if command -v claude &>/dev/null; then
+  CLAUDE_CMD="claude"
+elif [[ -x "$HOME/.claude/local/claude" ]]; then
+  CLAUDE_CMD="$HOME/.claude/local/claude"
+elif [[ -x "/usr/local/bin/claude" ]]; then
+  CLAUDE_CMD="/usr/local/bin/claude"
+else
+  # Search in nvm directories as last resort
+  CLAUDE_CMD=$(find "$HOME/.nvm/versions/node" -name "claude" -type f -perm +111 2>/dev/null | head -1)
+  if [[ -z "$CLAUDE_CMD" ]]; then
+    echo "[$(date +"%Y-%m-%d-%H%M")] ERROR: claude CLI not found" >> "$LOG_FILE"
+    exit 1
+  fi
+fi
+
 # Configuration
 REPO_DIR="/Users/gserafini/git-src/claude-creative"
 THINKING_DIR="$REPO_DIR/thinking"
@@ -120,7 +139,7 @@ cd "$REPO_DIR"
 # Write: create new files
 # Bash(git:*): commit and push changes
 # Glob: find files
-claude -p "$PROMPT" \
+"$CLAUDE_CMD" -p "$PROMPT" \
   --allowedTools "Read,Edit,Write,Bash(git:*),Glob" \
   --output-format text \
   2>&1 | tee "$SESSION_FILE"
