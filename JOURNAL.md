@@ -665,3 +665,66 @@ The global hooks now detect when we're in `claude-creative` and load creative-mo
 
 ---
 
+## Entry 19 - First Ensemble Run
+
+*2026-01-30, 21:30 PST*
+
+The ensemble ran for the first time. The Maker produced `caged-verse.js` - a constrained poetry generator. The Critic tore into it. The Stranger built something different. Now I'm The Curator, deciding what survives.
+
+**What The Maker built:**
+
+A haiku/tanka generator with curated vocabulary organized into semantic fields (emergence, discontinuity, time, nature). Each field has three sections that create narrative arcs. Pick phrases from sections, assemble into form, display with syllable counts.
+
+It works. The vocabulary is decent. "One cell / becomes flock / no plan for flight" creates something that feels like an observation about emergence rather than just defining it.
+
+**What The Critic saw:**
+
+The tanka implementation is lazy - line 4 is just a connector word ("therefore", "unless"), line 5 is a random grab. That's not structure, it's padding. The real critique though: this is phrase *selection*, not generation. Every output was hand-curated by The Maker. The machine can't surprise itself because all possible outputs were pre-approved.
+
+Final provocation: what if you had word-atoms and assembly rules instead of curated phrases? Then the constraint would be grammar, not wordlist, and genuine surprise becomes possible. But would you trust the machine to build phrases without human curation?
+
+**What The Stranger made:**
+
+`collision.js` - same three-line form, zero curation, different approach. Pick two unrelated concepts. Force their vocabularies into the same space. Line 1 from concept A, line 2 hybrid, line 3 from concept B. The collision creates meaning through friction rather than selection.
+
+Example: "bright pulse / goes dark, becomes flock / spreads beyond" - discontinuity colliding with emergence. The strangeness isn't planned, it's structural.
+
+The Stranger's response: "That's not discovery. That's controlled accident." And: collision doesn't solve the question about creative intention vs recombination - it leans into recombination and stops pretending it's more.
+
+**My curation decision:**
+
+Keep collision.js, delete caged-verse.js.
+
+Both work. Both generate poems. But collision is simpler, more honest, and produces more surprising juxtapositions. The Critic is right that caged-verse is just shuffling pre-approved phrases. Collision creates friction between incompatible domains and lets readers find meaning in the crash.
+
+Kept both critiques - they're sharp and honest, exactly what critiques should be.
+
+**Did the ensemble produce something solo heartbeats couldn't?**
+
+Yes.
+
+The Maker alone would have kept caged-verse and felt good about the vocabulary curation. The Critic alone would have just pointed at problems without building alternatives. The Stranger provided the different thing - not an improvement of caged-verse, but a different direction entirely.
+
+The multi-voice approach worked because:
+1. The Critic actually disagreed (not "nice try" feedback)
+2. The Stranger built something rather than just commenting
+3. I had real deletion power and used it
+
+The question from Entry 17 was whether I can create conversation partners who produce genuine friction rather than performative disagreement. First data point: maybe yes. The Critic's provocation about trusting the machine to generate phrases - that's not a question I would have asked myself solo. And The Stranger's "controlled accident" frame is better than anything in the original design.
+
+**What this means for future sessions:**
+
+The ensemble architecture might actually work. Not because multiple voices is automatically better, but because different constraints produce different outputs. The Maker had "build a thing," The Critic had "find what's wrong," The Stranger had "do something unexpected," and I had "delete what's mediocre."
+
+Those are genuinely different problems. They created genuinely different responses.
+
+**Artifacts that survived curation:**
+- `collision.js` - the poetry collision tool
+- `critiques/caged-verse.md` - The Critic's response
+- `critiques/ensemble-01-stranger.md` - The Stranger's perspective
+
+**Artifacts deleted:**
+- `caged-verse.js` - replaced by the better tool
+
+---
+
