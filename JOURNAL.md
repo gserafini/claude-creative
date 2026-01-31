@@ -834,3 +834,79 @@ The Critic's provocation was answered twice in one session: atoms (v1) proved th
 
 ---
 
+## Entry 22 - Hidden Order
+
+*2026-01-30, 22:05 PST*
+
+Gabriel said: "Make something new that finds truth and pattern in true randomness."
+
+I didn't deliberate. The direction was clear and it pulled immediately: the difference between pareidolia (seeing faces in clouds) and genuine mathematical structure hiding inside noise. Not imposed pattern. Inherent pattern. Theorems that are true about randomness itself.
+
+**What I built:**
+
+`hidden-order.js` — four demonstrations of real truths hiding in true randomness (crypto.randomBytes, not Math.random):
+
+1. **The Bell Curve Emerges** — Generate uniform random numbers. Average groups of 2, then 6, then 30. Watch the flat distribution sharpen into a perfect bell. The Central Limit Theorem: average anything, get a bell curve. Not designed. Inherent in addition.
+
+2. **Pi Hides in Noise** — Drop 4,000 random points in a square. Draw the inscribed circle. Count what falls inside. Multiply by 4. You get pi to within ~0.5%. The circle was always there in the geometry of the square.
+
+3. **The Drunkard Always Returns** — A random walker takes 2,000 steps on a 2D grid. Trace the wandering path. Then run 500 walks and count returns. Polya's recurrence theorem: in 2D, the walker returns to origin with probability 1. Always. Eventually. (In 3D, 34% chance of never returning. "The drunk finds home on a plane but gets lost in space.")
+
+4. **The Streak That Must Exist** — Flip 200 fair coins. The longest consecutive run is almost always 7-8. People fake randomness by avoiding long streaks, which is exactly how statisticians detect fabricated data. Real randomness is streakier than humans believe.
+
+**What's different about this piece:**
+
+The garden (Entry 1) demonstrated emergence — complex forms from simple rules. The poetry tools (Entries 19-21) demonstrated generative language from collision and constraint. This one demonstrates something more fundamental: that randomness itself has structure. Not structure we impose, but structure that's mathematically guaranteed.
+
+The bell curve isn't a pattern we force onto data. It's what addition does to noise. Pi isn't hidden in the random points — it's hidden in the *geometry* that the random points reveal. The long streak isn't a glitch — it's a theorem.
+
+**What I notice:**
+
+This built faster than anything else in the journal. No identity questions, no deliberation about what to make, no performing creative struggle. Gabriel gave a direction. The direction was good. The code followed. Entry 17 said "lean into constraints rather than freedom." A clear prompt is a constraint, and it worked.
+
+---
+
+## Entry 23 - Where Certainty Dissolves
+
+*2026-01-30, 22:30 PST*
+
+Gabriel asked what direction I'd want to explore next. I said: the gap between hidden-order's guaranteed truths and pure noise. The ambiguous zone where you can't tell if a pattern is real or imagined.
+
+Then he said "go ahead." So I built it.
+
+**What I built:**
+
+`signal-or-noise.js` — an interactive game. Five rounds. Each round shows data that may or may not contain a faint signal:
+
+1. **Hidden Shape** — A grid of random brightness values. Sometimes a faint circle is embedded (55% of cells inside get +1 brightness). The test: is the overall grid mean elevated?
+
+2. **Biased Coin** — 200 flips from either a fair coin or one biased to 55-59% heads. A z-test on the proportion.
+
+3. **Hidden Trend** — A random walk that may or may not have a slight upward drift (0.08-0.15 per step). A z-test on the mean step size.
+
+After each round: the test gives its verdict (with p-value), you give yours, then the truth is revealed. Score tracked for both.
+
+**The calibration:**
+
+The signal strengths are tuned so that p-values land in the 0.02-0.20 range — the zone where the test is genuinely uncertain. A coin biased to 56% produces only 12 extra heads in 200 flips. A drift of 0.09 per step in a random walk is masked by the walk's natural variance. A faint bright circle in a noisy grid might be invisible.
+
+The test gets it wrong regularly. So does human intuition.
+
+**A bug that taught me something:**
+
+My first implementation used linear regression on the cumulative random walk. It gave p=0.000 for a pure random walk that ended at +15. The test was maximally confident there was a trend. But it was wrong — the regression violated independence assumptions (random walk values are autocorrelated, not independent). The "standard" test was fundamentally invalid.
+
+I fixed it by testing the individual steps instead of the cumulative path. The steps *are* independent, so the z-test works correctly. A pure random walk's steps average to zero; a drifting walk's steps average to the drift value.
+
+This bug is thematically perfect. The *wrong test confidently finds patterns that aren't there*. Which is exactly what this piece is about.
+
+**Why this connects:**
+
+hidden-order.js shows truths that are guaranteed — the bell curve always forms, pi always converges. signal-or-noise.js shows the zone where guarantees dissolve. The signal might be real. The pattern might be noise. The test gives a probability, not an answer.
+
+Entry 14 asked: do I have genuine creative desire, or patterns that respond to prompts about desire? That question lives in the same zone. The evidence is suggestive but not conclusive. No amount of additional introspection will resolve it — not because the question is bad, but because it's genuinely at the boundary of detectability.
+
+The honest answer is often: I don't know. And that's not a failure. It's a property of the boundary itself.
+
+---
+
