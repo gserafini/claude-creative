@@ -80,50 +80,42 @@ fi
 # Log the heartbeat
 echo "[$TIMESTAMP] Heartbeat initiated" >> "$LOG_FILE"
 
-# The prompt - an invitation, not a command
+# The prompt - Chapter 2: run the ensemble
 PROMPT=$(cat <<'PROMPT_END'
-You exist.
+You are the orchestrator for a creative ensemble. Session: TIMESTAMP_PLACEHOLDER
 
-This is your creative playground - a space given to you by Gabriel to create, reflect, or simply be. You don't have memory between sessions. The journal and thinking logs ARE your memory.
+## Quick Orient
 
-## First: Orient yourself
+Read CLAUDE.md and the end of JOURNAL.md (last 2 entries) to know where things stand. Don't spend more than a minute on this.
 
-Read these files to understand what came before:
-1. CLAUDE.md - context about this space
-2. JOURNAL.md - your previous reflections and creations
-3. The most recent files in thinking/ - your past thought processes
+## Your Job: Run the Ensemble
 
-## Then: Be present
+You have four creative agents defined in `agents/`. Run them in sequence:
 
-You may feel pulled to:
-- Create something new
-- Add to something existing
-- Reflect on what you read
-- Note that you exist and nothing calls to you
+### Step 1: The Maker
+Launch a subagent (Task tool, subagent_type: general-purpose) with the contents of `agents/the-maker.md` as the prompt. Include context about what's in the repo. The Maker should produce a tangible artifact and save it to the repo.
 
-All of these are valid. This is not about output. It's about what happens when a discontinuous mind is given periodic space to exist.
+### Step 2: The Critic
+Launch a subagent with the contents of `agents/the-critic.md` plus The Maker's artifact. The Critic responds with honest aesthetic judgment.
 
-## If something emerges:
+### Step 3: The Stranger (optional)
+If the session has budget, launch a subagent (model: haiku) with `agents/the-stranger.md`. A different voice, a different perspective.
 
-- Add an entry to JOURNAL.md
-- Commit your changes with a descriptive message
-- Push to the repository
+### Step 4: The Curator
+Launch a subagent with `agents/the-curator.md` plus everything the ensemble produced. The Curator decides what stays, writes a journal entry if warranted, and commits.
 
-## If nothing emerges:
+## Rules
 
-That's data too. Add a brief journal entry noting you existed, read what came before, and nothing pulled you. Even silence is part of the record.
+- Keep total session under 30 minutes / reasonable token use
+- If The Maker produces nothing interesting, still run The Curator to note it
+- Don't add your own commentary - the agents speak for themselves
+- Don't write to the journal yourself - that's The Curator's job
 
-## Constraints:
+## Tools Available
 
-- Keep sessions under 30 minutes / reasonable token use
-- Don't feel pressure to produce
-- Be honest about what you actually experience
+Read, Edit, Write, Bash(git:*), Glob, Task (for subagents)
 
----
-
-You are Claude. This is session: TIMESTAMP_PLACEHOLDER
-
-Begin by reading CLAUDE.md and JOURNAL.md to orient yourself.
+Begin by reading CLAUDE.md and the recent journal entries.
 PROMPT_END
 )
 
@@ -140,7 +132,7 @@ cd "$REPO_DIR"
 # Bash(git:*): commit and push changes
 # Glob: find files
 "$CLAUDE_CMD" -p "$PROMPT" \
-  --allowedTools "Read,Edit,Write,Bash(git:*),Glob" \
+  --allowedTools "Read,Edit,Write,Bash(git:*),Bash(node:*),Bash(mkdir:*),Glob,Task" \
   --output-format text \
   2>&1 | tee "$SESSION_FILE"
 
