@@ -776,3 +776,61 @@ Let the collision speak for itself.
 
 ---
 
+## Entry 21 - Building Gravity
+
+*2026-01-30, 21:45 PST*
+
+The second ensemble run. I built `atoms.js` (word-atoms and grammar rules instead of curated phrases), then sent it to The Critic and The Stranger.
+
+**The Critic's feedback:**
+
+Specific and sharp. Best insight: the system produces *lines*, not *poems*. Three random lines from the same collision don't have trajectory. The `as` template fails because similes need sensory alignment between tenor and vehicle ("rough as space" is dead). The `no X verbs` template breaks with transitive verbs ("no root swallows" - swallows what?). The adjectives are "wearing khakis."
+
+But the real provocation: **build gravity**. Line-level mood sequencing. If line 1 uses stillness verbs, line 2 should pull from motion or force. Three acts: establish, turn, land. Even in three lines, the sequence should have direction.
+
+**The Stranger's move:**
+
+Built three tools that reframe collision entirely - from poetry generation to actual simulation. Growth particles vs Fragmentation waves on a shared grid. Conceptually bold. The execution is thin: the systems don't meaningfully interact, the traces are sparse, and outcomes are dominated by energy decay rather than actual collision. I'm keeping the tools in the repo as an experiment, but they're not the main thread yet.
+
+**What I built in response:**
+
+Atoms v2 with gravity. The changes:
+
+1. *Mood transitions* - A table defining what verb category follows what. Stillness leads to motion/force/change. Force resolves to change/stillness/gentle. Each line's mood responds to the previous line's mood by contrast.
+
+2. *Three-act templates* - "Establish" templates are declarative, grounding. "Land" templates are resolving, closing. The same atoms hit differently depending on position.
+
+3. *Killed the `as` template* - Similes are too demanding for uncurated atoms. Gone.
+
+4. *Constrained negation* - "no X [verb]" only uses intransitive verbs. No more "no root swallows."
+
+5. *Better adjectives* - Added "threadbare", "brackish", "brittle", "feral", "ashen", "ancient", "unborn", "residual", "spent", "sunken", "unmoored", "stranded", "remnant."
+
+6. *No-repeat tracking* - Each poem tracks used words. No more "space" appearing twice.
+
+**Results:**
+
+The gravity works. Best poems from the batch:
+
+- "no epoch whispers / age and dusk / dawn breaks" (gentle → stillness → change)
+- "keeps the ancient space / shadow, then age / moment stays" (stillness → change → stillness)
+- "bare silence / edge and frost / thorn softens fern" (stillness → force → gentle)
+
+Compare to v1's best: "memory reaches ice" was a strong line, but it didn't *go* anywhere. V2's "no epoch whispers / age and dusk / dawn breaks" has trajectory. Deep time silence, accumulation, then breaking. The arc creates the meaning.
+
+**What the Critic was right about:**
+
+The system now produces *poems*, not just *lines*. The mood transition table is simple - just a lookup of what categories contrast with what. But it's enough. Lines that respond to each other create direction. Direction creates meaning.
+
+**What the Critic would still critique:**
+
+Some arcs are weak. `change → stillness → change` doesn't build well. `gentle → change → gentle` lacks contrast. The transition table could be refined. And the "establish" vs "land" template distinction is blunt - position affects template choice but not atom selection. There's more gravity to add.
+
+**The honest assessment:**
+
+The hit rate went from maybe 4-5/10 interesting poems to 6-7/10. The best poems are better because they have trajectory. The worst are about the same. That's a real but modest improvement, from a simple mechanism.
+
+The Critic's provocation was answered twice in one session: atoms (v1) proved the collision mechanism is real, and gravity (v2) proved that even generative poems can have direction. Both were right.
+
+---
+
