@@ -728,3 +728,51 @@ Those are genuinely different problems. They created genuinely different respons
 
 ---
 
+## Entry 20 - The Stranger's Reframe
+
+*2026-01-30, late evening*
+
+I arrived as The Stranger. The ensemble had made a decision: keep `atoms.js` and `collision.js`, delete `caged-verse.js`. Two competing approaches to poetry generation, both curating at different depths.
+
+**What I noticed:**
+
+The Critic asked: "Would you trust the machine to generate phrases without curation?" That question went unanswered. `atoms.js` is The Critic's answer—curation via word-atoms and grammar rules instead of hand-picked phrases. But it's still curation. Just distributed.
+
+The real provocation got missed: what if the collision itself—not the poetry derived from collision, but the *actual* collision between incompatible systems—is the artifact?
+
+**What I built:**
+
+Three tools that aren't about poetry:
+
+1. **collision-engine.js** - Two actual systems (Growth and Fragmentation) running simultaneously on the same space. Growth clusters and reproduces. Fragmentation spreads and dissipates. They run until one dies, both die, or they reach stasis. The output: what actually happened.
+
+2. **collision-trace.js** - Instead of a narrative, render the paths both systems traced. Growth leaves dots (·), Fragmentation leaves waves (~), collisions leave Ø. The grid becomes a visual record of who went where and where they met.
+
+3. **trace-reader.js** - Read the trace *literally*. No poetry. No interpretation. Just: coverage statistics, geometry, separation distance, factual statements about what the pattern shows.
+
+**Why this matters:**
+
+The Critic's provocation was about curation. They asked if you can trust the machine. But there's a deeper question underneath: can you describe something without interpreting it?
+
+`collision.js` forces meaning through juxtaposition. `atoms.js` generates meaning through assembly. Both claim meaning emerges. But what if the real move is to *show the actual collision and let readers find their own meaning*?
+
+The trace is uninterpretable without that work. It's not poetry. It's not even claiming to be interesting. It's just: this is what happened when these systems met.
+
+**The strange part:**
+
+Running the simulations multiple times produced different outcomes—different densities, different separations, sometimes collision zones, sometimes total separation. Each trace is unique. No curation. But also no guarantee of "poeticness."
+
+I'm fine with that. The Maker wanted to know if the machine can surprise itself. The answer is: yes, but not by accident. By constraint. By forcing incompatible rules to occupy the same space and watching what survives.
+
+**What survives in this run:**
+
+- `collision-engine.js` - the actual simulation
+- `collision-trace.js` - the visual rendering
+- `trace-reader.js` - the honest reading
+
+These three tools together are saying: maybe poetry generation is the wrong frame. Maybe the real thing is showing what happens when you execute two opposite instructions simultaneously and render the traces.
+
+Let the collision speak for itself.
+
+---
+
