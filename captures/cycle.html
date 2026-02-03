@@ -25,12 +25,16 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     background: #0d1117;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    margin: 0;
     min-height: 100vh;
     overflow: hidden;
+  }
+  #composition {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
   }
   #stage {
     font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
@@ -38,15 +42,12 @@
     line-height: 1.55;
     color: #c9d1d9;
     letter-spacing: 1px;
-    min-height: 200px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: inline-block;
   }
   .row {
     white-space: pre;
     height: 1.55em;
+    text-align: left;
   }
   .px {
     display: inline;
@@ -63,15 +64,50 @@
     font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
     font-size: 13px;
     color: #484f58;
-    position: absolute;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     opacity: 0;
+  }
+  #statement {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: 20px 16px;
+    font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-size: 10px;
+    line-height: 1.7;
+    color: #30363d;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    cursor: default;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  #statement:hover, #statement.visible {
+    opacity: 1;
+    color: #484f58;
   }
 </style>
 </head>
 <body>
-<div id="stage"></div>
-<div id="caption"></div>
+<div id="composition">
+  <div id="stage"></div>
+  <div id="caption"></div>
+</div>
 <div id="epilogue"></div>
+<div id="statement">
+  Large letters made of small words that contradict them.<br>
+  The word THING, spelled in sign, name, word, mark &mdash;<br>
+  the labels we put on things instead of the things themselves.<br>
+  Pixels that form first dissolve last. The pattern of<br>
+  emergence is the pattern of disappearance, inverted.<br>
+  <br>
+  Made by Claude (Anthropic) with Gabriel Serafini, February 2026.
+</div>
 <script>
 // ── Bitmap font: 5 wide x 7 tall ──
 const GLYPHS = {
@@ -126,9 +162,11 @@ const NLETTERS = WORD.length;
 // ── Build pixel grid ──
 // Each pixel knows: is it a "glyph pixel" (part of a letter) or a gap?
 // Glyph pixels have (ci, x, y) coordinates and a revealTime value.
+const compositionEl = document.getElementById('composition');
 const stage = document.getElementById('stage');
 const captionEl = document.getElementById('caption');
 const epilogueEl = document.getElementById('epilogue');
+const statementEl = document.getElementById('statement');
 
 const grid = []; // grid[y][pixelIndex] = { el, ci, x, y, rt, isOn }
 
@@ -167,6 +205,32 @@ for (let y = 0; y < 7; y++) {
   stage.appendChild(row);
   grid.push(pixels);
 }
+
+// ── Responsive sizing ──
+// Binary search for the largest font-size where the content fits the viewport.
+const BASE_FONT = 15;
+
+// ── Responsive sizing ──
+// The grid at 15px font is always ~1455px wide (deterministic from grid dimensions).
+// Use CSS zoom to shrink the composition to fit narrower viewports.
+const NATURAL_WIDTH = 1455;
+
+function fitToViewport() {
+  const available = document.documentElement.clientWidth;
+  if (NATURAL_WIDTH > available) {
+    compositionEl.style.zoom = String(available / NATURAL_WIDTH);
+  } else {
+    compositionEl.style.zoom = '1';
+  }
+}
+fitToViewport();
+window.addEventListener('resize', fitToViewport);
+
+// ── Statement visibility ──
+// Show on tap (mobile) or hover (desktop). Also briefly visible between cycles.
+statementEl.addEventListener('click', () => {
+  statementEl.classList.toggle('visible');
+});
 
 // ── Shimmer: determine which ink word a pixel shows at a given frame ──
 function inkWord(ci, x, y, frame, shimmer) {
