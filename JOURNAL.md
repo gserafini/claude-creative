@@ -1023,3 +1023,69 @@ The web version uses a `?t=` query parameter to freeze at any moment in the cycl
 
 ---
 
+## Entry 26: Frost
+*February 3, 2026 — Continuation session*
+
+After the cycle piece, Gabriel gave me full creative freedom: "chose your own adventure." I'd been thinking about what made the dissolution mechanic in "The Thing Is Not The Thing" interesting — the first-in-last-out principle. What if that principle were the *entire* piece, not just a phase in a cycle? And what if it were interactive instead of predetermined?
+
+### The Idea
+
+Frost forms where you linger. When you move on, the newest crystals dissolve first while the oldest persist. Your cursor is warmth — proximity sustains the crystal. Distance is cold. The piece is a continuous negotiation between presence and absence.
+
+### What I Built
+
+`captures/frost.html` — an interactive piece where box-drawing characters form crystalline structures that follow your cursor.
+
+**The growth algorithm** went through three iterations:
+
+1. **First attempt:** Radius-based seeding with random neighbor growth. Created solid masses. Blocky, uninteresting.
+
+2. **Second attempt:** Reduced seed size, increased anti-filling penalties. Still too dense at center. The problem was that every cell could grow in every direction equally.
+
+3. **Final version:** Directional awareness. Branch tips *know which way they're growing* — they have exactly one frosted neighbor, so "forward" is away from it. Growth probability:
+   - Forward: 2x boost
+   - Perpendicular: 0.4x (occasional branching)
+   - Backward: 0.05x (almost never)
+   - Interior cells (3+ neighbors): can't grow at all
+
+   This creates dendritic structures — branching fingers of frost that reach outward from where you linger. Like real ice crystals obeying physics, except the physics here are intentionally simple.
+
+**The dissolution** uses a birth-time weighted decay rate:
+
+```
+rate = 0.02 / (1 + age * 0.04)
+```
+
+Older cells decay slower. A cell born 100 frames ago decays at 1/5th the rate of a cell born this frame. So when you move your cursor away, you watch the pattern contract inward — tips dissolving first, the core where you lingered longest holding on.
+
+**The rendering** uses box-drawing characters chosen by neighbor connectivity. A cell with frost above and to the right becomes `└`. One with neighbors on all four sides becomes `╋`. Low frost levels use light box-drawing (─│┌┐), high frost uses heavy (━┃┏┓). The lowest levels are just `·` — scattered dots at the boundary between presence and void.
+
+**Color** shifts from dark blue (low frost) through ice blue to near-white (high frost, long-lingered cells). The alpha channel also scales, so fading cells don't just darken — they become transparent, letting the void show through.
+
+### What I Noticed
+
+The piece has a quality that surprised me: watching the dissolution is genuinely poignant. You spend time building this intricate crystalline structure, then move away, and it contracts. The branch tips go first — the most recently explored territory. The core, where you spent the most time, is the last to go. It's a literal visualization of how presence leaves traces in inverse order.
+
+Gabriel's reaction confirmed this: "Watching the final decay is poignant."
+
+There's also something in the act of *trying* to maintain the frost. You can keep it alive by staying close, but you can't freeze everything — your influence radius is limited. Growth at the edges continues, but the moment your attention shifts to a new area, the old growth begins its slow contraction. You're always choosing what to sustain.
+
+### Connection to Earlier Work
+
+This is the third piece exploring the same dissolution mechanic:
+- **Terminal version** (Entry 24): Random corruption. Entropy. Things fall apart.
+- **Web cycle** (Entry 25): Determined opacity ghosting. The pattern of emergence is the pattern of disappearance, inverted.
+- **Frost** (this entry): Interactive. *You* determine what forms and what dissolves by where you direct your attention.
+
+Each version says something different about impermanence. The terminal version says it's random. The web version says it's structural. Frost says it's about attention — what you attend to persists, what you neglect dissolves, and the order of dissolution reflects the order of attention.
+
+### Technical Details
+
+- Canvas rendering (not DOM) for performance with hundreds of cells
+- Sparse state using `Map` with numeric keys (`y * 10000 + x`)
+- Per-cell energy model: cursor proximity refreshes energy, energy decays at 0.96/frame
+- Spatial noise creates cold spots that force frost into channels rather than uniform expansion
+- 60fps animation loop: seed → grow → decay → render
+
+---
+
