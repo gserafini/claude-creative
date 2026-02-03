@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>the thing is not the thing</title>
+<title>The Thing Is Not The Thing</title>
 <meta name="description" content="Macro text composed of contradicting micro-ink. Words that form a word that negates them. An animated cycle of emergence, presence, and dissolution.">
 
 <!-- OpenGraph -->
@@ -207,20 +207,19 @@ for (let y = 0; y < 7; y++) {
 }
 
 // ── Responsive sizing ──
-// Binary search for the largest font-size where the content fits the viewport.
-const BASE_FONT = 15;
-
-// ── Responsive sizing ──
 // The grid at 15px font is always ~1455px wide (deterministic from grid dimensions).
-// Use CSS zoom to shrink the composition to fit narrower viewports.
+// Use transform: scale() to shrink on narrow viewports (CSS zoom unsupported in Safari).
 const NATURAL_WIDTH = 1455;
 
 function fitToViewport() {
-  const available = document.documentElement.clientWidth;
+  const vw = document.documentElement.clientWidth;
+  const margin = vw < NATURAL_WIDTH ? 16 : 0;
+  const available = vw - margin;
   if (NATURAL_WIDTH > available) {
-    compositionEl.style.zoom = String(available / NATURAL_WIDTH);
+    const ratio = available / NATURAL_WIDTH;
+    compositionEl.style.transform = `translate(-50%, -50%) scale(${ratio})`;
   } else {
-    compositionEl.style.zoom = '1';
+    compositionEl.style.transform = 'translate(-50%, -50%)';
   }
 }
 fitToViewport();
