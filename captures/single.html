@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body {
+    margin: 0;
+    padding: 60px 80px;
+    background: #0d1117;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+  }
+  .composition {
+    font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #c9d1d9;
+    white-space: pre;
+    letter-spacing: 1px;
+  }
+  .caption {
+    font-family: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    color: #484f58;
+    margin-top: 24px;
+  }
+</style>
+</head>
+<body>
+<script>
+const GLYPHS = {
+  A:[14,17,17,31,17,17,17], E:[31,16,16,30,16,16,31],
+  H:[17,17,17,31,17,17,17], I:[14,4,4,4,4,4,14],
+  L:[16,16,16,16,16,16,31], R:[30,17,17,30,20,18,17],
+  S:[14,17,16,14,1,17,14],  T:[31,4,4,4,4,4,4],
+  N:[17,25,21,19,17,17,17], G:[14,17,16,23,17,17,14],
+  U:[17,17,17,17,17,17,14], ' ':[0,0,0,0,0,0,0],
+};
+const FONT = {};
+for (const [c, rows] of Object.entries(GLYPHS)) {
+  FONT[c] = rows.map(n => {
+    const b = [];
+    for (let i = 4; i >= 0; i--) b.push((n >> i) & 1);
+    return b;
+  });
+}
+
+function render(word, ink, frame) {
+  const w = 5;
+  const lines = [];
+  for (let y = 0; y < 7; y++) {
+    let line = '';
+    for (let ci = 0; ci < word.length; ci++) {
+      if (ci > 0) line += ' '.repeat(w);
+      const g = FONT[word[ci]] || FONT[' '];
+      for (let x = 0; x < 5; x++) {
+        if (g[y][x]) {
+          const idx = (frame + y * 3 + x * 7 + ci * 11) % ink.length;
+          line += ink[idx].padEnd(w);
+        } else {
+          line += ' '.repeat(w);
+        }
+      }
+    }
+    lines.push(line);
+  }
+  return lines;
+}
+
+// Get composition from URL hash or default to REAL
+const hash = window.location.hash.slice(1) || 'real';
+const comps = {
+  real:  { word: 'REAL', ink: ['myth','tale','lore','yarn'], sub: 'the real is written in fiction' },
+  here:  { word: 'HERE', ink: ['gone','away','lost','past'], sub: 'here is spelled in absence' },
+  true:  { word: 'TRUE', ink: ['pose','mask','veil','play'], sub: 'truth is composed of performance' },
+  this:  { word: 'THIS', ink: ['that','each','some','next'], sub: 'this is always something other' },
+  thing: { word: 'THING', ink: ['sign','name','word','mark'], sub: 'the thing is not the thing' },
+};
+const comp = comps[hash] || comps.real;
+
+const pre = document.createElement('div');
+pre.className = 'composition';
+pre.textContent = render(comp.word, comp.ink, 2).join('\n');
+document.body.appendChild(pre);
+
+const cap = document.createElement('div');
+cap.className = 'caption';
+cap.textContent = '\u2014 ' + comp.sub;
+document.body.appendChild(cap);
+</script>
+</body>
+</html>
