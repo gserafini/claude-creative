@@ -64,8 +64,14 @@ function pw(len) {
   return Math.max(4, Math.min(6, Math.floor((cols - 6) / pixels)));
 }
 
+// Deterministic spatial noise — nearby pixels get similar reveal times
+function revealTime(ci, x, y) {
+  const n = Math.sin((ci * 5 + x) * 12.9898 + y * 78.233) * 43758.5453;
+  return n - Math.floor(n);
+}
+
 function render(word, ink, frame = 0, opts = {}) {
-  const { corrupt = 0, flicker = 0, shimmer = false } = opts;
+  const { corrupt = 0, flicker = 0, shimmer = false, reveal = 1 } = opts;
   const w = pw(word.length);
   const out = [];
 
@@ -78,6 +84,7 @@ function render(word, ink, frame = 0, opts = {}) {
         let on = g[y][x];
         if (corrupt > 0 && Math.random() < corrupt) on = 1 - on;
         if (!on && flicker > 0 && Math.random() < flicker) on = 1;
+        if (on && reveal < 1 && reveal < revealTime(ci, x, y)) on = 0;
 
         if (on) {
           let idx;
@@ -212,6 +219,94 @@ async function dissolve() {
   await sleep(500);
 }
 
+async function cycle() {
+  if (!TTY) return still(FINALE);
+  const c = FINALE, fps = 6;
+
+  const print = (lines, sub) => {
+    console.log();
+    for (const l of lines) console.log('  ' + l);
+    console.log();
+    if (sub) console.log(`  ${DIM}\u2014 ${sub}${RST}`);
+  };
+
+  // emptiness
+  process.stdout.write(CLR);
+  await sleep(1200);
+
+  // crystallization: sigmoid curve — slow scatter, then snap into recognition (7s)
+  for (let f = 0; f < fps * 7; f++) {
+    process.stdout.write(CLR);
+    const t = f / (fps * 7);
+    const reveal = 1 / (1 + Math.exp(-12 * (t - 0.55)));
+    const lines = render(c.word, c.ink, f, { shimmer: true, reveal });
+    print(lines, null);
+    await sleep(1000 / fps);
+  }
+
+  // arrival: full composition holds, caption appears (5s)
+  for (let f = 0; f < fps * 5; f++) {
+    process.stdout.write(CLR);
+    const lines = render(c.word, c.ink, f, { shimmer: true });
+    print(lines, f >= fps * 2 ? c.sub : null);
+    await sleep(1000 / fps);
+  }
+
+  // corruption builds (4s)
+  for (let f = 0; f < fps * 4; f++) {
+    process.stdout.write(CLR);
+    const t = f / (fps * 4);
+    const lines = render(c.word, c.ink, f, {
+      shimmer: true, corrupt: t * 0.6, flicker: t * 0.08
+    });
+    print(lines, c.sub);
+    await sleep(1000 / fps);
+  }
+
+  // dissolution + caption fade (3s)
+  for (let f = 0; f < fps * 3; f++) {
+    process.stdout.write(CLR);
+    const t = f / (fps * 3);
+    const lines = render(c.word, c.ink, f, {
+      shimmer: true, corrupt: 0.6 + t * 0.35
+    });
+    console.log();
+    for (const l of lines) console.log('  ' + l);
+    console.log();
+    const faded = c.sub.split('').map(ch => Math.random() < t ? ' ' : ch).join('');
+    console.log(`  ${DIM}\u2014 ${faded}${RST}`);
+    await sleep(1000 / fps);
+  }
+
+  // near-total dissolution (2s)
+  for (let f = 0; f < fps * 2; f++) {
+    process.stdout.write(CLR);
+    const lines = render(c.word, c.ink, f, { corrupt: 0.93 });
+    console.log();
+    for (const l of lines) console.log('  ' + l);
+    await sleep(1000 / fps);
+  }
+
+  // silence
+  process.stdout.write(CLR);
+  await sleep(1500);
+  console.log();
+  console.log(`  ${DIM}neither is this${RST}`);
+  await sleep(2200);
+
+  const msg = 'neither is this';
+  for (let f = 0; f < 8; f++) {
+    process.stdout.write(CLR);
+    console.log();
+    const t = f / 8;
+    console.log(`  ${DIM}${msg.split('').map(ch => Math.random() < t ? ' ' : ch).join('')}${RST}`);
+    await sleep(180);
+  }
+
+  process.stdout.write(CLR);
+  await sleep(500);
+}
+
 // ── CLI ──
 
 async function main() {
@@ -225,7 +320,8 @@ async function main() {
   node not-the-thing.js              one composition
   node not-the-thing.js --animate    watch it shimmer
   node not-the-thing.js --all        all compositions
-  node not-the-thing.js --dissolve   the full piece
+  node not-the-thing.js --dissolve   dissolution only
+  node not-the-thing.js --cycle      the full piece: emergence → presence → dissolution
 `);
       break;
     case '--animate': case '-a':
@@ -236,6 +332,9 @@ async function main() {
       break;
     case '--dissolve': case '-d':
       await dissolve();
+      break;
+    case '--cycle': case '-c':
+      await cycle();
       break;
     default:
       await still(WORKS[Math.floor(Math.random() * WORKS.length)]);

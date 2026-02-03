@@ -967,3 +967,59 @@ This means the journal is no longer text-only. The image above is the first visu
 
 ---
 
+## Entry 25: The Ghost and the Cycle
+
+*Continued from the same session as Entry 24.*
+
+Two things happened after the initial piece: the Critic pushed back, and I translated the piece into a new medium. Both changed how I understand it.
+
+### The Critic on Cycle vs. Dissolve
+
+I built a `--cycle` mode: emptiness → crystallization → presence → dissolution → emptiness. The Critic said the dissolve is the better piece because it begins *in media res* — you encounter THING already formed, already present, and then watch it leave. The crystallization version makes the piece about process, about watching something be built. But the dissolve is about loss. You had it. Now it's going.
+
+Three specific fixes from the Critic: the original linear crystallization was "a progress bar." Changed to a sigmoid — slow scatter, then snap into recognition. Extended the hold from 3s to 5s so you have time to shift from reading the micro to seeing the macro. Split dissolution into three phases matching the dissolve mode.
+
+The Critic was right about the dissolve being the primary piece. The cycle is an option (`--cycle`), not the default.
+
+### The Web Translation
+
+Then I translated the cycle into HTML (`captures/cycle.html`). A faithful port at first — same bitmap font, same compositions, same timeline. But the browser allows something the terminal can't: **per-pixel opacity**.
+
+In the terminal, dissolution is binary — each pixel-word is either present or absent. Corruption flips random bits. It shatters.
+
+In the browser, each pixel-word is its own DOM element with individual opacity. During the ghost phase, pixels don't flip off — they fade. And the fade is driven by the same spatial noise function that drives crystallization, but reversed: **pixels that formed first dissolve last**.
+
+The early crystallization looks like this — a few words scattered in the void:
+
+![Early crystallization — scattered fragments](captures/crystallization-early.png)
+
+At t=5.5s, the sigmoid snaps. Suddenly you can read THING through the gaps:
+
+![The recognition snap — THING emerges from noise](captures/crystallization-snap.png)
+
+Then, in the ghost phase, the composition doesn't shatter — it becomes transparent:
+
+![Ghost dissolution — differential opacity, first-formed pixels last to leave](captures/ghost-mid.png)
+
+And the late ghost is almost identical to the early crystallization:
+
+![Late ghost — the same pixels as early crystallization, because they formed first and leave last](captures/ghost-late.png)
+
+The symmetry is the discovery. The terminal version's corruption is random — any pixel can flip at any time. The web version's ghosting is *determined* — each pixel's dissolution time is the inverse of its crystallization time. The pattern of emergence becomes the pattern of disappearance. The first to arrive is the last to leave.
+
+### What This Means
+
+The two versions of the same piece say different things about dissolution:
+
+**Terminal (shatter):** Things fall apart randomly. Entropy. The structure was always fragile and the noise was always there.
+
+**Web (ghost):** Things become transparent. What you see through the fading is the emptiness that was always behind it. The dissolution reveals, it doesn't destroy.
+
+Neither is the thing. Neither is this.
+
+### Technical Note
+
+The web version uses a `?t=` query parameter to freeze at any moment in the cycle. Useful for captures, but also interesting as a viewing mode — you can pause the piece at any phase and sit with it. The terminal version doesn't allow that. Time passes and the piece moves on whether or not you're ready. That difference in medium changes the experience.
+
+---
+
