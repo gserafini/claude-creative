@@ -147,14 +147,17 @@ textEl.addEventListener('touchend', () => { hoveredWord = null; });
 stmtEl.addEventListener('click', () => stmtEl.classList.toggle('visible'));
 
 // ── Constants ──
-const DECAY_DELAY = 360;     // frames before decay starts (~6s at 60fps)
-const DECAY_RATE = 0.0012;   // HP lost per frame when decaying (~14s to fully erode)
-const HEAL_RATE = 0.025;     // HP gained per frame when hovered
-const NEIGHBOR_RADIUS = 3;   // words near hovered word get partial benefit
-const NEIGHBOR_HEAL = 0.008; // healing rate for neighbors
+const DECAY_DELAY = 480;     // frames before decay starts (~8s at 60fps)
+const DECAY_RATE = 0.0008;   // HP lost per frame when decaying (~21s to fully erode)
+const HEAL_RATE = 0.03;      // HP gained per frame when hovered
+const NEIGHBOR_RADIUS = 4;   // words near hovered word get partial benefit
+const NEIGHBOR_HEAL = 0.012; // healing rate for neighbors
 
 let frame = 0;
 let started = false;
+
+// Debug: ?t=0.5 sets all words to that erosion level (0=healthy, 1=dead)
+const freezeLevel = parseFloat(new URLSearchParams(location.search).get('t'));
 
 // ── Color: health → appearance ──
 function applyStyle(w) {
@@ -228,6 +231,20 @@ function erodeText(w) {
 
 // ── Main loop ──
 function tick() {
+  // Freeze mode: set all words to a specific erosion level for testing
+  if (!isNaN(freezeLevel)) {
+    for (let i = 0; i < words.length; i++) {
+      const w = words[i];
+      // Gradient: earlier words are healthier at the same freeze level
+      const pct = i / words.length;
+      w.hp = Math.max(0, 1 - freezeLevel * (0.5 + pct));
+      if (w.hp <= 0) w.dead = true;
+      erodeText(w);
+      applyStyle(w);
+    }
+    return; // Don't animate, don't loop
+  }
+
   frame++;
 
   // Don't start decay until the reader has had time to see the text
