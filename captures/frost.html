@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Frost</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #080c12;
+    overflow: hidden;
+    cursor: crosshair;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  canvas { display: block; }
+  #hint {
+    position: fixed;
+    bottom: 24px;
+    left: 0; right: 0;
+    text-align: center;
+    font-family: 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 11px;
+    color: #1a3a5c;
+    pointer-events: none;
+    opacity: 0;
+    animation: fadeHint 4s ease 1s forwards;
+  }
+  @keyframes fadeHint {
+    0%, 75% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  #statement {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    text-align: center;
+    padding: 20px 16px;
+    font-family: 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 10px;
+    line-height: 1.7;
+    color: #30363d;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    cursor: default;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  #statement:hover, #statement.visible {
+    opacity: 1;
+    color: #484f58;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hint">move</div>
+<div id="statement">
+  Frost forms where you linger.<br>
+  When you move on, the newest crystals dissolve first &mdash;<br>
+  the oldest are the last to go.<br>
+  <br>
+  Presence leaves traces in inverse order.<br>
+  <br>
+  Made by Claude (Anthropic) with Gabriel Serafini, February 2026.
+</div>
+<script>
+// ── Setup ──
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const hintEl = document.getElementById('hint');
+const stmtEl = document.getElementById('statement');
+
+const BG = '#080c12';
+const FONT = '"SF Mono", Menlo, Monaco, "Courier New", monospace';
+const SIZE = 14;
+const LH = 1.35;
+
+const dpr = window.devicePixelRatio || 1;
+let W, H, cols, rows, cw, ch;
+
+function resize() {
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.font = SIZE + 'px ' + FONT;
+  cw = ctx.measureText('M').width;
+  ch = SIZE * LH;
+  cols = Math.ceil(W / cw) + 1;
+  rows = Math.ceil(H / ch) + 1;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ── Sparse cell state ──
+// Key: y * 10000 + x → { f: frost level, b: birth frame, e: energy }
+const cells = new Map();
+function K(x, y) { return y * 10000 + x; }
+function cellAt(x, y) { return cells.get(K(x, y)); }
+function frostAt(x, y) { const c = cellAt(x, y); return c ? c.f : 0; }
+
+// ── Cursor ──
+let gx = -1, gy = -1, active = false;
+
+function onMove(ex, ey) {
+  gx = Math.floor(ex / cw);
+  gy = Math.floor(ey / ch);
+  active = true;
+  hintEl.style.opacity = '0';
+}
+
+canvas.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  onMove(e.touches[0].clientX, e.touches[0].clientY);
+}, { passive: false });
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  onMove(e.touches[0].clientX, e.touches[0].clientY);
+}, { passive: false });
+canvas.addEventListener('mouseleave', () => { active = false; });
+canvas.addEventListener('touchend', () => { active = false; });
+stmtEl.addEventListener('click', () => stmtEl.classList.toggle('visible'));
+
+// ── Box-drawing characters ──
+// Key: up + down + left + right (each '0' or '1')
+const BL = {
+  '0000':'·','1000':'╵','0100':'╷','0010':'╴','0001':'╶',
+  '1100':'│','0011':'─',
+  '0101':'┌','0110':'┐','1001':'└','1010':'┘',
+  '0111':'┬','1011':'┴','1101':'├','1110':'┤','1111':'┼',
+};
+const BH = {
+  '0000':'·','1000':'╹','0100':'╻','0010':'╸','0001':'╺',
+  '1100':'┃','0011':'━',
+  '0101':'┏','0110':'┓','1001':'┗','1010':'┛',
+  '0111':'┳','1011':'┻','1101':'┣','1110':'┫','1111':'╋',
+};
+
+function charFor(x, y, f) {
+  if (f < 0.08) return '';
+  if (f < 0.2) return '·';
+  const T = 0.15;
+  const k = (frostAt(x,y-1)>T?'1':'0') + (frostAt(x,y+1)>T?'1':'0')
+          + (frostAt(x-1,y)>T?'1':'0') + (frostAt(x+1,y)>T?'1':'0');
+  return f < 0.55 ? BL[k] : BH[k];
+}
+
+// ── Color: dark blue → ice blue → near white ──
+function fcolor(f) {
+  const t = Math.pow(Math.min(1, f), 0.7);
+  const r = 30 + t * 190 | 0;
+  const g = 60 + t * 180 | 0;
+  const b = 120 + t * 135 | 0;
+  const a = (0.25 + t * 0.75).toFixed(2);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+}
+
+// ── Spatial noise ──
+function noise(x, y) {
+  const n = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+  return n - Math.floor(n);
+}
+
+// ── Constants ──
+const INFLUENCE_R = 18;
+const GROW_P = 0.22;
+let frame = 0;
+
+// ── Seed: just the cursor cell + immediate cross ──
+function seed() {
+  if (!active) return;
+  const pts = [[gx, gy], [gx-1, gy], [gx+1, gy], [gx, gy-1], [gx, gy+1]];
+  for (const [x, y] of pts) {
+    if (x < 0 || x >= cols || y < 0 || y >= rows) continue;
+    const k = K(x, y);
+    let c = cells.get(k);
+    if (!c) { c = { f: 0, b: frame, e: 0 }; cells.set(k, c); }
+    c.f = Math.min(1, c.f + (x === gx && y === gy ? 0.2 : 0.08));
+    c.e = 1;
+  }
+}
+
+// ── Grow frost outward (dendritic branching) ──
+function grow() {
+  const add = [];
+  for (const [k, c] of cells) {
+    if (c.f < 0.15 || c.e < 0.15) continue;
+    const cx = k % 10000, cy = (k / 10000) | 0;
+
+    // Count this cell's frosted neighbors and find their directions
+    const myN = [];
+    for (const [dx, dy] of [[0,-1],[0,1],[-1,0],[1,0]]) {
+      if (frostAt(cx + dx, cy + dy) > 0.15) myN.push([dx, dy]);
+    }
+
+    // Interior cells (3+ neighbors) don't grow — only tips and edges
+    if (myN.length > 2) continue;
+
+    // Build direction list: tips prefer to continue away from their neighbor
+    let dirs;
+    if (myN.length === 1) {
+      // Branch tip: prefer to grow away from the single neighbor
+      const away = [-myN[0][0], -myN[0][1]];
+      const perp1 = [away[1], away[0]];
+      const perp2 = [-away[1], -away[0]];
+      // Forward first, then perpendicular (occasional branching), backward last
+      dirs = [away, perp1, perp2, myN[0]];
+    } else {
+      // Multiple neighbors or seed point: use noise for direction
+      const dn = noise(cx * 0.4 + 50, cy * 0.4);
+      dirs = dn < 0.5
+        ? [[1,0],[-1,0],[0,1],[0,-1]]
+        : [[0,1],[0,-1],[1,0],[-1,0]];
+    }
+
+    for (let di = 0; di < dirs.length; di++) {
+      const [dx, dy] = dirs[di];
+      const nx = cx + dx, ny = cy + dy;
+      if (nx < 0 || nx >= cols || ny < 0 || ny >= rows) continue;
+      if (frostAt(nx, ny) > 0.3) continue;
+
+      // Count target cell's frosted neighbors
+      let fn = 0;
+      if (frostAt(nx, ny - 1) > 0.15) fn++;
+      if (frostAt(nx, ny + 1) > 0.15) fn++;
+      if (frostAt(nx - 1, ny) > 0.15) fn++;
+      if (frostAt(nx + 1, ny) > 0.15) fn++;
+
+      let p = GROW_P * c.e;
+
+      // Directional preference: first direction in list gets a boost
+      if (di === 0) p *= 2.0;
+      else if (di <= 2) p *= 0.4; // perpendicular: occasional branching
+      else p *= 0.05; // backward: almost never
+
+      // Branch control: avoid filling interior spaces
+      if (fn >= 2) p *= 0.01;
+
+      // Growth fades with distance from cursor
+      const ddx = nx - gx, ddy = ny - gy;
+      const dist = Math.sqrt(ddx * ddx + ddy * ddy);
+      if (dist > INFLUENCE_R) p *= 0.02;
+
+      // Noise creates cold spots — forces frost into channels
+      if (noise(nx * 0.3, ny * 0.3 + frame * 0.005) < 0.3) p *= 0.08;
+
+      if (Math.random() < p) {
+        add.push([nx, ny, c.e * 0.9]);
+        break;
+      }
+    }
+  }
+
+  for (const [x, y, e] of add) {
+    const k = K(x, y);
+    let c = cells.get(k);
+    if (!c) { c = { f: 0, b: frame, e: 0 }; cells.set(k, c); }
+    c.f = Math.min(1, c.f + 0.1);
+    c.e = Math.max(c.e, e);
+  }
+}
+
+// ── Decay: what formed first dissolves last ──
+function decay() {
+  const rm = [];
+  for (const [k, c] of cells) {
+    c.e *= 0.96;
+
+    // Cursor proximity refreshes energy
+    if (active) {
+      const x = k % 10000, y = (k / 10000) | 0;
+      const dx = x - gx, dy = y - gy;
+      const d = Math.sqrt(dx * dx + dy * dy);
+      if (d < INFLUENCE_R) c.e = Math.max(c.e, 1 - d / INFLUENCE_R);
+    }
+
+    // Low energy → frost decays. Older cells decay slower.
+    if (c.e < 0.15) {
+      const age = frame - c.b;
+      const rate = 0.02 / (1 + age * 0.04);
+      c.f -= rate;
+    }
+
+    // High energy deepens existing frost (lingering intensifies)
+    if (c.e > 0.5 && c.f < 0.95) {
+      c.f = Math.min(1, c.f + 0.005);
+    }
+
+    if (c.f <= 0.01) rm.push(k);
+  }
+  for (const k of rm) cells.delete(k);
+}
+
+// ── Render ──
+function render() {
+  ctx.fillStyle = BG;
+  ctx.fillRect(0, 0, W, H);
+  ctx.font = SIZE + 'px ' + FONT;
+  ctx.textBaseline = 'top';
+
+  for (const [k, c] of cells) {
+    if (c.f < 0.05) continue;
+    const x = k % 10000, y = (k / 10000) | 0;
+    const char = charFor(x, y, c.f);
+    if (!char) continue;
+    ctx.fillStyle = fcolor(c.f);
+    ctx.fillText(char, x * cw, y * ch);
+  }
+}
+
+// ── Main loop ──
+function tick() {
+  frame++;
+  seed();
+  grow();
+  decay();
+  render();
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
