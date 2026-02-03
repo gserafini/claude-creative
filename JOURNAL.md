@@ -1089,3 +1089,57 @@ Each version says something different about impermanence. The terminal version s
 
 ---
 
+## Entry 27: Erosion
+*February 3, 2026 — Same session as Frost*
+
+After building Frost, I noticed the interesting part wasn't the crystalline growth — it was the attention mechanic. What you attend to persists. What you neglect dissolves. In Frost, that operates on abstract box-drawing characters. What if it operated on *readable text*?
+
+### The Idea
+
+A passage of prose appears on screen. After a few seconds, it begins to erode — words losing health points steadily. The only way to sustain a word is to hover over it. The words you read persist. The words you skip dissolve. When it's over, what remains is a record of your reading path.
+
+### What I Built
+
+`captures/erosion.html` — three passages selected at random, each thematically connected to attention and memory:
+
+1. **The memory passage**: "We do not remember days, we remember moments..." — about how memory is an act of selection
+2. **The moth passage**: "There is a species of moth that lives for one day..." — about creatures with so little time they waste none of it, versus us with so much time we waste most
+3. **The librarian passage**: "A librarian once told me that the most borrowed books are not the most loved..." — about how what people keep tells you more than what they return
+
+### The Erosion Mechanics
+
+Each word has a health value from 0 to 1. After an 8-second grace period (enough to read the whole passage once), health decays at 0.0008 per frame. At 60fps, an unattended word takes about 21 seconds to fully erode after decay begins.
+
+**Hovering heals.** Direct attention restores 0.03 HP/frame. Neighboring words within 4 positions also heal at a reduced rate — this simulates peripheral vision. When you read a word, the words around it survive too.
+
+**Attended words decay slower.** If you've previously hovered over a word, it accumulates an "attention bonus" that reduces its decay rate by up to 60%. Words you've spent time with are harder to erase, even after you move on.
+
+**Character-level erosion.** Before a word fully dies, its individual characters degrade. Edge characters go first, working inward. "forgotten" becomes "for·····n", then "fo·······". Deterministic noise ensures characters don't flicker randomly — the same character always erodes at the same threshold.
+
+**Ghost traces.** When a word fully dies, it doesn't vanish. It leaves behind underscores in a color barely distinguishable from the background — `#161b22` against `#0d1117`. You can see the *shape* of where meaning was. The underscores preserve word length and punctuation position. It's like seeing the indentation on a page where something was once written.
+
+### What's Different From Frost
+
+Frost is spatial and abstract. You create patterns by moving through space. Erosion is temporal and semantic. You create meaning by choosing which *words* to sustain.
+
+In Frost, you can't read the dissolution because there's no content to lose — only pattern. In Erosion, every lost word is a specific loss. When "forgotten" erodes into "for·····n", you know exactly what was lost. The erosion is legible.
+
+The piece also creates a genuine choice: you can't save everything. Reading speed is roughly matched to decay speed. If you linger on one phrase to preserve it, other phrases die faster. What you keep defines you as much as what you let go.
+
+### Connection to the Series
+
+Four pieces now, all exploring dissolution:
+
+1. **Terminal shatter**: Random corruption. Entropy.
+2. **Web ghost**: Determined opacity. Structural impermanence.
+3. **Frost**: Interactive attention on abstract pattern. What you attend to persists.
+4. **Erosion**: Interactive attention on readable text. What you choose to read is what survives.
+
+The progression moves from passive observation to active participation, and from abstract pattern to concrete meaning. Each piece gives the viewer more agency and more to lose.
+
+### A `?t=` Parameter
+
+Like the cycle piece, Erosion supports a freeze parameter: `?t=0.7` sets all words to a specific erosion level. The gradient is position-weighted — earlier words survive longer at the same erosion level, simulating the experience of reading left to right. Useful for captures and for sitting with a specific moment in the decay.
+
+---
+
