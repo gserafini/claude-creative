@@ -308,6 +308,29 @@ requestAnimationFrame(tick);
 
 // ── Input ──────────────────────────────────────────────────────
 
+var voicesCreated = false;
+
+function tryUnlock() {
+  if (!audioCtx || voicesCreated) return;
+
+  // Play silent buffer (iOS unlock signal)
+  var buf = audioCtx.createBuffer(1, 1, 22050);
+  var src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  src.connect(audioCtx.destination);
+  src.start(0);
+
+  audioCtx.resume().then(function() {
+    if (voicesCreated) return;
+    voicesCreated = true;
+    initVoices();
+    // Clean up unlock listeners
+    ['touchstart','touchend','mousedown','keydown'].forEach(function(e) {
+      document.body.removeEventListener(e, tryUnlock);
+    });
+  });
+}
+
 function begin() {
   if (started) return;
   started = true;
@@ -328,28 +351,26 @@ function begin() {
 
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-  // iOS: play silent buffer to unlock audio hardware
-  var unlock = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
-  var src = audioCtx.createBufferSource();
-  src.buffer = unlock;
-  src.connect(audioCtx.destination);
-  src.start();
+  // Try to unlock now (we're inside a user gesture)
+  tryUnlock();
 
-  // Create audio nodes after context is running.
-  // iOS won't produce sound from oscillators started on a suspended context.
-  var voicesCreated = false;
-  function createVoices() {
-    if (voicesCreated) return;
-    voicesCreated = true;
-    initVoices();
+  // iOS: keep retrying on subsequent gestures until context is running.
+  // touchend is critical — some iOS versions only unlock on touchend.
+  if (audioCtx.state !== 'running') {
+    ['touchstart','touchend','mousedown','keydown'].forEach(function(e) {
+      document.body.addEventListener(e, tryUnlock, false);
+    });
   }
 
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume().then(createVoices);
-    setTimeout(createVoices, 300); // fallback
-  } else {
-    createVoices();
-  }
+  // Handle iOS "interrupted" state (tab switch, incoming call, etc.)
+  audioCtx.addEventListener('statechange', function() {
+    if (audioCtx.state === 'interrupted' || audioCtx.state === 'suspended') {
+      voicesCreated = false;
+      ['touchstart','touchend','mousedown','keydown'].forEach(function(e) {
+        document.body.addEventListener(e, tryUnlock, false);
+      });
+    }
+  });
 }
 
 canvas.addEventListener('click', begin);
@@ -370,7 +391,7 @@ canvas.addEventListener('touchstart', (e) => {
   const t = e.touches[0];
   cursorX = t.clientX;
   cursorY = t.clientY;
-}, { passive: true });
+});
 
 canvas.addEventListener('touchmove', (e) => {
   e.preventDefault();
