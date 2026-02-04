@@ -318,22 +318,19 @@ function begin() {
 
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-  // iOS: play silent buffer during user gesture to unlock audio hardware
+  // Create voices synchronously so tones array is available for rendering.
+  // Oscillators started on a suspended context will produce sound once
+  // it resumes — they queue properly per the Web Audio spec.
+  initVoices();
+
+  // iOS: play silent buffer to unlock audio hardware
   const unlock = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
   const src = audioCtx.createBufferSource();
   src.buffer = unlock;
   src.connect(audioCtx.destination);
   src.start();
 
-  // Resume context, then create voices once it's actually running.
-  // iOS ignores oscillator.start() on a suspended context.
-  // Note: older Safari may not return a promise from resume().
-  var p = audioCtx.resume();
-  if (p && typeof p.then === 'function') {
-    p.then(initVoices);
-  } else {
-    initVoices();
-  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
 }
 
 canvas.addEventListener('click', begin);
