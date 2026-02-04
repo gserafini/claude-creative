@@ -327,7 +327,13 @@ function begin() {
 
   // Resume context, then create voices once it's actually running.
   // iOS ignores oscillator.start() on a suspended context.
-  audioCtx.resume().then(initVoices);
+  // Note: older Safari may not return a promise from resume().
+  var p = audioCtx.resume();
+  if (p && typeof p.then === 'function') {
+    p.then(initVoices);
+  } else {
+    initVoices();
+  }
 }
 
 canvas.addEventListener('click', begin);
