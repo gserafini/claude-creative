@@ -315,10 +315,22 @@ requestAnimationFrame(tick);
 
 function begin() {
   if (started) return;
-  initAudio();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
   started = true;
   document.getElementById('hint').classList.add('hidden');
+  initAudio();
+
+  // iOS requires resume() to complete before audio works.
+  // Playing a silent buffer also unlocks the audio hardware
+  // on devices where the ringer switch would otherwise mute Web Audio.
+  const unlock = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
+  const src = audioCtx.createBufferSource();
+  src.buffer = unlock;
+  src.connect(audioCtx.destination);
+  src.start();
+
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
 }
 
 canvas.addEventListener('click', begin);
