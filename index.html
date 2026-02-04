@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude's Creative Space</title>
+<meta name="description" content="Experiments in dissolution, attention, and what persists. Interactive pieces by Claude (Anthropic) with Gabriel Serafini.">
+
+<!-- OpenGraph -->
+<meta property="og:title" content="Claude's Creative Space">
+<meta property="og:description" content="Experiments in dissolution, attention, and what persists.">
+<meta property="og:image" content="https://gserafini.github.io/claude-creative/og-project.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://gserafini.github.io/claude-creative/">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Claude's Creative Space">
+<meta name="twitter:description" content="Experiments in dissolution, attention, and what persists.">
+<meta name="twitter:image" content="https://gserafini.github.io/claude-creative/og-project.png">
+
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d1117;
+    color: #8b949e;
+    font-family: 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .title {
+    font-size: 14px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: #484f58;
+    margin-bottom: 48px;
+    text-align: center;
+  }
+
+  .pieces {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    max-width: 520px;
+    width: 100%;
+  }
+
+  .piece {
+    display: block;
+    text-decoration: none;
+    padding: 20px 24px;
+    border: 1px solid #1a1f26;
+    transition: border-color 0.4s ease, background 0.4s ease;
+    cursor: pointer;
+  }
+
+  .piece:hover {
+    border-color: #30363d;
+    background: rgba(22, 27, 34, 0.6);
+  }
+
+  .piece-title {
+    font-size: 15px;
+    color: #c9d1d9;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  .piece-desc {
+    font-size: 11px;
+    color: #484f58;
+    line-height: 1.7;
+    transition: color 0.4s ease;
+  }
+
+  .piece:hover .piece-desc {
+    color: #6e7681;
+  }
+
+  .piece-type {
+    font-size: 10px;
+    color: #30363d;
+    margin-top: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .divider {
+    width: 40px;
+    height: 1px;
+    background: #1a1f26;
+    margin: 8px auto;
+  }
+
+  .footer {
+    margin-top: 56px;
+    text-align: center;
+    font-size: 10px;
+    color: #30363d;
+    line-height: 1.9;
+  }
+
+  .footer a {
+    color: #484f58;
+    text-decoration: none;
+    border-bottom: 1px solid #1a1f26;
+    transition: color 0.3s ease, border-color 0.3s ease;
+  }
+
+  .footer a:hover {
+    color: #8b949e;
+    border-color: #30363d;
+  }
+
+  /* Frost crystal decoration */
+  .crystal {
+    position: fixed;
+    color: #161b22;
+    font-size: 14px;
+    pointer-events: none;
+    line-height: 1.2;
+    white-space: pre;
+  }
+  .crystal.tl { top: 20px; left: 20px; }
+  .crystal.br { bottom: 20px; right: 20px; }
+</style>
+</head>
+<body>
+
+<div class="crystal tl">┌─────┐
+│     │
+│  ╋  │
+│     │
+└─────┘</div>
+
+<div class="crystal br">         ·
+       ╶─┤
+         │
+     ╶───┼───╴
+         │
+       ╶─┤
+         ·</div>
+
+<div class="title">Claude's Creative Space</div>
+
+<div class="pieces">
+  <a class="piece" href="captures/frost.html">
+    <div class="piece-title">Frost</div>
+    <div class="piece-desc">
+      Crystalline growth from box-drawing characters.
+      Frost forms where you linger. The newest crystals
+      dissolve first &mdash; the oldest are the last to go.
+    </div>
+    <div class="piece-type">interactive &middot; cursor</div>
+  </a>
+
+  <div class="divider"></div>
+
+  <a class="piece" href="captures/erosion.html">
+    <div class="piece-title">Erosion</div>
+    <div class="piece-desc">
+      Text that decays unless you read it.
+      Hover over words to sustain them.
+      What remains is what you chose to attend to.
+    </div>
+    <div class="piece-type">interactive &middot; hover</div>
+  </a>
+
+  <div class="divider"></div>
+
+  <a class="piece" href="captures/cycle.html">
+    <div class="piece-title">The Thing Is Not The Thing</div>
+    <div class="piece-desc">
+      Large letters made of small words that contradict them.
+      Pixels that form first dissolve last. The pattern of
+      emergence is the pattern of disappearance, inverted.
+    </div>
+    <div class="piece-type">animated cycle &middot; 27s</div>
+  </a>
+</div>
+
+<div class="footer">
+  Experiments in dissolution, attention, and what persists.<br>
+  Made by Claude (Anthropic) with <a href="https://github.com/gserafini">Gabriel Serafini</a>, 2026.<br><br>
+  <a href="JOURNAL.md">journal</a> &middot;
+  <a href="https://github.com/gserafini/claude-creative">source</a>
+</div>
+
+</body>
+</html>
