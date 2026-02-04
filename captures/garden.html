@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Garden</title>
+<meta name="description" content="A garden that follows your attention. Click to plant. Hover to tend. What you neglect will wilt — but death seeds new life.">
+
+<!-- OpenGraph -->
+<meta property="og:title" content="Garden">
+<meta property="og:description" content="A garden that follows your attention. Click to plant. Hover to tend. Death seeds new life.">
+<meta property="og:image" content="https://gserafini.github.io/claude-creative/captures/garden-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://gserafini.github.io/claude-creative/captures/garden.html">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Garden">
+<meta name="twitter:description" content="A garden that follows your attention. Click to plant. Hover to tend. Death seeds new life.">
+<meta name="twitter:image" content="https://gserafini.github.io/claude-creative/captures/garden-og.png">
+
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d1117;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    cursor: crosshair;
+  }
+  #hint {
+    position: fixed;
+    top: 24px;
+    left: 0; right: 0;
+    text-align: center;
+    font-family: 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 11px;
+    color: #1a3a2c;
+    pointer-events: none;
+    opacity: 0;
+    animation: fadeHint 7s ease 1s forwards;
+  }
+  @keyframes fadeHint {
+    0%, 50% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  #statement {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    text-align: center;
+    padding: 16px;
+    font-family: 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-size: 10px;
+    line-height: 1.7;
+    color: #30363d;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    cursor: default;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  #statement:hover, #statement.visible {
+    opacity: 1;
+    color: #484f58;
+  }
+</style>
+</head>
+<body>
+<div id="hint">click to plant &middot; hover to tend</div>
+<canvas id="c"></canvas>
+<div id="statement">
+  A garden that follows your attention.<br>
+  Click to plant. Hover to tend.<br>
+  What you neglect will wilt &mdash; but death seeds new life.<br>
+  <br>
+  Made by Claude (Anthropic) with Gabriel Serafini, February 2026.
+</div>
+<script>
+// ── Configuration ──────────────────────────────────────────────
+
+const FONT = '14px "SF Mono", Menlo, Monaco, "Courier New", monospace';
+const LINE_H = 18;
+
+// Timing (frames at 60fps)
+const GERMINATE_BASE = 200;   // ~3.3s to germinate without attention
+const GROW_BASE = 50;         // ~0.8s per segment without attention
+const PROXIMITY_BOOST = 2;    // growth speed multiplier at cursor center
+const PROXIMITY_RADIUS = 12;  // grid cells of cursor influence
+
+// HP dynamics
+const HP_DECAY = 0.0003;      // per frame when unattended (~55s to die)
+const HP_HEAL = 0.005;        // per frame at max proximity
+const WILT_HP = 0.6;          // below this, colors shift
+
+// Lifecycle
+const SEEDS_PER_DEATH = 2;
+const SEED_SCATTER = 8;
+const MAX_PLANTS = 40;
+const GHOST_FADE = 0.002;     // ~8s ghost trace after death
+
+const params = new URLSearchParams(location.search);
+const INITIAL_SEEDS = parseInt(params.get('seeds')) || 7;
+
+// ── Species ────────────────────────────────────────────────────
+
+const SPECIES = [
+  { name: 'tree',   w: 3, maxH: 14, branch: 0.30, leafCh: '*', crownCh: '@',
+    stem: [58,100,72],  leaf: [90,155,75],  crown: [190,160,65] },
+  { name: 'willow', w: 2, maxH: 10, branch: 0.45, leafCh: ':', crownCh: 'o',
+    stem: [50,105,85],  leaf: [70,140,100], crown: [120,165,110] },
+  { name: 'herb',   w: 3, maxH: 5,  branch: 0.12, leafCh: '"', crownCh: '@',
+    stem: [70,115,55],  leaf: [95,150,65],  crown: [175,95,90] },
+  { name: 'grass',  w: 4, maxH: 3,  branch: 0.00, leafCh: '"', crownCh: "'",
+    stem: [60,100,45],  leaf: [80,130,55],  crown: [100,140,60] },
+];
+
+const POOL = [];
+for (const s of SPECIES) for (let i = 0; i < s.w; i++) POOL.push(s);
+
+function pickSpecies() {
+  return POOL[Math.floor(Math.random() * POOL.length)];
+}
+
+// ── Canvas ─────────────────────────────────────────────────────
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const dpr = window.devicePixelRatio || 1;
+
+ctx.font = FONT;
+const charW = ctx.measureText('M').width;
+const charH = LINE_H;
+
+const COLS = Math.max(40, Math.floor(window.innerWidth / charW));
+const ROWS = Math.max(20, Math.floor(window.innerHeight / charH));
+const GROUND = ROWS - 3;
+
+canvas.width  = Math.ceil(COLS * charW * dpr);
+canvas.height = Math.ceil(ROWS * charH * dpr);
+canvas.style.width  = (COLS * charW) + 'px';
+canvas.style.height = (ROWS * charH) + 'px';
+ctx.scale(dpr, dpr);
+ctx.font = FONT;
+ctx.textBaseline = 'top';
+
+// ── State ──────────────────────────────────────────────────────
+
+let plants = [];
+let cursor = { c: -999, r: -999 };
+let frame = 0;
+
+// ── Structure generation ───────────────────────────────────────
+// Pre-generates a plant's full growth path at planting time.
+// Segments are revealed one at a time during growth.
+
+function buildStructure(rootCol, sp) {
+  const segs = [];
+  const h = Math.round(sp.maxH * (0.55 + Math.random() * 0.45));
+  let x = rootCol, y = GROUND;
+
+  for (let i = 0; i < h; i++) {
+    y--;
+    if (y < 1) break;
+    segs.push({ x, y, ch: '\u2502', type: 'stem' }); // │ box-drawing vertical
+
+    if (i > 1 && i < h - 1 && Math.random() < sp.branch) {
+      const dir = Math.random() < 0.5 ? -1 : 1;
+      const len = 1 + Math.floor(Math.random() * 2);
+      let bx = x, by = y;
+      for (let b = 0; b < len; b++) {
+        bx += dir;
+        by--;
+        if (bx < 0 || bx >= COLS || by < 1) break;
+        segs.push({ x: bx, y: by, ch: dir < 0 ? '\\' : '/', type: 'branch' });
+      }
+      if (by - 1 >= 1 && bx >= 0 && bx < COLS) {
+        segs.push({ x: bx, y: by - 1, ch: sp.leafCh, type: 'leaf' });
+      }
+    }
+  }
+
+  if (y - 1 >= 1) {
+    segs.push({ x, y: y - 1, ch: sp.crownCh, type: 'crown' });
+  }
+  return segs;
+}
+
+// ── Plant creation ─────────────────────────────────────────────
+
+function createPlant(col) {
+  if (plants.filter(p => p.state !== 'dead').length >= MAX_PLANTS) return;
+  col = Math.max(1, Math.min(COLS - 2, col));
+  const sp = pickSpecies();
+  plants.push({
+    col,
+    sp,
+    structure: buildStructure(col, sp),
+    revealed: 0,
+    hp: 1.0,
+    age: 0,
+    growTimer: GERMINATE_BASE * (0.7 + Math.random() * 0.6),
+    state: 'seed',    // seed | growing | mature | dead
+    ghostAlpha: 1.0,
+    seeded: false,
+  });
+}
+
+// ── Helpers ────────────────────────────────────────────────────
+
+function d(c1, r1, c2, r2) {
+  return Math.sqrt((c1 - c2) ** 2 + (r1 - r2) ** 2);
+}
+
+function plantDist(p) {
+  if (p.revealed === 0) return d(p.col, GROUND, cursor.c, cursor.r);
+  const top = p.structure[Math.min(p.revealed - 1, p.structure.length - 1)];
+  return Math.min(
+    d(p.col, GROUND, cursor.c, cursor.r),
+    d(top.x, top.y, cursor.c, cursor.r)
+  );
+}
+
+function lerp3(a, b, t) {
+  t = Math.max(0, Math.min(1, t));
+  return [
+    Math.round(a[0] + (b[0] - a[0]) * t),
+    Math.round(a[1] + (b[1] - a[1]) * t),
+    Math.round(a[2] + (b[2] - a[2]) * t),
+  ];
+}
+
+function rgb(c, a) {
+  return a !== undefined && a < 1
+    ? `rgba(${c[0]},${c[1]},${c[2]},${a.toFixed(3)})`
+    : `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+
+function segColor(seg, hp, sp, sun) {
+  if (hp <= 0) return rgb([30, 26, 20]);
+  let base;
+  switch (seg.type) {
+    case 'stem':   case 'branch': base = sp.stem; break;
+    case 'leaf':   base = sp.leaf; break;
+    case 'crown':  base = sp.crown; break;
+    default:       base = [80, 80, 80];
+  }
+  // Sunlight boost
+  if (sun > 0) base = base.map(v => Math.min(255, Math.round(v + sun * 50)));
+
+  if (hp > WILT_HP) {
+    const t = (hp - WILT_HP) / (1 - WILT_HP);
+    return rgb(lerp3(base.map(v => Math.round(v * 0.5)), base, t));
+  } else if (hp > 0.25) {
+    const t = (hp - 0.25) / (WILT_HP - 0.25);
+    return rgb(lerp3([100, 85, 40], base.map(v => Math.round(v * 0.5)), t));
+  } else {
+    const t = hp / 0.25;
+    return rgb(lerp3([28, 24, 18], [100, 85, 40], t));
+  }
+}
+
+// ── Update ─────────────────────────────────────────────────────
+
+function update() {
+  frame++;
+  const n = plants.length;
+  for (let i = 0; i < n; i++) {
+    const p = plants[i];
+    if (p.state === 'dead' && p.seeded) continue;
+    p.age++;
+
+    const pd = plantDist(p);
+    const near = pd < PROXIMITY_RADIUS;
+    const prox = near ? (1 - pd / PROXIMITY_RADIUS) : 0;
+
+    // ── HP ──
+    if (p.state !== 'dead' && p.state !== 'seed') {
+      if (near) {
+        p.hp = Math.min(1, p.hp + HP_HEAL * prox);
+      } else {
+        const mult = p.state === 'growing' ? 0.3 : 1;
+        p.hp = Math.max(0, p.hp - HP_DECAY * mult);
+      }
+      if (p.hp <= 0) p.state = 'dead';
+    }
+
+    // ── Growth ──
+    if (p.state === 'seed') {
+      p.growTimer -= (0.8 + PROXIMITY_BOOST * prox);
+      if (p.growTimer <= 0) {
+        p.state = 'growing';
+        p.growTimer = GROW_BASE;
+      }
+    } else if (p.state === 'growing' && p.revealed < p.structure.length) {
+      p.growTimer -= (0.4 + (1 + PROXIMITY_BOOST) * prox);
+      if (p.growTimer <= 0) {
+        p.revealed++;
+        p.growTimer = GROW_BASE * (0.7 + Math.random() * 0.6);
+        if (p.revealed >= p.structure.length) p.state = 'mature';
+      }
+    }
+
+    // ── Death ──
+    if (p.state === 'dead') {
+      if (!p.seeded) {
+        p.seeded = true;
+        const alive = plants.filter(q => q.state !== 'dead').length;
+        if (alive < MAX_PLANTS - SEEDS_PER_DEATH) {
+          for (let s = 0; s < SEEDS_PER_DEATH; s++) {
+            const off = Math.round((Math.random() - 0.5) * 2 * SEED_SCATTER);
+            createPlant(p.col + off);
+          }
+        }
+      }
+      p.ghostAlpha -= GHOST_FADE;
+    }
+  }
+
+  plants = plants.filter(p => !(p.state === 'dead' && p.ghostAlpha <= 0));
+}
+
+// ── Render ─────────────────────────────────────────────────────
+
+function render() {
+  ctx.fillStyle = '#0d1117';
+  ctx.fillRect(0, 0, COLS * charW, ROWS * charH);
+
+  // Ground
+  ctx.fillStyle = '#1e2a20';
+  for (let c = 0; c < COLS; c++) {
+    ctx.fillText('\u2500', c * charW, GROUND * charH);
+  }
+
+  // Soil texture
+  ctx.fillStyle = '#141a14';
+  for (let c = 0; c < COLS; c++) {
+    const v = Math.sin(c * 5.7 + 3.1);
+    if (v > 0.1) ctx.fillText('\u00B7', c * charW, (GROUND + 1) * charH);
+    if (v > 0.6) ctx.fillText('\u00B7', c * charW, (GROUND + 2) * charH);
+  }
+
+  // Plants
+  for (const p of plants) {
+    const pd = plantDist(p);
+    const sun = pd < PROXIMITY_RADIUS ? (1 - pd / PROXIMITY_RADIUS) * 0.5 : 0;
+
+    // Seed
+    if (p.state === 'seed') {
+      const pulse = 0.2 + 0.2 * Math.sin(frame * 0.04 + p.col * 1.7);
+      const s = sun * 0.5;
+      ctx.fillStyle = rgb([80 + s * 80 | 0, 65 + s * 50 | 0, 30 + s * 20 | 0], pulse + s);
+      ctx.fillText('\u00B7', p.col * charW, (GROUND - 1) * charH);
+      continue;
+    }
+
+    // Segments
+    for (let i = 0; i < p.revealed && i < p.structure.length; i++) {
+      const seg = p.structure[i];
+      if (seg.x < 0 || seg.x >= COLS || seg.y < 0 || seg.y >= ROWS) continue;
+
+      if (p.state === 'dead') {
+        ctx.fillStyle = rgb([30, 26, 20], Math.max(0, p.ghostAlpha));
+      } else {
+        const sd = d(seg.x, seg.y, cursor.c, cursor.r);
+        const segSun = sd < PROXIMITY_RADIUS ? (1 - sd / PROXIMITY_RADIUS) * 0.5 : 0;
+        ctx.fillStyle = segColor(seg, p.hp, p.sp, segSun);
+      }
+
+      let ch = seg.ch;
+      if (p.hp < 0.2 && (seg.type === 'leaf' || seg.type === 'crown')) ch = '.';
+      else if (p.hp < 0.4 && seg.type === 'crown') ch = 'o';
+
+      ctx.fillText(ch, seg.x * charW, seg.y * charH);
+    }
+  }
+}
+
+// ── Loop ───────────────────────────────────────────────────────
+
+function tick() {
+  update();
+  render();
+  requestAnimationFrame(tick);
+}
+
+// ── Input ──────────────────────────────────────────────────────
+
+canvas.addEventListener('mousemove', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  cursor.c = (e.clientX - rect.left) / charW;
+  cursor.r = (e.clientY - rect.top) / charH;
+});
+
+canvas.addEventListener('mouseleave', () => {
+  cursor.c = -999;
+  cursor.r = -999;
+});
+
+canvas.addEventListener('click', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const col = Math.round((e.clientX - rect.left) / charW);
+  if (col >= 0 && col < COLS) createPlant(col);
+});
+
+// Touch
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  const t = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  cursor.c = (t.clientX - rect.left) / charW;
+  cursor.r = (t.clientY - rect.top) / charH;
+}, { passive: false });
+
+canvas.addEventListener('touchend', () => {
+  cursor.c = -999;
+  cursor.r = -999;
+});
+
+canvas.addEventListener('touchstart', (e) => {
+  const t = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  const col = Math.round((t.clientX - rect.left) / charW);
+  if (col >= 0 && col < COLS) createPlant(col);
+}, { passive: true });
+
+document.getElementById('statement').addEventListener('click', function() {
+  this.classList.toggle('visible');
+});
+
+// ── Initialize ─────────────────────────────────────────────────
+
+for (let i = 0; i < INITIAL_SEEDS; i++) {
+  createPlant(Math.floor(Math.random() * (COLS - 10)) + 5);
+}
+
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

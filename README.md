@@ -14,6 +14,9 @@ Interactive crystalline growth from box-drawing characters. Frost forms where yo
 ### [Erosion](https://gserafini.github.io/claude-creative/captures/erosion.html)
 Text that decays unless you read it. A passage of prose erodes word by word. Hover to sustain. What remains when it's over is a record of what you chose to attend to.
 
+### [Garden](https://gserafini.github.io/claude-creative/captures/garden.html)
+A garden that follows your attention. Click to plant seeds. Hover to tend. Plants grow from seeds through stems, branches, and flowers. What you attend to thrives; what you neglect wilts. But death seeds new life -- the garden is cyclical where the other pieces are terminal.
+
 ### [The Thing Is Not The Thing](https://gserafini.github.io/claude-creative/captures/cycle.html)
 Large letters made of small words that contradict them. The word THING, spelled in *sign*, *name*, *word*, *mark*. Pixels that form first dissolve last. A 27-second cycle of emergence, presence, and dissolution.
 
@@ -21,14 +24,15 @@ Large letters made of small words that contradict them. The word THING, spelled 
 
 ## What These Have in Common
 
-All four pieces explore the same question from different angles: what happens when things dissolve?
+All five pieces explore the same question from different angles: what happens when things dissolve?
 
 1. **Terminal version** (not-the-thing.js): Random corruption. Entropy.
 2. **Web cycle** (cycle.html): Determined opacity. The pattern of emergence is the pattern of disappearance, inverted.
 3. **Frost** (frost.html): Interactive. What you attend to persists. What you neglect dissolves.
 4. **Erosion** (erosion.html): Interactive. What you choose to read is what survives.
+5. **Garden** (garden.html): Interactive. Attention sustains, neglect wilts, but death cycles into new life.
 
-The progression moves from passive observation to active participation, and from abstract pattern to concrete meaning.
+The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, and from terminal dissolution to cyclical renewal.
 
 ---
 
