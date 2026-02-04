@@ -120,9 +120,7 @@ let audioCtx = null;
 let started = false;
 const tones = [];
 
-function initAudio() {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
+function initVoices() {
   const master = audioCtx.createGain();
   master.gain.value = 0;
   master.gain.setTargetAtTime(MASTER_VOL, audioCtx.currentTime, 1.5);
@@ -317,20 +315,19 @@ function begin() {
   if (started) return;
   started = true;
   document.getElementById('hint').classList.add('hidden');
-  initAudio();
 
-  // iOS requires resume() to complete before audio works.
-  // Playing a silent buffer also unlocks the audio hardware
-  // on devices where the ringer switch would otherwise mute Web Audio.
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  // iOS: play silent buffer during user gesture to unlock audio hardware
   const unlock = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
   const src = audioCtx.createBufferSource();
   src.buffer = unlock;
   src.connect(audioCtx.destination);
   src.start();
 
-  if (audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
+  // Resume context, then create voices once it's actually running.
+  // iOS ignores oscillator.start() on a suspended context.
+  audioCtx.resume().then(initVoices);
 }
 
 canvas.addEventListener('click', begin);
