@@ -187,13 +187,8 @@ function initVoices() {
     osc1.start();
     osc2.start();
 
-    tones.push({
-      freq, gain, filter,
-      amp: 0,
-      energy: 0,
-      filterTarget: freq * 4,
-      index: i,
-    });
+    tones[i].gain = gain;
+    tones[i].filter = filter;
   }
 }
 
@@ -239,9 +234,11 @@ function update() {
       }
     }
 
-    // Apply audio
-    t.gain.gain.setTargetAtTime(t.amp, audioCtx.currentTime, 0.04);
-    t.filter.frequency.setTargetAtTime(t.filterTarget, audioCtx.currentTime, 0.15);
+    // Apply audio (nodes may not exist yet on iOS during initial resume)
+    if (t.gain) {
+      t.gain.gain.setTargetAtTime(t.amp, audioCtx.currentTime, 0.04);
+      t.filter.frequency.setTargetAtTime(t.filterTarget, audioCtx.currentTime, 0.15);
+    }
   }
 }
 
@@ -316,21 +313,43 @@ function begin() {
   started = true;
   document.getElementById('hint').classList.add('hidden');
 
+  // Pre-populate tones for rendering (audio nodes attached later)
+  for (var i = 0; i < N; i++) {
+    tones.push({
+      freq: FREQS[i],
+      gain: null,
+      filter: null,
+      amp: 0,
+      energy: 0,
+      filterTarget: FREQS[i] * 4,
+      index: i,
+    });
+  }
+
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-  // Create voices synchronously so tones array is available for rendering.
-  // Oscillators started on a suspended context will produce sound once
-  // it resumes — they queue properly per the Web Audio spec.
-  initVoices();
-
   // iOS: play silent buffer to unlock audio hardware
-  const unlock = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
-  const src = audioCtx.createBufferSource();
+  var unlock = audioCtx.createBuffer(1, 1, audioCtx.sampleRate);
+  var src = audioCtx.createBufferSource();
   src.buffer = unlock;
   src.connect(audioCtx.destination);
   src.start();
 
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  // Create audio nodes after context is running.
+  // iOS won't produce sound from oscillators started on a suspended context.
+  var voicesCreated = false;
+  function createVoices() {
+    if (voicesCreated) return;
+    voicesCreated = true;
+    initVoices();
+  }
+
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume().then(createVoices);
+    setTimeout(createVoices, 300); // fallback
+  } else {
+    createVoices();
+  }
 }
 
 canvas.addEventListener('click', begin);
