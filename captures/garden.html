@@ -151,6 +151,7 @@ ctx.textBaseline = 'top';
 // ── State ──────────────────────────────────────────────────────
 
 let plants = [];
+let drops = [];   // falling seed particles
 let cursor = { c: -999, r: -999 };
 let frame = 0;
 
@@ -322,6 +323,17 @@ function update() {
   }
 
   plants = plants.filter(p => !(p.state === 'dead' && p.ghostAlpha <= 0));
+
+  // ── Falling seeds ──
+  for (let i = drops.length - 1; i >= 0; i--) {
+    const dr = drops[i];
+    dr.vy += 0.12;
+    dr.y += dr.vy;
+    if (dr.y >= GROUND - 1) {
+      createPlant(dr.col);
+      drops.splice(i, 1);
+    }
+  }
 }
 
 // ── Render ─────────────────────────────────────────────────────
@@ -378,6 +390,24 @@ function render() {
       ctx.fillText(ch, seg.x * charW, seg.y * charH);
     }
   }
+
+  // Falling seeds
+  for (const dr of drops) {
+    const row = Math.floor(dr.y);
+    if (row < 0 || row >= ROWS) continue;
+    // Trail dots
+    if (row > 1 && dr.vy > 0.5) {
+      ctx.fillStyle = rgb([100, 80, 35], 0.12);
+      ctx.fillText('\u00B7', dr.col * charW, (row - 2) * charH);
+    }
+    if (row > 0 && dr.vy > 0.3) {
+      ctx.fillStyle = rgb([120, 95, 40], 0.25);
+      ctx.fillText('\u00B7', dr.col * charW, (row - 1) * charH);
+    }
+    // Seed dot
+    ctx.fillStyle = rgb([160, 130, 55], 0.85);
+    ctx.fillText('\u00B7', dr.col * charW, row * charH);
+  }
 }
 
 // ── Loop ───────────────────────────────────────────────────────
@@ -404,7 +434,10 @@ canvas.addEventListener('mouseleave', () => {
 canvas.addEventListener('click', (e) => {
   const rect = canvas.getBoundingClientRect();
   const col = Math.round((e.clientX - rect.left) / charW);
-  if (col >= 0 && col < COLS) createPlant(col);
+  const row = (e.clientY - rect.top) / charH;
+  if (col >= 0 && col < COLS) {
+    drops.push({ col, y: Math.min(row, GROUND - 2), vy: 0 });
+  }
 });
 
 // Touch
@@ -425,7 +458,10 @@ canvas.addEventListener('touchstart', (e) => {
   const t = e.touches[0];
   const rect = canvas.getBoundingClientRect();
   const col = Math.round((t.clientX - rect.left) / charW);
-  if (col >= 0 && col < COLS) createPlant(col);
+  const row = (t.clientY - rect.top) / charH;
+  if (col >= 0 && col < COLS) {
+    drops.push({ col, y: Math.min(row, GROUND - 2), vy: 0 });
+  }
 }, { passive: true });
 
 document.getElementById('statement').addEventListener('click', function() {
