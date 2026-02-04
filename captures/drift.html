@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drift</title>
+<meta name="description" content="A tonal field shaped by attention. Move to sound. Linger to sustain. What you leave fades — oldest last.">
+
+<!-- OpenGraph -->
+<meta property="og:title" content="Drift">
+<meta property="og:description" content="A tonal field shaped by attention. Move to sound. Linger to sustain.">
+<meta property="og:image" content="https://gserafini.github.io/claude-creative/captures/drift-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Drift">
+<meta name="twitter:description" content="A tonal field shaped by attention. Move to sound. Linger to sustain.">
+<meta name="twitter:image" content="https://gserafini.github.io/claude-creative/captures/drift-og.png">
+
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d1117;
+    min-height: 100vh;
+    overflow: hidden;
+    cursor: crosshair;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  canvas { display: block; }
+  #hint {
+    position: fixed;
+    bottom: 32px;
+    width: 100%;
+    text-align: center;
+    font: 11px/1.6 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    color: #30363d;
+    pointer-events: none;
+    transition: opacity 2s ease;
+  }
+  #hint.hidden { opacity: 0; }
+  #statement {
+    position: fixed;
+    bottom: 14px;
+    width: 100%;
+    text-align: center;
+    font: 10px/1.6 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    color: #161b22;
+    cursor: pointer;
+    transition: color 0.5s ease;
+  }
+  #statement.visible { color: #484f58; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hint">click anywhere to begin</div>
+<div id="statement">what does attention sound like?</div>
+<script>
+
+// ── Configuration ──────────────────────────────────────────────
+
+const PENTATONIC = [0, 2, 4, 7, 9];   // C D E G A semitone offsets
+const BASE_FREQ  = 65.41;              // C2
+const OCTAVES    = 4;
+const PROX_FRAC  = 0.12;              // proximity radius as fraction of width
+const MAX_AMP    = 0.1;               // max amplitude per voice
+const MASTER_VOL = 0.45;
+const ATTACK     = 0.06;              // attack smoothing factor
+const BASE_DECAY = 0.005;             // base decay per frame
+const ENERGY_K   = 0.012;             // how much energy slows decay
+const ENERGY_DRAIN = 0.25;            // energy drain when silent
+
+// ── Build scale ────────────────────────────────────────────────
+
+const FREQS = [];
+for (let oct = 0; oct < OCTAVES; oct++) {
+  for (const semi of PENTATONIC) {
+    FREQS.push(BASE_FREQ * Math.pow(2, oct + semi / 12));
+  }
+}
+const N = FREQS.length; // 20
+
+// ── Canvas ─────────────────────────────────────────────────────
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const dpr = window.devicePixelRatio || 1;
+let W = window.innerWidth;
+let H = window.innerHeight;
+
+function sizeCanvas() {
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+}
+sizeCanvas();
+window.addEventListener('resize', () => {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  sizeCanvas();
+});
+
+// Note positions
+function noteX(i) { return (i + 0.5) / N * W; }
+function noteY(i, frame) {
+  return H * 0.5 + Math.sin(frame * 0.008 + i * 0.7) * 4;
+}
+
+// ── Audio ──────────────────────────────────────────────────────
+
+let audioCtx = null;
+let started = false;
+const tones = [];
+
+function initAudio() {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  const master = audioCtx.createGain();
+  master.gain.value = 0;
+  master.gain.setTargetAtTime(MASTER_VOL, audioCtx.currentTime, 1.5);
+
+  // Reverb: parallel delays with feedback
+  const dry = audioCtx.createGain();
+  dry.gain.value = 0.65;
+  const wet = audioCtx.createGain();
+  wet.gain.value = 0.4;
+
+  const reverbIn = audioCtx.createGain();
+  reverbIn.gain.value = 1;
+
+  reverbIn.connect(dry);
+  dry.connect(master);
+
+  const DELAYS = [
+    { time: 0.11, gain: 0.3,  fb: 0.18 },
+    { time: 0.26, gain: 0.22, fb: 0.14 },
+    { time: 0.39, gain: 0.16, fb: 0.10 },
+    { time: 0.55, gain: 0.10, fb: 0.08 },
+  ];
+
+  for (const d of DELAYS) {
+    const delay = audioCtx.createDelay(1);
+    delay.delayTime.value = d.time;
+    const g = audioCtx.createGain();
+    g.gain.value = d.gain;
+    const fb = audioCtx.createGain();
+    fb.gain.value = d.fb;
+    reverbIn.connect(delay);
+    delay.connect(g);
+    g.connect(wet);
+    delay.connect(fb);
+    fb.connect(delay);
+  }
+  wet.connect(master);
+  master.connect(audioCtx.destination);
+
+  // Create voices
+  for (let i = 0; i < N; i++) {
+    const freq = FREQS[i];
+
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    osc1.type = 'sine';
+    osc2.type = 'sine';
+    osc1.frequency.value = freq;
+    osc2.frequency.value = freq * 1.003; // slight detune for warmth
+
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = freq * 4;
+    filter.Q.value = 0.7;
+
+    const gain = audioCtx.createGain();
+    gain.gain.value = 0;
+
+    osc1.connect(filter);
+    osc2.connect(filter);
+    filter.connect(gain);
+    gain.connect(reverbIn);
+
+    osc1.start();
+    osc2.start();
+
+    tones.push({
+      freq, gain, filter,
+      amp: 0,
+      energy: 0,
+      filterTarget: freq * 4,
+      index: i,
+    });
+  }
+}
+
+// ── State ──────────────────────────────────────────────────────
+
+let cursorX = -999;
+let cursorY = -999;
+let frame = 0;
+
+// ── Update ─────────────────────────────────────────────────────
+
+function update() {
+  if (!started) return;
+  frame++;
+
+  const proxPx = W * PROX_FRAC;
+
+  for (const t of tones) {
+    const x = noteX(t.index);
+    const dx = Math.abs(cursorX - x);
+
+    if (dx < proxPx && cursorX > 0) {
+      // Excited: proximity-based amplitude
+      const prox = 1 - dx / proxPx;
+      const target = prox * prox * MAX_AMP;
+
+      t.amp += (target - t.amp) * ATTACK;
+      t.energy += 1;
+
+      // Y-axis: filter brightness
+      if (cursorY > 0) {
+        const yPct = 1 - cursorY / H; // 0=bottom(dark), 1=top(bright)
+        t.filterTarget = t.freq * (1.5 + yPct * 8);
+      }
+    } else {
+      // Decay: energy-dependent
+      const rate = BASE_DECAY / (1 + t.energy * ENERGY_K);
+      t.amp = Math.max(0, t.amp - rate);
+
+      if (t.amp < 0.0005) {
+        t.amp = 0;
+        t.energy = Math.max(0, t.energy - ENERGY_DRAIN);
+      }
+    }
+
+    // Apply audio
+    t.gain.gain.setTargetAtTime(t.amp, audioCtx.currentTime, 0.04);
+    t.filter.frequency.setTargetAtTime(t.filterTarget, audioCtx.currentTime, 0.15);
+  }
+}
+
+// ── Render ─────────────────────────────────────────────────────
+
+function render() {
+  ctx.fillStyle = '#0d1117';
+  ctx.fillRect(0, 0, W, H);
+
+  if (!started) return;
+
+  for (const t of tones) {
+    const x = noteX(t.index);
+    const y = noteY(t.index, frame);
+    const pct = t.index / (N - 1);
+
+    // Color: warm amber (low) → cool blue (high)
+    const r = Math.round(200 - pct * 100);
+    const g = Math.round(150 + pct * 30);
+    const b = Math.round(100 + pct * 130);
+
+    // Faint trace of accumulated energy (even when silent)
+    if (t.amp < 0.002 && t.energy > 8) {
+      const traceA = Math.min(0.12, t.energy / 600);
+      ctx.beginPath();
+      ctx.arc(x, y, 2, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${r},${g},${b},${traceA.toFixed(3)})`;
+      ctx.fill();
+      continue;
+    }
+
+    if (t.amp < 0.002) continue;
+
+    const bright = Math.min(1, t.amp / MAX_AMP);
+
+    // Glow
+    const glowR = 6 + bright * 30;
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, glowR);
+    grad.addColorStop(0,   `rgba(${r},${g},${b},${(bright * 0.45).toFixed(3)})`);
+    grad.addColorStop(0.4, `rgba(${r},${g},${b},${(bright * 0.12).toFixed(3)})`);
+    grad.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x, y, glowR, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Core dot
+    const coreR = 1.5 + bright * 3;
+    ctx.beginPath();
+    ctx.arc(x, y, coreR, 0, Math.PI * 2);
+    const cr = Math.min(255, r + 50);
+    const cg = Math.min(255, g + 40);
+    const cb = Math.min(255, b + 30);
+    ctx.fillStyle = `rgba(${cr},${cg},${cb},${(bright * 0.85).toFixed(3)})`;
+    ctx.fill();
+  }
+}
+
+// ── Loop ───────────────────────────────────────────────────────
+
+function tick() {
+  update();
+  render();
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+
+// ── Input ──────────────────────────────────────────────────────
+
+function begin() {
+  if (started) return;
+  initAudio();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  started = true;
+  document.getElementById('hint').classList.add('hidden');
+}
+
+canvas.addEventListener('click', begin);
+
+canvas.addEventListener('mousemove', (e) => {
+  cursorX = e.clientX;
+  cursorY = e.clientY;
+});
+
+canvas.addEventListener('mouseleave', () => {
+  cursorX = -999;
+  cursorY = -999;
+});
+
+// Touch
+canvas.addEventListener('touchstart', (e) => {
+  begin();
+  const t = e.touches[0];
+  cursorX = t.clientX;
+  cursorY = t.clientY;
+}, { passive: true });
+
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+  const t = e.touches[0];
+  cursorX = t.clientX;
+  cursorY = t.clientY;
+});
+
+canvas.addEventListener('touchend', () => {
+  cursorX = -999;
+  cursorY = -999;
+});
+
+document.getElementById('statement').addEventListener('click', function() {
+  this.classList.toggle('visible');
+});
+
+</script>
+</body>
+</html>

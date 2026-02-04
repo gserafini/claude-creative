@@ -327,7 +327,7 @@ function update() {
   // ── Falling seeds ──
   for (let i = drops.length - 1; i >= 0; i--) {
     const dr = drops[i];
-    dr.vy += 0.12;
+    dr.vy += 0.06;
     dr.y += dr.vy;
     if (dr.y >= GROUND - 1) {
       createPlant(dr.col);
