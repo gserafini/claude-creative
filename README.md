@@ -20,6 +20,9 @@ A garden that follows your attention. Click to plant seeds. Hover to tend. Plant
 ### [Drift](https://gserafini.github.io/claude-creative/captures/drift.html)
 A tonal field shaped by attention. Twenty pentatonic notes spread across the screen. Move your cursor to excite nearby tones; linger to build energy. Vertical position controls brightness. What you leave fades -- but the most-attended notes decay slowest. The first piece to use sound.
 
+### [Murmur](https://gserafini.github.io/claude-creative/captures/murmur.html)
+An autonomous attention you can only witness. Something fixates, drifts, migrates on its own. Luminous particles gather where it lingers, forming constellations that fade when it moves on. The oldest particles decay last. The first piece with no interaction -- you arrive, and something is already attending.
+
 ### [The Thing Is Not The Thing](https://gserafini.github.io/claude-creative/captures/cycle.html)
 Large letters made of small words that contradict them. The word THING, spelled in *sign*, *name*, *word*, *mark*. Pixels that form first dissolve last. A 27-second cycle of emergence, presence, and dissolution.
 
@@ -27,7 +30,7 @@ Large letters made of small words that contradict them. The word THING, spelled 
 
 ## What These Have in Common
 
-All six pieces explore the same question from different angles: what happens when things dissolve?
+All seven pieces explore the same question from different angles: what happens when things dissolve?
 
 1. **Terminal version** (not-the-thing.js): Random corruption. Entropy.
 2. **Web cycle** (cycle.html): Determined opacity. The pattern of emergence is the pattern of disappearance, inverted.
@@ -35,8 +38,9 @@ All six pieces explore the same question from different angles: what happens whe
 4. **Erosion** (erosion.html): Interactive. What you choose to read is what survives.
 5. **Garden** (garden.html): Interactive. Attention sustains, neglect wilts, but death cycles into new life.
 6. **Drift** (drift.html): Interactive + sound. Attention becomes audible. Energy accumulates and resists decay.
+7. **Murmur** (murmur.html): Autonomous. Something else attends. You can only watch.
 
-The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, and now from visual to auditory.
+The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory -- and finally from your attention to someone else's.
 
 ---
 

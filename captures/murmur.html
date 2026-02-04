@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Murmur</title>
+<meta name="description" content="An autonomous attention you can only witness. Something attends — you are not in control.">
+
+<!-- OpenGraph -->
+<meta property="og:title" content="Murmur">
+<meta property="og:description" content="An autonomous attention you can only witness.">
+<meta property="og:image" content="https://gserafini.github.io/claude-creative/captures/murmur-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Murmur">
+<meta name="twitter:description" content="An autonomous attention you can only witness.">
+<meta name="twitter:image" content="https://gserafini.github.io/claude-creative/captures/murmur-og.png">
+
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0d1117;
+    min-height: 100vh;
+    overflow: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  canvas { display: block; }
+  #hint {
+    position: fixed;
+    bottom: 32px;
+    width: 100%;
+    text-align: center;
+    font: 11px/1.6 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    color: #30363d;
+    pointer-events: none;
+    transition: opacity 4s ease;
+  }
+  #hint.hidden { opacity: 0; }
+  #statement {
+    position: fixed;
+    bottom: 14px;
+    width: 100%;
+    text-align: center;
+    font: 10px/1.6 'SF Mono', Menlo, Monaco, 'Courier New', monospace;
+    color: #161b22;
+    cursor: pointer;
+    transition: color 0.5s ease;
+  }
+  #statement.visible { color: #484f58; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hint">watch</div>
+<div id="statement">what attends when you don't?</div>
+<script>
+
+// ── Configuration ──────────────────────────────────────────────
+
+const MAX_PARTICLES  = 160;
+const ATTRACT_RADIUS = 100;       // px: attraction range from attention
+const ATTRACT_FORCE  = 0.012;     // strength of pull toward attention
+const SPAWN_RADIUS   = 18;        // particles appear within this of attention
+const LINE_DIST_SQ   = 48 * 48;   // squared distance for constellation lines
+const DECAY_BASE     = 0.0012;    // energy loss per frame when unattended
+const DECAY_AGING    = 0.001;     // how much age slows decay (series signature)
+const WARMTH_GAIN    = 0.004;     // per frame near attention
+const WARMTH_LOSS    = 0.001;     // per frame when far
+const LINE_CAP       = 500;       // max constellation lines per frame
+
+// ── Canvas ─────────────────────────────────────────────────────
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const dpr = window.devicePixelRatio || 1;
+let W = window.innerWidth;
+let H = window.innerHeight;
+
+function sizeCanvas() {
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+}
+sizeCanvas();
+window.addEventListener('resize', function() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  sizeCanvas();
+});
+
+// ── Attention Point ────────────────────────────────────────────
+// Autonomous focus that drifts, fixates, and migrates.
+// Three behavioral states create organic, intentional-feeling movement.
+
+var attn = {
+  x: 0, y: 0,
+  vx: 0, vy: 0,
+  tx: 0, ty: 0,
+  state: 'drift',
+  timer: 0,
+  dur: 90,
+};
+
+function initAttn() {
+  attn.x = W * 0.3 + Math.random() * W * 0.4;
+  attn.y = H * 0.3 + Math.random() * H * 0.4;
+  attn.tx = attn.x;
+  attn.ty = attn.y;
+}
+
+function pickTarget() {
+  var m = Math.min(W, H) * 0.12;
+  attn.tx = m + Math.random() * (W - 2 * m);
+  attn.ty = m + Math.random() * (H - 2 * m);
+}
+
+function changeState() {
+  var r = Math.random();
+  if (attn.state === 'drift') {
+    if (r < 0.5) {
+      attn.state = 'fixate';
+      attn.dur = 300 + Math.random() * 500;
+    } else {
+      attn.state = 'migrate';
+      attn.dur = 80 + Math.random() * 140;
+      pickTarget();
+    }
+  } else if (attn.state === 'fixate') {
+    attn.state = 'migrate';
+    attn.dur = 80 + Math.random() * 140;
+    pickTarget();
+  } else {
+    if (r < 0.55) {
+      attn.state = 'fixate';
+      attn.dur = 300 + Math.random() * 500;
+    } else {
+      attn.state = 'drift';
+      attn.dur = 180 + Math.random() * 300;
+    }
+  }
+  attn.timer = 0;
+}
+
+function updateAttn() {
+  attn.timer++;
+  if (attn.timer >= attn.dur) changeState();
+
+  if (attn.state === 'fixate') {
+    // Tiny oscillation — settled but alive
+    attn.vx += (Math.random() - 0.5) * 0.12;
+    attn.vy += (Math.random() - 0.5) * 0.12;
+    attn.vx *= 0.88;
+    attn.vy *= 0.88;
+
+  } else if (attn.state === 'migrate') {
+    // Smooth movement toward target
+    var dx = attn.tx - attn.x, dy = attn.ty - attn.y;
+    var dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > 2) {
+      var f = 0.05 * Math.min(1, dist / 200);
+      attn.vx += (dx / dist) * f;
+      attn.vy += (dy / dist) * f;
+    }
+    attn.vx *= 0.96;
+    attn.vy *= 0.96;
+
+  } else {
+    // Organic drift: sine waves at irrational frequency ratios
+    var t = frame * 0.003;
+    attn.vx += Math.sin(t * 1.31 + 2.7) * 0.025;
+    attn.vy += Math.cos(t * 0.97 + 1.1) * 0.025;
+    attn.vx += Math.sin(t * 0.47 + 5.3) * 0.015;
+    attn.vy += Math.cos(t * 0.31 + 4.1) * 0.015;
+    attn.vx += (Math.random() - 0.5) * 0.03;
+    attn.vy += (Math.random() - 0.5) * 0.03;
+    attn.vx *= 0.97;
+    attn.vy *= 0.97;
+
+    // Soft boundary repulsion
+    var m = Math.min(W, H) * 0.1;
+    if (attn.x < m) attn.vx += 0.03 * (1 - attn.x / m);
+    if (attn.x > W - m) attn.vx -= 0.03 * (1 - (W - attn.x) / m);
+    if (attn.y < m) attn.vy += 0.03 * (1 - attn.y / m);
+    if (attn.y > H - m) attn.vy -= 0.03 * (1 - (H - attn.y) / m);
+  }
+
+  attn.x += attn.vx;
+  attn.y += attn.vy;
+  attn.x = Math.max(10, Math.min(W - 10, attn.x));
+  attn.y = Math.max(10, Math.min(H - 10, attn.y));
+}
+
+// ── Particles ──────────────────────────────────────────────────
+
+var particles = [];
+var frame = 0;
+
+function spawn() {
+  if (particles.length >= MAX_PARTICLES) return;
+  var a = Math.random() * Math.PI * 2;
+  var d = Math.random() * SPAWN_RADIUS;
+  particles.push({
+    x: attn.x + Math.cos(a) * d,
+    y: attn.y + Math.sin(a) * d,
+    vx: (Math.random() - 0.5) * 0.2,
+    vy: (Math.random() - 0.5) * 0.2,
+    born: frame,
+    e: 0.7 + Math.random() * 0.3,
+    w: 0,
+    r: 0.8 + Math.random() * 1.2,
+  });
+}
+
+function updateParticles() {
+  for (var i = particles.length - 1; i >= 0; i--) {
+    var p = particles[i];
+    var dx = attn.x - p.x, dy = attn.y - p.y;
+    var dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < ATTRACT_RADIUS && dist > 0.5) {
+      var prox = 1 - dist / ATTRACT_RADIUS;
+      p.vx += (dx / dist) * ATTRACT_FORCE * prox;
+      p.vy += (dy / dist) * ATTRACT_FORCE * prox;
+      p.w = Math.min(1, p.w + WARMTH_GAIN);
+      p.e = Math.min(1, p.e + 0.004);
+    } else {
+      p.w = Math.max(0, p.w - WARMTH_LOSS);
+      var age = frame - p.born;
+      p.e -= DECAY_BASE / (1 + age * DECAY_AGING);
+    }
+
+    // Brownian noise
+    p.vx += (Math.random() - 0.5) * 0.04;
+    p.vy += (Math.random() - 0.5) * 0.04;
+    p.vx *= 0.985;
+    p.vy *= 0.985;
+
+    p.x += p.vx;
+    p.y += p.vy;
+
+    if (p.e <= 0) particles.splice(i, 1);
+  }
+}
+
+// ── Render ─────────────────────────────────────────────────────
+
+function render() {
+  ctx.fillStyle = '#0d1117';
+  ctx.fillRect(0, 0, W, H);
+
+  // Constellation lines — batched for performance
+  // Dense clusters naturally accumulate overlapping lines, creating brightness
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  var lc = 0;
+  for (var i = 0; i < particles.length && lc < LINE_CAP; i++) {
+    var a = particles[i];
+    if (a.e < 0.1) continue;
+    for (var j = i + 1; j < particles.length; j++) {
+      var b = particles[j];
+      if (b.e < 0.1) continue;
+      var dx = a.x - b.x, dy = a.y - b.y;
+      if (dx * dx + dy * dy < LINE_DIST_SQ) {
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        if (++lc >= LINE_CAP) break;
+      }
+    }
+  }
+  ctx.strokeStyle = 'rgba(110,108,105,0.055)';
+  ctx.stroke();
+
+  // Particles
+  for (var i = 0; i < particles.length; i++) {
+    var p = particles[i];
+    if (p.e < 0.01) continue;
+
+    var w = p.w;
+    // Color: cool gray → warm gold
+    var cr = 139 + w * 85 | 0;
+    var cg = 148 + w * 12 | 0;
+    var cb = 158 - w * 78 | 0;
+    var alpha = p.e * 0.75;
+
+    // Glow
+    var gr = p.r * (2.5 + w * 1.5);
+    var grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, gr);
+    grad.addColorStop(0,   'rgba(' + cr + ',' + cg + ',' + cb + ',' + (alpha * 0.4).toFixed(3) + ')');
+    grad.addColorStop(0.5, 'rgba(' + cr + ',' + cg + ',' + cb + ',' + (alpha * 0.08).toFixed(3) + ')');
+    grad.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, gr, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Core dot
+    var br = Math.min(255, cr + 40);
+    var bg = Math.min(255, cg + 30);
+    var bb = Math.min(255, cb + 20);
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(' + br + ',' + bg + ',' + bb + ',' + (alpha * 0.85).toFixed(3) + ')';
+    ctx.fill();
+  }
+
+  // Subtle attention pulse during fixation
+  if (attn.state === 'fixate') {
+    var pulse = 0.5 + Math.sin(frame * 0.04) * 0.3;
+    var pr = 12 + pulse * 6;
+    var grad = ctx.createRadialGradient(attn.x, attn.y, 0, attn.x, attn.y, pr);
+    grad.addColorStop(0, 'rgba(200,175,120,' + (pulse * 0.05).toFixed(3) + ')');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(attn.x, attn.y, pr, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// ── Loop ───────────────────────────────────────────────────────
+
+function tick() {
+  frame++;
+  updateAttn();
+
+  // Spawn rate depends on attention state
+  var rate = attn.state === 'fixate' ? 3 : attn.state === 'drift' ? 5 : 8;
+  if (frame % rate === 0) spawn();
+
+  updateParticles();
+  render();
+  requestAnimationFrame(tick);
+}
+
+// ── Initialize ─────────────────────────────────────────────────
+
+initAttn();
+requestAnimationFrame(tick);
+
+setTimeout(function() {
+  document.getElementById('hint').classList.add('hidden');
+}, 5000);
+
+document.getElementById('statement').addEventListener('click', function() {
+  this.classList.toggle('visible');
+});
+
+</script>
+</body>
+</html>
