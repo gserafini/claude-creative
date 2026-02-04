@@ -91,9 +91,27 @@
     opacity: 1;
     color: #484f58;
   }
+  #fs {
+    position: fixed;
+    top: 8px;
+    right: 8px;
+    width: 44px;
+    height: 44px;
+    padding: 12px;
+    cursor: pointer;
+    color: #30363d;
+    transition: color 0.3s, opacity 0.8s;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+  }
+  #fs.show { opacity: 1; pointer-events: auto; }
+  #fs:hover { color: #6e7681; }
+  #fs svg { display: block; width: 100%; height: 100%; }
 </style>
 </head>
 <body>
+<div id="fs"></div>
 <div id="composition">
   <div id="stage"></div>
   <div id="caption"></div>
@@ -388,6 +406,32 @@ function tick(now) {
 }
 
 requestAnimationFrame(tick);
+
+// ── Fullscreen toggle ────────────────────────────────────────
+(function() {
+  var fs = document.getElementById('fs'), timer;
+  if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) {
+    fs.style.display = 'none'; return;
+  }
+  var expand = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 13v4h4m10-4v4h-4M3 7V3h4m10 4V3h-4"/></svg>';
+  var shrink = '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 3v4H3m10 0V3h4M7 17v-4H3m10 0v4h4"/></svg>';
+  function show() {
+    fs.classList.add('show'); clearTimeout(timer);
+    timer = setTimeout(function() { fs.classList.remove('show'); }, 3000);
+  }
+  function isFs() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function icon() { fs.innerHTML = isFs() ? shrink : expand; }
+  fs.addEventListener('click', function(e) {
+    e.stopPropagation(); e.preventDefault();
+    if (isFs()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    else { var el = document.documentElement; (el.requestFullscreen || el.webkitRequestFullscreen).call(el); }
+  });
+  document.addEventListener('fullscreenchange', function() { icon(); show(); });
+  document.addEventListener('webkitfullscreenchange', function() { icon(); show(); });
+  document.addEventListener('mousemove', show);
+  document.addEventListener('touchstart', show, { passive: true });
+  icon(); show();
+})();
 </script>
 </body>
 </html>
