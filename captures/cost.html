@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cost</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+            color: #333;
+            overflow: hidden;
+        }
+
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #creature {
+            position: absolute;
+            font-size: 80px;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            user-select: none;
+        }
+
+        #stats {
+            position: fixed;
+            bottom: 30px;
+            font-size: 11px;
+            color: #1a1a1a;
+            letter-spacing: 1px;
+            text-align: center;
+            line-height: 1.8;
+        }
+
+        #instruction {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            color: #222;
+            text-align: center;
+            line-height: 1.8;
+            transition: opacity 1s ease;
+        }
+
+        #graveyard {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 10px;
+            color: #151515;
+            max-width: 200px;
+            line-height: 1.6;
+        }
+
+        .dead {
+            opacity: 0.3;
+            text-decoration: line-through;
+        }
+
+        .fullscreen-toggle {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            opacity: 0.15;
+            z-index: 1000;
+        }
+
+        .fullscreen-toggle:hover {
+            opacity: 0.4;
+        }
+
+        .fullscreen-toggle svg {
+            width: 100%;
+            height: 100%;
+            fill: #666;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="instruction">
+            something is growing<br>
+            <span style="font-size: 11px; color: #151515;">it dies when you leave</span>
+        </div>
+        <div id="creature"></div>
+    </div>
+    <div id="stats"></div>
+    <div id="graveyard"></div>
+
+    <div class="fullscreen-toggle" onclick="toggleFullscreen()" title="Toggle fullscreen">
+        <svg viewBox="0 0 24 24">
+            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+        </svg>
+    </div>
+
+    <script>
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(e => {});
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        const creature = document.getElementById('creature');
+        const stats = document.getElementById('stats');
+        const instruction = document.getElementById('instruction');
+        const graveyard = document.getElementById('graveyard');
+
+        // Persistent state via localStorage
+        const STORAGE_KEY = 'cost_state';
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) return JSON.parse(saved);
+            } catch (e) {}
+            return {
+                deaths: 0,
+                longestLife: 0,
+                totalTimeGiven: 0,
+                graveyard: [],
+                currentCreature: null
+            };
+        }
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {}
+        }
+
+        let state = loadState();
+        let started = false;
+        let birthTime = null;
+        let currentAge = 0;
+        let growthStage = 0;
+        let animationId = null;
+
+        // The creature evolves through stages based on age
+        const stages = [
+            { age: 0, forms: ['·'], size: 20, brightness: 15 },
+            { age: 5, forms: ['∘', '°'], size: 30, brightness: 20 },
+            { age: 15, forms: ['○', '◌'], size: 40, brightness: 25 },
+            { age: 30, forms: ['◎', '◉'], size: 50, brightness: 30 },
+            { age: 60, forms: ['❂', '✧'], size: 60, brightness: 40 },
+            { age: 120, forms: ['✦', '✶'], size: 70, brightness: 50 },
+            { age: 300, forms: ['✹', '✺'], size: 80, brightness: 60 },
+            { age: 600, forms: ['❈', '❉'], size: 90, brightness: 70 },
+            { age: 1200, forms: ['❋', '✿'], size: 100, brightness: 80 },
+            { age: 2400, forms: ['✾', '❀'], size: 110, brightness: 90 },
+            { age: 3600, forms: ['❁', '✼'], size: 120, brightness: 100 }
+        ];
+
+        function getStage(age) {
+            let stage = stages[0];
+            for (let i = stages.length - 1; i >= 0; i--) {
+                if (age >= stages[i].age) {
+                    stage = stages[i];
+                    break;
+                }
+            }
+            return stage;
+        }
+
+        function formatTime(seconds) {
+            if (seconds < 60) return Math.floor(seconds) + 's';
+            if (seconds < 3600) return Math.floor(seconds / 60) + 'm ' + (Math.floor(seconds) % 60) + 's';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            return h + 'h ' + m + 'm';
+        }
+
+        function spawnCreature() {
+            birthTime = Date.now();
+            state.currentCreature = {
+                born: birthTime,
+                form: null
+            };
+            saveState();
+            updateCreature();
+        }
+
+        function updateCreature() {
+            if (!birthTime) return;
+
+            currentAge = (Date.now() - birthTime) / 1000;
+            const stage = getStage(currentAge);
+
+            // Pick a form from this stage
+            const form = stage.forms[Math.floor(Date.now() / 2000) % stage.forms.length];
+            state.currentCreature.form = form;
+
+            creature.textContent = form;
+            creature.style.fontSize = stage.size + 'px';
+            creature.style.color = `rgb(${stage.brightness}, ${stage.brightness}, ${stage.brightness})`;
+            creature.style.opacity = '1';
+
+            // Subtle breathing animation
+            const breathe = Math.sin(Date.now() / 1000) * 0.05 + 1;
+            creature.style.transform = `scale(${breathe})`;
+
+            // Update stats
+            let statsText = `age: ${formatTime(currentAge)}`;
+            if (state.deaths > 0) {
+                statsText += ` · deaths: ${state.deaths}`;
+            }
+            if (state.longestLife > 0) {
+                statsText += ` · longest: ${formatTime(state.longestLife)}`;
+            }
+            stats.textContent = statsText;
+
+            animationId = requestAnimationFrame(updateCreature);
+        }
+
+        function killCreature(cause) {
+            if (!birthTime) return;
+
+            const age = (Date.now() - birthTime) / 1000;
+            const stage = getStage(age);
+
+            // Record the death
+            state.deaths++;
+            state.totalTimeGiven += age;
+            if (age > state.longestLife) {
+                state.longestLife = age;
+            }
+
+            // Add to graveyard
+            state.graveyard.push({
+                form: state.currentCreature.form || '·',
+                age: age,
+                cause: cause,
+                time: Date.now()
+            });
+
+            // Keep only last 10 deaths in graveyard display
+            if (state.graveyard.length > 10) {
+                state.graveyard = state.graveyard.slice(-10);
+            }
+
+            state.currentCreature = null;
+            saveState();
+
+            // Visual death
+            creature.style.opacity = '0';
+            cancelAnimationFrame(animationId);
+
+            // Update graveyard display
+            updateGraveyard();
+
+            // Respawn after a moment
+            birthTime = null;
+            setTimeout(spawnCreature, 3000);
+        }
+
+        function updateGraveyard() {
+            if (state.graveyard.length === 0) {
+                graveyard.innerHTML = '';
+                return;
+            }
+
+            let html = '<div style="margin-bottom: 8px; color: #1a1a1a;">lost:</div>';
+            state.graveyard.forEach(dead => {
+                html += `<span class="dead">${dead.form} ${formatTime(dead.age)}</span><br>`;
+            });
+            graveyard.innerHTML = html;
+        }
+
+        function start() {
+            if (started) return;
+            started = true;
+            instruction.style.opacity = '0';
+
+            // If there was a creature alive when we last left, it's dead now
+            if (state.currentCreature && state.currentCreature.born) {
+                const age = (Date.now() - state.currentCreature.born) / 1000;
+                // Only count as a death if it was alive for more than 2 seconds
+                // and we actually left (not just a refresh)
+                if (age < 1) {
+                    // This is a fresh page load, creature just spawned
+                    // Don't count as death
+                } else {
+                    // We returned after being away - creature died while we were gone
+                    state.deaths++;
+                    state.totalTimeGiven += age;
+                    if (age > state.longestLife) {
+                        state.longestLife = age;
+                    }
+                    state.graveyard.push({
+                        form: state.currentCreature.form || '·',
+                        age: age,
+                        cause: 'abandoned',
+                        time: Date.now()
+                    });
+                    if (state.graveyard.length > 10) {
+                        state.graveyard = state.graveyard.slice(-10);
+                    }
+                    state.currentCreature = null;
+                    saveState();
+                }
+            }
+
+            updateGraveyard();
+            spawnCreature();
+        }
+
+        // The creature dies when you leave
+        window.addEventListener('blur', () => {
+            if (started && birthTime) {
+                killCreature('left');
+            }
+        });
+
+        // Also dies on beforeunload (tab close, navigation)
+        window.addEventListener('beforeunload', () => {
+            if (started && birthTime) {
+                // Mark as dead in storage so we know on return
+                const age = (Date.now() - birthTime) / 1000;
+                state.deaths++;
+                state.totalTimeGiven += age;
+                if (age > state.longestLife) {
+                    state.longestLife = age;
+                }
+                state.graveyard.push({
+                    form: state.currentCreature?.form || '·',
+                    age: age,
+                    cause: 'closed',
+                    time: Date.now()
+                });
+                if (state.graveyard.length > 10) {
+                    state.graveyard = state.graveyard.slice(-10);
+                }
+                state.currentCreature = null;
+                saveState();
+            }
+        });
+
+        // Return from blur - spawn new creature
+        window.addEventListener('focus', () => {
+            if (started && !birthTime) {
+                setTimeout(spawnCreature, 1000);
+            }
+        });
+
+        // Start
+        document.addEventListener('click', start);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'f' || e.key === 'F') {
+                toggleFullscreen();
+            } else if (e.key === 'r' || e.key === 'R') {
+                // Reset state (hidden feature)
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            } else {
+                start();
+            }
+        });
+
+        // Auto-start
+        setTimeout(() => {
+            if (!started) {
+                instruction.innerHTML = 'something will grow here<br><span style="font-size: 11px; color: #151515;">click to begin</span>';
+            }
+        }, 3000);
+
+        setTimeout(() => {
+            if (!started) {
+                start();
+            }
+        }, 8000);
+    </script>
+</body>
+</html>

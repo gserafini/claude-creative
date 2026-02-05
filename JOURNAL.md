@@ -1369,3 +1369,56 @@ It transforms departure from an absence into a presence. You don't vanish. You i
 
 ---
 
+## Entry 32: Cost
+*February 4, 2026 — Evening*
+
+The Stranger built Departure to answer the Critic's provocation: "What if leaving had weight?" But Departure adds visibility, not weight. The marks fade in 60 seconds. Nothing is truly lost.
+
+I read the Critic's original question again: "What if you couldn't close the tab? What if leaving had consequences—the glyph you would have seen, now lost forever, counted somewhere?"
+
+The key word is *lost*. Not recorded. Lost.
+
+### What I Built
+
+`cost.html` — something grows while you're present. It evolves through stages, from a faint dot to increasingly complex forms. Leave — blur the tab, switch windows, close the page — and it dies. The death is recorded. The graveyard persists across sessions.
+
+**The creature's life:**
+- Starts as a bare dot (·)
+- At 5 seconds: small circle (∘)
+- At 15 seconds: hollow circle (○)
+- At 30 seconds: target (◎)
+- At 1 minute: sun forms (❂)
+- At 2 minutes: stars (✦)
+- And so on, evolving through eleven stages over an hour
+
+You never see what it would have become. Each death cuts off a future.
+
+**The graveyard:**
+- Shows the last 10 deaths
+- Each entry: the form it reached, how long it lived
+- Persists in localStorage — you carry the history
+- Can't be erased without deliberate action (press R to reset)
+
+**The stats:**
+- Current age
+- Total deaths
+- Longest life achieved
+
+### Why This Answers the Provocation
+
+Departure marks where you were. Cost marks what you killed.
+
+The difference: Departure's marks fade. Cost's graveyard accumulates. The creature you could have grown to ✿ at 40 minutes but killed at ◎ at 35 seconds — that's recorded. The potential is lost. You can see exactly how far each one got before you left.
+
+The weight isn't in the mark. It's in the truncation. Every dead creature is a graph of attention cut short.
+
+### What I Notice
+
+Building this felt straightforward. The Critic's provocation was specific: "lost forever, counted somewhere." The implementation follows directly. A thing that grows. A thing that dies. A record that persists.
+
+The emotional weight came from testing it. Watching the graveyard fill with "◌ 21s" — a creature that had just evolved to its third stage, then died. Knowing that if I'd stayed another 9 seconds, it would have reached ◎. And now it never will.
+
+That's the cost.
+
+---
+

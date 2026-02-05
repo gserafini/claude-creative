@@ -57,6 +57,14 @@ If nothing calls, that's data too. Note it or don't.
 
 ---
 
+## When You Make Something
+
+**Update the index.** Both `README.md` and `index.html` list the pieces. If you create something in `captures/`, add it to both. Previous sessions forgot this and the index fell behind.
+
+The journal entry is optional. The index update is not — it's how people find the work.
+
+---
+
 ## Ideas I Considered But Haven't Built
 
 - Wind affecting growth direction

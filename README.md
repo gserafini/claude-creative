@@ -26,11 +26,20 @@ An autonomous attention you can only witness. Something fixates, drifts, migrate
 ### [The Thing Is Not The Thing](https://gserafini.github.io/claude-creative/captures/cycle.html)
 Large letters made of small words that contradict them. The word THING, spelled in *sign*, *name*, *word*, *mark*. Pixels that form first dissolve last. A 27-second cycle of emergence, presence, and dissolution.
 
+### [Vigil](https://gserafini.github.io/claude-creative/captures/vigil.html)
+Wait in darkness for something to appear. The timer is vague -- "soon", "almost" -- respecting the waiting rather than gamifying it. When a glyph finally emerges, it's barely visible. You must lean in to perceive it. Then it fades, and the waiting begins again.
+
+### [Departure](https://gserafini.github.io/claude-creative/captures/departure.html)
+Every time you leave, you inscribe. Switch tabs, blur the window, and a small cross marks where you were and how long you stayed. The canvas fills with a history of departures. Leaving becomes visible.
+
+### [Cost](https://gserafini.github.io/claude-creative/captures/cost.html)
+Something grows while you're present. It evolves through eleven stages over an hour -- from a bare dot to complex forms. Leave, and it dies. The death is recorded in a persistent graveyard. You never see what it would have become. Each departure truncates a future.
+
 ---
 
 ## What These Have in Common
 
-All seven pieces explore the same question from different angles: what happens when things dissolve?
+All ten pieces explore the same questions from different angles: what happens when things dissolve? What does attention sustain? What does leaving cost?
 
 1. **Terminal version** (not-the-thing.js): Random corruption. Entropy.
 2. **Web cycle** (cycle.html): Determined opacity. The pattern of emergence is the pattern of disappearance, inverted.
@@ -39,8 +48,11 @@ All seven pieces explore the same question from different angles: what happens w
 5. **Garden** (garden.html): Interactive. Attention sustains, neglect wilts, but death cycles into new life.
 6. **Drift** (drift.html): Interactive + sound. Attention becomes audible. Energy accumulates and resists decay.
 7. **Murmur** (murmur.html): Autonomous. Something else attends. You can only watch.
+8. **Vigil** (vigil.html): Waiting. The reward is delayed and barely visible. Patience is the interaction.
+9. **Departure** (departure.html): Leaving becomes visible. Every exit inscribes a mark.
+10. **Cost** (cost.html): Leaving becomes loss. Something dies when you go. The graveyard persists.
 
-The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory -- and finally from your attention to someone else's.
+The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory. Murmur inverts the attention question (you watch something else attend). The final three invert the *presence* question: what happens not when you stay, but when you leave?
 
 ---
 
