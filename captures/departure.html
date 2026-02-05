@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Departure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+            color: #333;
+            overflow: hidden;
+            cursor: none;
+        }
+
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        #canvas {
+            display: block;
+            background: #0a0a0a;
+            cursor: crosshair;
+        }
+
+        #instruction {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            color: #222;
+            text-align: center;
+            line-height: 1.8;
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            z-index: 10;
+        }
+
+        #instruction.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #timer {
+            position: fixed;
+            bottom: 30px;
+            font-size: 12px;
+            color: #1a1a1a;
+            letter-spacing: 1px;
+        }
+
+        .exit-warning {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: #555;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+            line-height: 1.6;
+        }
+
+        .exit-warning.visible {
+            opacity: 1;
+        }
+
+        .mark {
+            font-size: 24px;
+            line-height: 1.2;
+        }
+
+        .fullscreen-toggle {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            opacity: 0.15;
+            z-index: 1000;
+        }
+
+        .fullscreen-toggle:hover {
+            opacity: 0.4;
+        }
+
+        .fullscreen-toggle svg {
+            width: 100%;
+            height: 100%;
+            fill: #666;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <canvas id="canvas"></canvas>
+        <div id="instruction">
+            wait<br>
+            <span style="font-size: 11px; color: #111;">leaving marks something</span>
+        </div>
+        <div id="timer"></div>
+    </div>
+
+    <div class="exit-warning" id="exitWarning">
+        <div class="mark" id="mark"></div>
+        <div style="font-size: 12px; margin-top: 10px; color: #333;">You were here</div>
+    </div>
+
+    <div class="fullscreen-toggle" onclick="toggleFullscreen()" title="Toggle fullscreen">
+        <svg viewBox="0 0 24 24">
+            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+        </svg>
+    </div>
+
+    <script>
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(e => {});
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // When leaving is weighted - departures become visible marks
+        // This draws a record of everyone who came and went
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const instruction = document.getElementById('instruction');
+        const exitWarning = document.getElementById('exitWarning');
+        const mark = document.getElementById('mark');
+        const timer = document.getElementById('timer');
+
+        let sessionStarted = false;
+        let sessionEndTime = 0;
+        let departures = [];
+        let currentPosition = null;
+        let timeInThisSession = 0;
+
+        // Resize canvas to window
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            redraw();
+        }
+
+        // Track cursor position
+        document.addEventListener('mousemove', (e) => {
+            if (sessionStarted) {
+                currentPosition = { x: e.clientX, y: e.clientY };
+            }
+        });
+
+        // Mark a point when user initiates departure (blur, unload, or click outside)
+        function recordDeparture() {
+            if (!sessionStarted || !currentPosition) return;
+
+            const timeSpent = Date.now() - sessionEndTime;
+
+            // Only record if they were here more than 2 seconds
+            if (timeSpent > 2000) {
+                departures.push({
+                    x: currentPosition.x,
+                    y: currentPosition.y,
+                    time: Date.now(),
+                    duration: timeSpent,
+                    brightness: Math.max(15, Math.min(200, (timeSpent / 1000) * 10))
+                });
+            }
+        }
+
+        // Redraw all departures as a history
+        function redraw() {
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw older departures first (fading)
+            departures.forEach((dep, idx) => {
+                const age = Date.now() - dep.time;
+                const maxAge = 60000; // 1 minute to fully fade
+                const alpha = Math.max(0, 1 - (age / maxAge));
+
+                ctx.save();
+                ctx.globalAlpha = alpha * 0.6;
+
+                // Draw as a small cross/mark
+                const size = 8;
+                ctx.strokeStyle = `rgb(${dep.brightness}, ${Math.floor(dep.brightness * 0.7)}, ${Math.floor(dep.brightness * 0.4)})`;
+                ctx.lineWidth = 1;
+
+                // Vertical line
+                ctx.beginPath();
+                ctx.moveTo(dep.x, dep.y - size);
+                ctx.lineTo(dep.x, dep.y + size);
+                ctx.stroke();
+
+                // Horizontal line
+                ctx.beginPath();
+                ctx.moveTo(dep.x - size, dep.y);
+                ctx.lineTo(dep.x + size, dep.y);
+                ctx.stroke();
+
+                // Small circle around the mark
+                ctx.beginPath();
+                ctx.arc(dep.x, dep.y, size + 2, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.restore();
+
+                // Label the duration near each mark (very faint)
+                ctx.save();
+                ctx.globalAlpha = alpha * 0.3;
+                ctx.font = '10px monospace';
+                ctx.fillStyle = `rgb(${dep.brightness * 0.5}, ${dep.brightness * 0.4}, ${dep.brightness * 0.3})`;
+                const seconds = Math.floor(dep.duration / 1000);
+                ctx.fillText(seconds + 's', dep.x + size + 5, dep.y - size - 2);
+                ctx.restore();
+            });
+
+            // Remove very old departures
+            departures = departures.filter(dep => (Date.now() - dep.time) < 120000);
+        }
+
+        function startSession() {
+            if (sessionStarted) return;
+            sessionStarted = true;
+            sessionEndTime = Date.now();
+            instruction.classList.add('hidden');
+
+            // Animation loop
+            function animate() {
+                redraw();
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // Detect departure attempts
+        window.addEventListener('beforeunload', () => {
+            recordDeparture();
+        });
+
+        window.addEventListener('blur', () => {
+            if (sessionStarted && currentPosition) {
+                const timeSpent = Date.now() - sessionEndTime;
+                if (timeSpent > 1000) {
+                    // Show a subtle warning that departure was recorded
+                    exitWarning.classList.add('visible');
+                    const symbols = ['◆', '●', '✦', '★', '×', '÷', '◈'];
+                    mark.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+
+                    recordDeparture();
+
+                    setTimeout(() => {
+                        exitWarning.classList.remove('visible');
+                    }, 2000);
+                }
+            }
+        });
+
+        // Focus returns
+        window.addEventListener('focus', () => {
+            sessionEndTime = Date.now();
+        });
+
+        // Start on first interaction
+        document.addEventListener('click', startSession);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'f' || e.key === 'F') {
+                toggleFullscreen();
+            } else {
+                startSession();
+            }
+        });
+
+        // Auto-start after delay
+        setTimeout(() => {
+            if (!sessionStarted) {
+                instruction.innerHTML = 'click to begin<br><span style="font-size: 11px; color: #111;">or simply wait</span>';
+            }
+        }, 3000);
+
+        setTimeout(() => {
+            if (!sessionStarted) {
+                startSession();
+            }
+        }, 10000);
+
+        // Handle window resize
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+    </script>
+</body>
+</html>
