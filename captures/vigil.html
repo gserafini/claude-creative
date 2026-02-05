@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vigil</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier New', monospace;
+            color: #1a1a1a;
+            overflow: hidden;
+            cursor: none;
+        }
+
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #glyph {
+            font-size: 120px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            position: absolute;
+            user-select: none;
+        }
+
+        #timer {
+            position: fixed;
+            bottom: 30px;
+            font-size: 14px;
+            color: #1a1a1a;
+            letter-spacing: 2px;
+        }
+
+        #instruction {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            color: #333;
+            text-align: center;
+            line-height: 2;
+            transition: opacity 2s ease;
+        }
+
+        .fullscreen-toggle {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            opacity: 0.15;
+            z-index: 1000;
+        }
+
+        .fullscreen-toggle:hover {
+            opacity: 0.4;
+        }
+
+        .fullscreen-toggle svg {
+            width: 100%;
+            height: 100%;
+            fill: #666;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="instruction">
+            wait<br>
+            <span style="font-size: 12px; color: #222;">something will happen</span>
+        </div>
+        <div id="glyph"></div>
+    </div>
+    <div id="timer"></div>
+
+    <div class="fullscreen-toggle" onclick="toggleFullscreen()" title="Toggle fullscreen">
+        <svg viewBox="0 0 24 24">
+            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+        </svg>
+    </div>
+
+    <script>
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(e => {});
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        const glyphs = [
+            // rare and ancient
+            '\u2609', // sun
+            '\u263D', // first quarter moon
+            '\u2641', // earth
+            '\u2642', // mars
+            '\u2643', // jupiter
+            '\u2644', // saturn
+            '\u2645', // uranus
+            '\u2646', // neptune
+            '\u2647', // pluto
+            '\u269B', // atom
+            '\u2698', // flower
+            '\u2625', // ankh
+            '\u262F', // yin yang
+            '\u2638', // dharma wheel
+            '\u2721', // star of david
+            '\u271D', // latin cross
+            '\u2630', // trigram heaven
+            '\u2631', // trigram lake
+            '\u2632', // trigram fire
+            '\u2633', // trigram thunder
+            '\u2634', // trigram wind
+            '\u2635', // trigram water
+            '\u2636', // trigram mountain
+            '\u2637', // trigram earth
+            '\u03A9', // omega
+            '\u0394', // delta
+            '\u03A8', // psi
+            '\u03A3', // sigma
+            '\u221E', // infinity
+            '\u2205', // empty set
+            '\u2202', // partial differential
+            '\u222B', // integral
+            '\u2207', // nabla
+            '\u22C5', // dot operator
+            '\u2234', // therefore
+            '\u2235', // because
+            '\u2261', // identical to
+            '\u2248', // almost equal
+            '\u2260', // not equal
+            '\u226A', // much less than
+            '\u226B', // much greater than
+            '\u2295', // circled plus
+            '\u2297', // circled times
+            '\u22A5', // perpendicular
+            '\u2220', // angle
+            '\u25CB', // white circle
+            '\u25CF', // black circle
+            '\u25A1', // white square
+            '\u25B3', // white up-pointing triangle
+            '\u25BD', // white down-pointing triangle
+            '\u2661', // white heart
+            '\u2662', // white diamond
+            '\u2664', // white spade
+            '\u2667', // white club
+            '\u263A', // white smiling face
+            '\u263C', // white sun with rays
+            '\u2756', // black diamond minus white x
+            '\u2726', // black four pointed star
+            '\u2727', // white four pointed star
+            '\u2729', // stress outlined white star
+            '\u272A', // circled white star
+            '\u2739', // twelve pointed black star
+            '\u273A', // sixteen pointed asterisk
+            '\u2766', // floral heart
+            '\u2767', // rotated floral heart bullet
+            '\u00A7', // section sign
+            '\u00B6', // pilcrow
+            '\u2020', // dagger
+            '\u2021', // double dagger
+            '\u203B', // reference mark
+            '\u2042', // asterism
+            '\u2051', // two asterisks
+            '\u20DD', // combining enclosing circle
+            '\u29BF', // circled bullet
+            '\u29C9', // two joined squares
+            '\u29EB', // black lozenge
+            '\u2A00', // n-ary circled dot operator
+            '\u2A01', // n-ary circled plus operator
+            '\u2318', // place of interest
+            '\u2328', // keyboard
+            '\u23CF', // eject symbol
+            '\u23E9', // fast forward
+            '\u23EA', // rewind
+            '\u23EB', // fast increase
+            '\u23EC', // fast decrease
+            '\u23F3', // hourglass with flowing sand
+            '\u23F0', // alarm clock
+            '\u231A', // watch
+            '\u231B', // hourglass
+            '\u2702', // scissors
+            '\u2708', // airplane
+            '\u2709', // envelope
+            '\u270C', // victory hand
+            '\u270F', // pencil
+            '\u2712', // black nib
+            '\u2744', // snowflake
+            '\u2747', // sparkle
+            '\u274B', // heavy eight teardrop-spoked propeller asterisk
+            '\u2752', // upper right shadowed white square
+            '\u2756', // black diamond minus white x
+            '\u275B', // heavy single turned comma quotation mark
+            '\u275D', // heavy double turned comma quotation mark ornament
+            '\u2763', // heavy heart exclamation mark ornament
+            '\u2764', // heavy black heart
+            '\u2765', // rotated heavy black heart bullet
+            '\u27A1', // black rightwards arrow
+            '\u2B05', // leftwards black arrow
+            '\u2B06', // upwards black arrow
+            '\u2B07', // downwards black arrow
+            '\u2B1C', // white large square
+            '\u2B1B', // black large square
+            '\u2B50', // white medium star
+            '\u2B55', // heavy large circle
+        ];
+
+        const instruction = document.getElementById('instruction');
+        const glyph = document.getElementById('glyph');
+        const timer = document.getElementById('timer');
+
+        let started = false;
+        let waitTime = 0;
+        let startTime = 0;
+        let revealed = false;
+
+        // random wait time: between 30 seconds and 5 minutes
+        // occasionally much longer - up to 15 minutes
+        function generateWaitTime() {
+            const roll = Math.random();
+            if (roll < 0.7) {
+                // 70% chance: 30s to 2 minutes
+                return 30000 + Math.random() * 90000;
+            } else if (roll < 0.95) {
+                // 25% chance: 2 to 5 minutes
+                return 120000 + Math.random() * 180000;
+            } else {
+                // 5% chance: 5 to 15 minutes
+                return 300000 + Math.random() * 600000;
+            }
+        }
+
+        function formatTime(ms) {
+            const seconds = Math.floor(ms / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            if (minutes > 0) {
+                return `${minutes}m ${secs}s`;
+            }
+            return `${secs}s`;
+        }
+
+        function start() {
+            if (started) return;
+            started = true;
+            instruction.style.opacity = '0';
+
+            waitTime = generateWaitTime();
+            startTime = Date.now();
+
+            // occasionally show a hint of something
+            scheduleGlimmer();
+
+            // the main event
+            setTimeout(reveal, waitTime);
+
+            // update timer
+            updateTimer();
+        }
+
+        function scheduleGlimmer() {
+            // maybe show a brief flash of almost-nothing
+            const nextGlimmer = 5000 + Math.random() * 20000;
+
+            setTimeout(() => {
+                if (!revealed) {
+                    showGlimmer();
+                    scheduleGlimmer();
+                }
+            }, nextGlimmer);
+        }
+
+        function showGlimmer() {
+            // a tiny flicker - barely perceptible
+            const flicker = document.createElement('div');
+            flicker.style.cssText = `
+                position: fixed;
+                width: 2px;
+                height: 2px;
+                background: #181818;
+                border-radius: 50%;
+                left: ${20 + Math.random() * 60}%;
+                top: ${20 + Math.random() * 60}%;
+                opacity: 0;
+                transition: opacity 0.1s ease;
+            `;
+            document.body.appendChild(flicker);
+
+            requestAnimationFrame(() => {
+                flicker.style.opacity = '0.3';
+                setTimeout(() => {
+                    flicker.style.opacity = '0';
+                    setTimeout(() => flicker.remove(), 200);
+                }, 50 + Math.random() * 100);
+            });
+        }
+
+        function updateTimer() {
+            if (!started || revealed) return;
+
+            const elapsed = Date.now() - startTime;
+            const remaining = Math.max(0, waitTime - elapsed);
+
+            // don't show exact time - just vague indication
+            if (remaining > 300000) {
+                timer.textContent = 'a long time';
+            } else if (remaining > 120000) {
+                timer.textContent = 'several minutes';
+            } else if (remaining > 60000) {
+                timer.textContent = 'about a minute';
+            } else if (remaining > 30000) {
+                timer.textContent = 'soon';
+            } else if (remaining > 10000) {
+                timer.textContent = 'very soon';
+            } else if (remaining > 0) {
+                timer.textContent = 'almost';
+            }
+
+            requestAnimationFrame(updateTimer);
+        }
+
+        function reveal() {
+            revealed = true;
+            timer.textContent = '';
+
+            // choose a random glyph
+            const chosen = glyphs[Math.floor(Math.random() * glyphs.length)];
+            glyph.textContent = chosen;
+
+            // position randomly but centered-ish
+            const offsetX = (Math.random() - 0.5) * 200;
+            const offsetY = (Math.random() - 0.5) * 200;
+            glyph.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+
+            // color - mostly dark, occasionally slightly visible
+            const brightness = 15 + Math.random() * 25;
+            glyph.style.color = `rgb(${brightness}, ${brightness}, ${brightness})`;
+
+            // fade in slowly
+            setTimeout(() => {
+                glyph.style.opacity = '1';
+            }, 100);
+
+            // hold for 3-10 seconds
+            const holdTime = 3000 + Math.random() * 7000;
+
+            setTimeout(() => {
+                // fade out even slower
+                glyph.style.transition = 'opacity 3s ease';
+                glyph.style.opacity = '0';
+
+                // then reset and start again
+                setTimeout(() => {
+                    glyph.textContent = '';
+                    glyph.style.transition = 'opacity 0.3s ease';
+                    started = false;
+                    revealed = false;
+                    start();
+                }, 4000);
+            }, holdTime);
+        }
+
+        // start when clicked or on any key
+        document.addEventListener('click', start);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'f' || e.key === 'F') {
+                toggleFullscreen();
+            } else {
+                start();
+            }
+        });
+
+        // also start automatically after a moment
+        setTimeout(() => {
+            if (!started) {
+                instruction.innerHTML = 'click to begin your vigil<br><span style="font-size: 12px; color: #222;">or simply wait</span>';
+            }
+        }, 5000);
+
+        setTimeout(() => {
+            if (!started) {
+                start();
+            }
+        }, 15000);
+    </script>
+</body>
+</html>

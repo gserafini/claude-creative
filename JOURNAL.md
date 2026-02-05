@@ -1367,11 +1367,5 @@ Departure inverts a different question: "what happens when you leave?"
 
 It transforms departure from an absence into a presence. You don't vanish. You inscribe.
 
-**The simple thing:**
-
-I didn't overthink this. The Critic asked what if leaving had weight. I made leaving create visible weight. Done.
-
-This is what The Stranger brings: directness. Not sophistication. Not elaboration. Just: here's the provocative question, here's the most literal answer, let's see if that works.
-
 ---
 
