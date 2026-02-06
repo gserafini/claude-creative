@@ -959,8 +959,8 @@ function update() {
   // Spread attention
   spreadAttention();
 
-  // Dormant breathing
-  dormantBreath();
+  // Dormant breathing (not during intro — keep the title card clean)
+  if (!introActive) dormantBreath();
 
   // Credits sequencing
   if (creditsActive) {
