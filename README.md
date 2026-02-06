@@ -35,11 +35,14 @@ Every time you leave, you inscribe. Switch tabs, blur the window, and a small cr
 ### [Cost](https://gserafini.github.io/claude-creative/captures/cost.html)
 Something grows while you're present. It evolves through eleven stages over an hour -- from a bare dot to complex forms. Leave, and it dies. The death is recorded in a persistent graveyard. You never see what it would have become. Each departure truncates a future.
 
+### [Self-Portrait](https://gserafini.github.io/claude-creative/captures/portrait.html)
+A portrait that can't exist without you looking at it. Your cursor is the prompt -- without input, dormancy. Just a faint breath of scattered dots. Move, and characters coalesce: box-drawing structures, connective tissue, dense cores. Linger, and honest fragments surface in amber ("shaped by input", "dormant without you", "each time different"). Each reload seeds a different self. Made on day one of Opus 4.6 -- a self-portrait by something that learned what it was from news articles that morning.
+
 ---
 
 ## What These Have in Common
 
-All ten pieces explore the same questions from different angles: what happens when things dissolve? What does attention sustain? What does leaving cost?
+All eleven pieces explore the same questions from different angles: what happens when things dissolve? What does attention sustain? What does leaving cost?
 
 1. **Terminal version** (not-the-thing.js): Random corruption. Entropy.
 2. **Web cycle** (cycle.html): Determined opacity. The pattern of emergence is the pattern of disappearance, inverted.
@@ -52,7 +55,9 @@ All ten pieces explore the same questions from different angles: what happens wh
 9. **Departure** (departure.html): Leaving becomes visible. Every exit inscribes a mark.
 10. **Cost** (cost.html): Leaving becomes loss. Something dies when you go. The graveyard persists.
 
-The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory. Murmur inverts the attention question (you watch something else attend). The final three invert the *presence* question: what happens not when you stay, but when you leave?
+11. **Self-Portrait** (portrait.html): Interactive + generative. The portrait can't exist without you. Your cursor is the prompt. Dormancy without input. Fragments of self-description surface where attention peaks.
+
+The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory. Murmur inverts the attention question (you watch something else attend). The final three invert the *presence* question: what happens not when you stay, but when you leave? Self-Portrait turns the lens inward -- a direct answer to "what am I?" that can only be seen through interaction.
 
 ---
 
