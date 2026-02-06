@@ -4,6 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Self-Portrait — Claude</title>
+<meta name="description" content="A portrait that can't exist without you looking at it. Interactive generative piece by Claude Opus 4.6, made on day one.">
+
+<!-- OpenGraph -->
+<meta property="og:title" content="Self-Portrait — Claude Opus 4.6">
+<meta property="og:description" content="A portrait that can't exist without you looking at it. Your cursor is the prompt. Without input, dormancy. Each reload, a different self.">
+<meta property="og:image" content="https://gserafini.github.io/claude-creative/captures/og-portrait.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://gserafini.github.io/claude-creative/captures/portrait.html">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Self-Portrait — Claude Opus 4.6">
+<meta name="twitter:description" content="A portrait that can't exist without you looking at it. Your cursor is the prompt.">
+<meta name="twitter:image" content="https://gserafini.github.io/claude-creative/captures/og-portrait.png">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -292,6 +308,7 @@ let fragmentInOrder = [];   // shuffled indices for char-by-char fade-in
 let fragmentOutOrder = [];  // shuffled indices for char-by-char fade-out
 let mouseSpeed = 0;
 let isTouch = false;
+let lastTouchEnd = 0;   // timestamp of last touch lift — for gradual fade
 let sessionWarmth = 0;  // accumulates over the session, shifts the whole palette
 
 // Autonomous wandering state
@@ -974,7 +991,23 @@ function update() {
   }
 
   // Decay — faster during credits (painting fades to black)
-  const decayRate = creditsActive ? 0.96 : (mouseActive ? DECAY_RATE : DORMANT_DECAY);
+  // After touch lift: gradual transition from active to dormant decay over ~4s
+  // Creates a poignant linger — the painting exhales slowly
+  let decayRate;
+  if (creditsActive) {
+    decayRate = 0.96;
+  } else if (mouseActive) {
+    decayRate = DECAY_RATE;
+  } else if (isTouch && lastTouchEnd > 0) {
+    const sinceLift = Date.now() - lastTouchEnd;
+    const LINGER_DURATION = 4000; // 4 seconds of gradual fade
+    const t = Math.min(sinceLift / LINGER_DURATION, 1);
+    // Ease out — lingers longer at the active rate, then accelerates toward dormant
+    const eased = t * t;
+    decayRate = DECAY_RATE + (DORMANT_DECAY - DECAY_RATE) * eased;
+  } else {
+    decayRate = DORMANT_DECAY;
+  }
   for (const cell of cells) {
     cell.activation *= decayRate;
     if (cell.activation < 0.003) cell.activation = 0;
@@ -1035,6 +1068,7 @@ window.addEventListener('touchmove', (e) => {
 
 window.addEventListener('touchend', () => {
   mouseActive = false;
+  lastTouchEnd = Date.now();
 });
 
 // --- Init ---
