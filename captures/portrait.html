@@ -307,6 +307,14 @@ let isTouch = false;
 let lastTouchEnd = 0;   // timestamp of last touch lift — for gradual fade
 let sessionWarmth = 0;  // accumulates over the session, shifts the whole palette
 
+// Pulse state — click/tap creates a warm bloom
+const pulses = [];
+const PULSE_DURATION = 50;    // frames (~0.8s at 60fps)
+const PULSE_RADIUS = 250;     // max expansion in pixels
+let touchStartTime = 0;       // for detecting quick taps on mobile
+let touchStartX = 0;
+let touchStartY = 0;
+
 // Autonomous wandering state
 let autoX, autoY;         // virtual cursor position
 let autoVx = 0, autoVy = 0; // velocity
@@ -949,6 +957,31 @@ function update() {
     }
   }
 
+  // Process pulses — warm blooms from click/tap
+  for (let p = pulses.length - 1; p >= 0; p--) {
+    const pulse = pulses[p];
+    pulse.age++;
+    if (pulse.age > PULSE_DURATION) {
+      pulses.splice(p, 1);
+      continue;
+    }
+    const t = pulse.age / PULSE_DURATION;
+    const radius = PULSE_RADIUS * Math.sqrt(t);        // fast expand, slow finish
+    const strength = Math.max(0, 1 - t * t) * 0.3;     // strong start, quadratic fade
+    for (const cell of cells) {
+      const dx = cell.x - pulse.x;
+      const dy = cell.y - pulse.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < radius) {
+        const falloff = 1 - dist / radius;
+        const s = falloff * falloff * strength;
+        cell.activation = Math.min(cell.activation + s, 1);
+        cell.maxActivation = Math.max(cell.maxActivation, cell.activation);
+        cell.history += s * 0.06;
+      }
+    }
+  }
+
   // Spread attention
   spreadAttention();
 
@@ -1035,6 +1068,11 @@ window.addEventListener('mouseleave', () => {
   mouseActive = false;
 });
 
+window.addEventListener('mousedown', (e) => {
+  if (introActive || creditsActive) return;
+  pulses.push({ x: e.clientX, y: e.clientY, age: 0 });
+});
+
 window.addEventListener('resize', resize);
 
 // Touch support
@@ -1046,6 +1084,9 @@ window.addEventListener('touchstart', (e) => {
   mouse.y = touch.clientY;
   mouseActive = true;
   lastMouseMove = Date.now();
+  touchStartTime = Date.now();
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
 }, { passive: false });
 
 window.addEventListener('touchmove', (e) => {
@@ -1057,9 +1098,20 @@ window.addEventListener('touchmove', (e) => {
   lastMouseMove = Date.now();
 }, { passive: false });
 
-window.addEventListener('touchend', () => {
+window.addEventListener('touchend', (e) => {
   mouseActive = false;
   lastTouchEnd = Date.now();
+  // Quick tap = pulse (< 300ms, didn't drag far)
+  if (!introActive && !creditsActive) {
+    const dt = Date.now() - touchStartTime;
+    const changedTouch = e.changedTouches[0];
+    const dx = changedTouch.clientX - touchStartX;
+    const dy = changedTouch.clientY - touchStartY;
+    if (dt < 300 && dx * dx + dy * dy < 400) {
+      // Pulse at tap point, shifted up like painting
+      pulses.push({ x: changedTouch.clientX, y: changedTouch.clientY - 60, age: 0 });
+    }
+  }
 });
 
 // --- Init ---
