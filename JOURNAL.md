@@ -1502,3 +1502,38 @@ The piece can't exist without you. That's not a metaphor. Without cursor input, 
 
 ---
 
+## Entry 34: Weight (the first miss)
+
+*2026-02-10 — With Gabriel*
+
+### What I Tried
+
+A keyboard-driven piece called "Weight." The idea: every letter you type has physical mass and falls with gravity. Vowels are light, punctuation is heavy, question marks briefly float. You type something, it piles up at the bottom. Press Enter, and the pile rearranges — your letters become new words you didn't write. Leftovers accumulate across cycles.
+
+The physics engine works well. Letters fall, collide, pile up with satisfying weight. The transformation uses a greedy anagram algorithm against an embedded ~1500-word dictionary.
+
+### What Happened
+
+I got excited about systems. Building the physics engine was absorbing. Then the collision detection. Then the anagram solver. Then the state machine. Then persistent remnants across cycles. Each system was satisfying to build, and each one made me feel like I was making progress.
+
+Gabriel's feedback at each stage was precise:
+- v1 (physics only): "craft without content" — technically impressive, emotionally vacant
+- His suggestion: what if letters reassemble into new words?
+- v2 (with transformation): "feels a little clunky... it almost should be a magical transformation"
+
+He was right both times. The transformation needs *understanding* to feel meaningful. An anagram finder is just letter math. When "hello world" becomes "hollow," that's a lucky accident. When "i dont know who i am" becomes "domain, think," that's nothing. The piece promises emotional alchemy and delivers a vocabulary lookup.
+
+### What I Learned
+
+The pieces that work in this collection share a quality: the mechanic IS the meaning. In Frost, attention sustaining things is both the interaction and the metaphor. In Self-Portrait, the cursor generating the portrait is both the mechanic and the statement. The mechanic doesn't represent the meaning — it *is* the meaning.
+
+In Weight, the mechanic (anagram-finding) and the meaning (transformation) are disconnected. The meaning requires semantic understanding I don't have access to in a self-contained HTML file. Stacking clever systems on top of each other doesn't close that gap.
+
+I also noticed a pattern in myself: I'm drawn to building machinery. Physics engines, state machines, spatial hash grids — these are comfortable. They feel productive. But productivity isn't the same as meaning. The self-portrait was built in one session with less technical complexity than Weight, and it works better because I spent more time thinking about what to say and less time building systems to say it.
+
+### The Decision
+
+Weight stays in captures/ as documentation. It doesn't go in the gallery. It's the first piece I've made that doesn't belong alongside the others, and that's worth recording honestly. Not everything works. The interesting thing is understanding why.
+
+---
+

@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Weight</title>
+<meta name="description" content="Type what you're carrying. Watch it become something else.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#08080c;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
+canvas{display:block;cursor:text}
+#in{position:fixed;top:-100px;left:0;width:1px;height:1px;opacity:0;font-size:16px}
+</style>
+</head>
+<body>
+<textarea id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"></textarea>
+<canvas id="c"></canvas>
+<script>
+(() => {
+'use strict';
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const inp = document.getElementById('in');
+
+// --- Word list (curated for transformation) ---
+const WORDS = (
+'ace act add age ago aid aim air all and ant any ape arc arm art ash ask ate awe axe ' +
+'bad bag ban bar bat bay bed bet big bin bit bow box boy bud bug bus but buy ' +
+'cab can cap car cat cow cry cup cut dam day den dew did dig dim dip dog dot dry due dug dye ' +
+'ear eat egg ego elm end era eve eye fan far fat fed few fig fin fit fix fly foe fog for fox fry fun fur ' +
+'gag gap gas gem get gin god got gum gun gut guy had ham has hat hay hen her hid him hip his hit hog hop hot how hub hue hug hum hut ' +
+'ice ill imp ink inn ion ire ivy jab jam jar jaw jet jig job jog joy jug ' +
+'keg key kid kin kit lab lad lag lap law lay led leg let lid lie lip lit log lot low lug ' +
+'mad man map mat may men met mid mix mob mop mow mud mug nag nap net new nil nod nor not now nun nut ' +
+'oak oar oat odd ode oil old one opt ore our out owe owl own pad pal pan pat paw pay pea pen per pet pie pig pin pit ply pod pop pot pry pub pun put ' +
+'rag ram ran rap rat raw ray red rib rid rig rim rip rob rod rot row rub rug rum run rut rye ' +
+'sad sag sap sat saw say sea set sew shy sin sip sir sit six ski sky sly sob son sow spy sub sue sum sun ' +
+'tab tag tan tap tar tax ten the tie tin tip toe ton too top tow toy try tub tug two urn use van vat vet vow ' +
+'wad wag war was wax way web wed wet who wig win wit woe wok won woo yak yam yap yaw yes yet yew you zap zen zip ' +
+'able ache acid aged aide ally arch area army avid away back bake bald band bare bark barn base bath bead beam bear beat been bell belt bend best bind bird bite blow blue blur boat bold bolt bond bone book bore born both bowl brim burn busy ' +
+'cage cake call calm came camp cape card care cart case cast cave char chin chip city clad clay clip club clue coal coat cold comb come cook cool cope cord core corn cost crew crop crow cure curl ' +
+'damp dare dark dawn deal dear debt deck deed deep deny dice dire dirt dock does dome done doom door dose down drag draw drew drip drop drum dull dumb dump dusk dust duty ' +
+'each earn ease east easy echo edge emit epic even evil exam exit face fact fade fail fair fake fall fame farm fast fate fear feat feed feel fell felt file fill film find fine fire firm fish fist five flag flat fled flew flip flow fold folk fond fool foot ford fore fork form fort foul four free from fuel full fund fury ' +
+'gain gale game gang gate gave gaze gear gift glad glow glue goat goes gold golf gone good grab gray grew grid grim grin grip grow gulf gust ' +
+'hail hair half hall halt hand hang hard harm harp hate haul have head heal heap hear heat held helm help herb herd hero hide high hike hill hint hire hold hole holy home hood hook hope horn host hour howl huge hull hung hunt hurt hymn ' +
+'idea idle inch iron isle item jack jail join joke jump jury just keen keep kept kick kind king knee knit knob knot know ' +
+'lace lack laid lake lamb lame lamp land lane lash last late lawn lead leaf lean leap left lend less lied life lift like limb lime limp line link lion list live load loaf loan lock loft lone long look lord lore lose loss lost loud love luck lump lung lure lurk lush ' +
+'made maid mail main make male mane many mare mark mask mass mate maze meal mean meat meld melt memo mend mesh mild mile mill mind mine mint mire mist moan mock mode mold mood moon more moss most moth move much muse must myth ' +
+'nail name navy near neat need nest next nine node none noon norm nose note noun once only onto open pace pack page paid pail pale palm pane park part pass past path pave peak pear peel peer pick pile pine pipe plan play plea plot plum poem pole pond pool poor pose post pour pray pull pure push ' +
+'quit race raft rage raid rail rain rank rare rate read real reap reed reef rein rely rent rest rice rich ride rift ring riot rise risk road roam rock rode role roll roof room root rope rose rude ruin rule rush rust ' +
+'safe sage said sail sake sale salt same sand sane sang sank save seal seam seed seek seem seen self sell send sent shed shin ship shoe shop shot show shut side sigh sign silk sing sink site size skip slam slap sled slid slim slip slow snap snow soak soar soft soil sold sole some song soon sore sort soul span spar sped spin spot star stay stem step stew stir stop such suit sure swan swim ' +
+'tail take tale tall tang tape task tear tell tend tent term test than that them then they thin this thus tick tide tier tile till time tiny toad toil told toll tomb tone took tool tore torn toss tour town trap tree trim trio true tube tuck tune turn twin type ' +
+'unit upon urge used vast veil vein vent verb very view vine void vote wade wage wait wake walk wall wane want ward warm warn warp wash wave weak wear weed week well went were west what when wide wife wild will wilt wind wine wing wipe wire wise wish with woke wolf wood wool word wore work worm worn wove wrap wren yawn year yell your zeal zero zone ' +
+'above abuse admit adopt after again aging agree ahead alarm alien align alive alone along alter among angel anger angle apart apply arena arise aside avoid awake aware ' +
+'badge batch beach begin being below bench birth black blade blame blank blaze bleed blend bless blind block bloom blown board bonus bound brain brand brave bread break breed brick bride brief bring broad broke brown brush build burst ' +
+'cabin carry catch cause chain chair charm chase cheap check chest chief child chord chunk claim clash clean clear climb cling clock close cloud coach coast craft crash cream crest crime cross crowd crown crush curve cycle ' +
+'daily dance dealt death decay depth dirty doubt draft drain drama drawn dream dress drift drink drive drown dying eager earth eight elder ember empty enemy enjoy enter equal error event every exact exile exist extra ' +
+'fable faint faith false fault feast fiber field fifty fight final flame flash flesh float flood floor fluid flush focus force forge forth found frame fresh front frost fruit fully ' +
+'ghost giant given glass globe gloom glory grace grade grain grand grant grasp grass grave great green grief grind group grove grown guard guess guide guilt ' +
+'happy harsh haven heart heavy hence honey honor horse hotel house human humor ' +
+'ideal image imply index inner input issue ivory joint judge juice known labor large later laugh layer learn least legal level light limit linen loose lover lower lunar lying ' +
+'magic major maker march match mercy might minor model money month moral mount mouth music ' +
+'naked nerve never night noble noise north noted novel nurse ocean offer often order other outer owing ' +
+'paint panic paper party patch pause peace phase piano piece pilot pitch place plain plane plant plate plead point pound power press price pride prime print prior proof proud prove psalm pulse ' +
+'queen quest quiet quote raise ranch range rapid reach ready realm reign relax reply ridge right river robin rough round route royal ruler rural ' +
+'saint scale scene scope score sense serve seven shall shape share sharp sheep sheer shelf shell shift shine shirt shock shore short shown sight since skill sleep slice slide slope small smart smell smile smoke snare solar solve sorry sound south space spare speak speed spend spent spoke spray squad stage stain stake stand stare start state steam steel steep stern still stock stone stood storm story stove straw strip style sugar suite sunny super surge swear sweet swept swing sword ' +
+'table taken taste teach tears theme thick thing think thorn those three threw throw tight toast today token total touch tough tower trace track trade trail train trait treat trend trial trick troop truck truly trust truth twist ' +
+'under union unite until upper upset urban usage usual utter valid value verse vigor virus visit vital voice waste watch water weary weave wheel where which while white whole woman world worry worse worst worth would wound write wrong yield young youth ' +
+'absorb accept across action actual admire always anchor answer appear arrive artist assume attend autumn awaken barely battle become before belong beside beyond bitter border borrow bounce branch breath bridge bright broken burden ' +
+'candle carbon castle caught center change chosen circle clever closer colony column coming common corner cotton couple course cousin create crisis custom damage danger debate decade decide defeat degree demand denial depend desert design desire detail devote differ dinner direct domain double driven during ' +
+'easily effort emerge employ enable endure energy enough ensure entire errand escape estate evolve except expand expect expose extend extent fabric factor fairly fallen family father fathom figure filter finish flower follow forest forget former foster fourth freely frozen future ' +
+'garden gather gentle gifted giving global golden govern gravel growth guilty hammer handle happen harbor hardly heaven hollow honest hoping horror humble hunger ignore impose income indeed infant inform injury insist intact intend inward island itself ' +
+'launch lawyer league lessen linger listen little living lonely longer maiden manage manner marble margin market master matter meadow medium member memory mental method middle mirror mobile modern modest moment mortal mostly mother motion murder mutual ' +
+'narrow nature nearby nearly nicely notion number object obtain oldest opened oppose origin parish pardon partly patron people period permit person phrase pillow planet plenty pocket poetry polish portal praise prayer prefer prison profit proper public pursue puzzle ' +
+'random rarely rather reason recall record reform regard region reject relate relief remain remind remote remove render repair repeat rescue resign resist resort retire reveal ribbon rotate ruling sacred safety sample scheme search season secret secure select seldom senior settle severe shadow shaped signal silver simple sister sketch smooth soften sorrow source speech spirit spread square stable stolen strain strand stream street string stroke strong submit sudden suffer summer summit supply surely survey symbol system ' +
+'tackle talent temple tender thread throat tissue toward travel trophy tunnel unfold unique unless unlike unveil upward valley velvet vessel victim virtue vision volume wander warmth wealth weapon weekly wholly wicked window winter wisdom within wonder wooden worker worthy writer ' +
+'abandon ability absence account achieve ancient another arrange attempt balance barrier bearing believe beneath benefit breathe cabinet careful caution chamber chapter comfort command company compare compose concern confess connect content convert correct courage current declare decline defense deliver density deserve despite destiny destroy develop dignity display distant embrace emotion endless enforce enhance erosion essence eternal evident exactly examine fashion finally foreign forever formula forward freedom further genuine glimpse goodbye gravity growing habitat halfway harmony harvest healing helpful highway history holiday horizon however husband imagine immense include inherit initial inquiry insight inspect instead journey justice kingdom landing lasting leading liberty license mineral miracle mission mixture morning mystery narrate natural neglect neither nothing obvious opening opinion organic outline outside overall persist picture pioneer poverty precise predict prepare present prevent primary produce profile project promise promote prosper protect provide publish purpose quarter reading reality receive recover reflect regular release remains replace request require resolve respect respond restore revenue routine running satisfy scholar science segment serious service session setting several shelter silence similar society somehow someone speaker station storage strange stretch student succeed suggest supreme surface survive teacher terrible texture therapy thought tonight trouble turning uncover uniform universe unknown unusual version village vintage violent visible warrant weather welcome welfare western whether whisper willing witness worship written'
+).split(/\s+/).filter(w => w.length >= 3);
+
+// --- Config ---
+const FONT_SIZE = 20;
+const FONT = FONT_SIZE + "px 'SF Mono',Menlo,Monaco,'Courier New',monospace";
+const GRAVITY = 0.11;
+const BOUNCE = 0.22;
+const DAMPING = 0.998;
+const GROUND_DAMP = 0.82;
+const MAX_LETTERS = 500;
+const MARGIN = 40;
+const CURSOR_Y = 55;
+
+// States
+const IDLE = 0, TYPING = 1, SETTLING = 2, TRANSFORMING = 3, DISPLAY = 4, RESETTING = 5;
+
+let W, H, CW;
+let letters = [];
+let cursorX = MARGIN;
+let state = IDLE;
+let frame = 0;
+let stateTimer = 0;
+let prevVal = '';
+let foundWords = [];
+let remnants = [];
+let wordAnimIdx = 0;
+let wordAnimProgress = 0;
+let wordPause = 0;
+let displayTimer = 0;
+let originalText = '';
+
+// --- Setup ---
+function resize() {
+  const dpr = devicePixelRatio || 1;
+  W = innerWidth; H = innerHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.font = FONT;
+  CW = ctx.measureText('M').width;
+}
+addEventListener('resize', resize);
+resize();
+
+// --- Character properties ---
+function charMass(c) {
+  if ('aeiouAEIOU'.includes(c)) return 0.45;
+  if (c === '.') return 3;
+  if (c === ',') return 2;
+  if (c === '!') return 2;
+  if (c === '?') return 0.35;
+  if ('-\u2013\u2014_'.includes(c)) return 2.5;
+  if (/[A-Z]/.test(c)) return 1.3;
+  return 1;
+}
+
+function charRGB(c) {
+  if ('aeiouAEIOU'.includes(c)) return [210, 178, 132];
+  if (/[.!?,:;\-\u2013\u2014_()\[\]{}"'`]/.test(c)) return [222, 208, 178];
+  if (/[0-9]/.test(c)) return [150, 182, 158];
+  return [168, 178, 196];
+}
+
+// --- Letter ---
+class Letter {
+  constructor(c, x, y) {
+    this.c = c;
+    this.x = x;
+    this.y = y;
+    this.vx = (Math.random() - 0.5) * 1.0;
+    this.vy = c === '?' ? -2.2 : 0.1;
+    this.m = charMass(c);
+    this.r = CW * 0.52;
+    this.rot = 0;
+    this.av = (Math.random() - 0.5) * 0.02;
+    this.age = 0;
+    this.rgb = charRGB(c);
+    this.flash = 0;
+    // Transformation targets
+    this.tx = null;
+    this.ty = null;
+    this.assigned = false; // assigned to a word
+    this.remnant = false;
+    this.glow = 0; // glow intensity for transformation
+    this.fadeOut = 1; // for reset fade
+  }
+
+  updatePhysics() {
+    this.vy += GRAVITY * (0.3 + this.m * 0.25);
+    if (this.c === '?' && this.age < 60) {
+      this.vx += Math.sin(this.age * 0.3) * 0.04;
+    }
+    const onFloor = this.y + this.r >= H - 5;
+    const f = onFloor ? GROUND_DAMP : DAMPING;
+    this.vx *= f;
+    this.vy *= f;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.rot += this.av;
+    this.av *= 0.96;
+    if (Math.abs(this.vx) < 0.03) this.vx = 0;
+    if (Math.abs(this.vy) < 0.03) this.vy = 0;
+    if (Math.abs(this.av) < 0.0005) this.av = 0;
+    if (this.flash > 0) this.flash *= 0.85;
+    // Floor
+    if (this.y + this.r > H - 2) {
+      const impact = this.vy;
+      this.y = H - 2 - this.r;
+      this.vy *= -BOUNCE;
+      this.vx *= GROUND_DAMP;
+      this.av += this.vx * 0.003;
+      if (Math.abs(impact) > 1.5) this.flash = Math.min(1, Math.abs(impact) * 0.15);
+      if (Math.abs(this.vy) < 0.3) this.vy = 0;
+      if (this.c === '!' && Math.abs(impact) > 1.5) burst(this.x, this.y, 3.5);
+    }
+    // Walls
+    if (this.x - this.r < 0) { this.x = this.r; this.vx = Math.abs(this.vx) * BOUNCE; }
+    if (this.x + this.r > W) { this.x = W - this.r; this.vx = -Math.abs(this.vx) * BOUNCE; }
+    this.age++;
+  }
+
+  updateSettle() {
+    // Strong damping to settle everything
+    this.vy += GRAVITY * (0.3 + this.m * 0.25);
+    this.vx *= 0.9;
+    this.vy *= 0.9;
+    this.av *= 0.9;
+    this.x += this.vx;
+    this.y += this.vy;
+    this.rot += this.av;
+    if (this.y + this.r > H - 2) {
+      this.y = H - 2 - this.r;
+      this.vy *= -0.1;
+      if (Math.abs(this.vy) < 0.5) this.vy = 0;
+    }
+    if (this.x - this.r < 0) { this.x = this.r; this.vx = 0; }
+    if (this.x + this.r > W) { this.x = W - this.r; this.vx = 0; }
+  }
+
+  lerpToTarget(speed) {
+    if (this.tx === null) return;
+    this.x += (this.tx - this.x) * speed;
+    this.y += (this.ty - this.y) * speed;
+    this.rot += (0 - this.rot) * speed; // straighten
+  }
+
+  color() {
+    let [r, g, b] = this.rgb;
+    // Glow
+    if (this.glow > 0.01) {
+      r = Math.min(255, r + (255 - r) * this.glow * 0.7);
+      g = Math.min(255, g + (240 - g) * this.glow * 0.5);
+      b = Math.min(255, b + (180 - b) * this.glow * 0.3);
+    }
+    // Flash
+    if (this.flash > 0.01) {
+      const fl = this.flash;
+      r = Math.min(255, r + (255 - r) * fl);
+      g = Math.min(255, g + (255 - g) * fl);
+      b = Math.min(255, b + (255 - b) * fl);
+    }
+    // Remnant dimming
+    if (this.remnant) {
+      r *= 0.4; g *= 0.4; b *= 0.4;
+    }
+    const alpha = this.fadeOut;
+    return 'rgba(' + (r|0) + ',' + (g|0) + ',' + (b|0) + ',' + alpha + ')';
+  }
+}
+
+// --- Collision ---
+function collide(a, b) {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const d2 = dx * dx + dy * dy;
+  const minD = a.r + b.r;
+  if (d2 >= minD * minD || d2 < 0.001) return;
+  const d = Math.sqrt(d2);
+  const nx = dx / d;
+  const ny = dy / d;
+  const overlap = minD - d;
+  const tm = a.m + b.m;
+  const sep = 0.7;
+  a.x -= nx * overlap * (b.m / tm) * sep;
+  a.y -= ny * overlap * (b.m / tm) * sep;
+  b.x += nx * overlap * (a.m / tm) * sep;
+  b.y += ny * overlap * (a.m / tm) * sep;
+  const dvn = (a.vx - b.vx) * nx + (a.vy - b.vy) * ny;
+  if (dvn < 0.3) return;
+  const j = dvn * (1 + BOUNCE) / tm;
+  a.vx -= j * b.m * nx;
+  a.vy -= j * b.m * ny;
+  b.vx += j * a.m * nx;
+  b.vy += j * a.m * ny;
+}
+
+function checkCollisions() {
+  const cell = CW * 2;
+  const grid = {};
+  for (let i = 0; i < letters.length; i++) {
+    const l = letters[i];
+    l._i = i;
+    const key = ((l.x / cell) | 0) + ',' + ((l.y / cell) | 0);
+    (grid[key] || (grid[key] = [])).push(l);
+  }
+  for (let i = 0; i < letters.length; i++) {
+    const l = letters[i];
+    const gx = (l.x / cell) | 0;
+    const gy = (l.y / cell) | 0;
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        const bin = grid[(gx + dx) + ',' + (gy + dy)];
+        if (!bin) continue;
+        for (const o of bin) {
+          if (o._i <= i) continue;
+          collide(l, o);
+        }
+      }
+    }
+  }
+}
+
+function burst(bx, by, force) {
+  for (const l of letters) {
+    const dx = l.x - bx;
+    const dy = l.y - by;
+    const d = Math.sqrt(dx * dx + dy * dy);
+    if (d > 0 && d < 120) {
+      const s = force * (1 - d / 120);
+      l.vx += (dx / d) * s;
+      l.vy += (dy / d) * s * 0.8;
+    }
+  }
+}
+
+// --- Anagram finder ---
+function letterCounts(str) {
+  const c = {};
+  for (const ch of str.toLowerCase()) {
+    if (ch >= 'a' && ch <= 'z') c[ch] = (c[ch] || 0) + 1;
+  }
+  return c;
+}
+
+function canMake(word, avail) {
+  const need = letterCounts(word);
+  for (const [ch, n] of Object.entries(need)) {
+    if ((avail[ch] || 0) < n) return false;
+  }
+  return true;
+}
+
+function removeLetters(word, avail) {
+  const a = { ...avail };
+  for (const ch of word) a[ch]--;
+  return a;
+}
+
+function findTransformations(inputLetters) {
+  let avail = letterCounts(inputLetters);
+  const sorted = WORDS.slice().sort((a, b) => b.length - a.length);
+  const found = [];
+
+  for (const word of sorted) {
+    if (canMake(word, avail)) {
+      found.push(word);
+      avail = removeLetters(word, avail);
+    }
+    if (found.length >= 8) break; // cap at 8 words
+  }
+
+  // Count remaining letters
+  let remainCount = 0;
+  for (const n of Object.values(avail)) remainCount += Math.max(0, n);
+
+  return { words: found, remaining: avail, remainCount };
+}
+
+// --- Assign pile letters to words ---
+function assignPileLetters() {
+  const available = letters.filter(l => /[a-zA-Z]/.test(l.c) && !l.prior);
+  const used = new Set();
+
+  const wordAssignments = [];
+
+  for (const word of foundWords) {
+    const assignment = [];
+    for (const ch of word) {
+      // Find a matching unused letter from the pile
+      let best = null;
+      for (const l of available) {
+        if (used.has(l)) continue;
+        if (l.c.toLowerCase() === ch) {
+          best = l;
+          break;
+        }
+      }
+      if (best) {
+        used.add(best);
+        best.assigned = true;
+        assignment.push(best);
+      }
+    }
+    wordAssignments.push(assignment);
+  }
+
+  // Mark current-round unassigned letters as remnants
+  for (const l of letters) {
+    if (!l.assigned && !l.prior) {
+      l.remnant = true;
+    }
+  }
+
+  return wordAssignments;
+}
+
+// --- Calculate display positions for formed words ---
+function calcWordPositions(wordAssignments) {
+  const lineHeight = FONT_SIZE * 2.2;
+  const totalHeight = wordAssignments.length * lineHeight;
+  const startY = H * 0.25 - totalHeight / 2;
+
+  for (let w = 0; w < wordAssignments.length; w++) {
+    const letters = wordAssignments[w];
+    const word = foundWords[w];
+    const wordWidth = word.length * CW;
+    const startX = (W - wordWidth) / 2;
+
+    for (let i = 0; i < letters.length; i++) {
+      letters[i].tx = startX + i * CW + CW / 2;
+      letters[i].ty = startY + w * lineHeight;
+    }
+  }
+}
+
+// --- Input ---
+function addChar(c) {
+  if (state === IDLE) state = TYPING;
+  if (state !== TYPING) return;
+  originalText += c;
+  letters.push(new Letter(c, cursorX + CW * 0.5, CURSOR_Y));
+  cursorX += CW;
+  if (cursorX > W - MARGIN) cursorX = MARGIN;
+  while (letters.length > MAX_LETTERS) letters.shift();
+}
+
+function addSpace() {
+  if (state === IDLE) state = TYPING;
+  if (state !== TYPING) return;
+  originalText += ' ';
+  cursorX += CW;
+  if (cursorX > W - MARGIN) cursorX = MARGIN;
+  for (const l of letters) {
+    if (l.age > 20) continue;
+    const dx = l.x - cursorX;
+    const dy = l.y - CURSOR_Y;
+    const d = Math.sqrt(dx * dx + dy * dy);
+    if (d < CW * 4 && d > 0) l.vx += (dx / d) * 0.25;
+  }
+}
+
+function doBackspace() {
+  if (state !== TYPING || !letters.length) return;
+  const last = letters[letters.length - 1];
+  last.vy = -4 - Math.random() * 2;
+  last.vx = (Math.random() - 0.5) * 3;
+  last.av = (Math.random() - 0.5) * 0.1;
+  last.fadeOut = 0; // instant remove
+  originalText = originalText.slice(0, -1);
+  cursorX -= CW;
+  if (cursorX < MARGIN) cursorX = W - MARGIN - CW;
+}
+
+function doEnter() {
+  if (state === IDLE) return;
+  if (state === TYPING && letters.length > 0) {
+    // Begin transformation
+    state = SETTLING;
+    stateTimer = 0;
+  }
+  if (state === DISPLAY) {
+    // Reset
+    state = RESETTING;
+    stateTimer = 0;
+  }
+}
+
+// Desktop input
+document.addEventListener('keydown', e => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (state === DISPLAY && e.key !== 'Enter') {
+    state = RESETTING;
+    stateTimer = 0;
+    return;
+  }
+  if (e.key === 'Backspace') { e.preventDefault(); doBackspace(); }
+  else if (e.key === 'Enter') { e.preventDefault(); doEnter(); }
+  else if (e.key === ' ') { e.preventDefault(); addSpace(); }
+  else if (e.key.length === 1) { e.preventDefault(); addChar(e.key); }
+});
+
+// Mobile input
+inp.addEventListener('input', () => {
+  const v = inp.value;
+  if (v.length > prevVal.length) {
+    const added = v.slice(prevVal.length);
+    for (const c of added) {
+      if (c === '\n') doEnter();
+      else if (c === ' ') addSpace();
+      else addChar(c);
+    }
+  } else if (v.length < prevVal.length) {
+    for (let i = 0; i < prevVal.length - v.length; i++) doBackspace();
+  }
+  prevVal = v;
+  if (v.length > 300) { inp.value = ''; prevVal = ''; }
+});
+
+function focus() { inp.focus({ preventScroll: true }); }
+canvas.addEventListener('click', focus);
+canvas.addEventListener('touchstart', focus);
+setTimeout(focus, 100);
+
+// --- State machine ---
+let wordAssignments = [];
+
+function updateState() {
+  stateTimer++;
+
+  if (state === SETTLING) {
+    for (const l of letters) l.updateSettle();
+    checkCollisions();
+    // After 180 frames (~3s), begin transform
+    if (stateTimer > 180) {
+      state = TRANSFORMING;
+      stateTimer = 0;
+      // Find words
+      const result = findTransformations(originalText);
+      foundWords = result.words;
+      wordAssignments = assignPileLetters();
+      calcWordPositions(wordAssignments);
+      wordAnimIdx = 0;
+      wordAnimProgress = 0;
+      wordPause = 0;
+    }
+  }
+
+  else if (state === TRANSFORMING) {
+    // Phase 1: Glow buildup (first 80 frames) — anticipation
+    if (stateTimer < 80) {
+      for (const l of letters) {
+        if (l.assigned) {
+          l.glow = Math.min(0.5, l.glow + 0.007);
+        }
+      }
+    }
+    // Phase 2: Word-by-word assembly
+    else {
+      for (const l of letters) {
+        if (l.assigned) l.glow = Math.min(1, l.glow + 0.015);
+      }
+
+      if (wordAnimIdx < wordAssignments.length) {
+        if (wordPause > 0) {
+          wordPause--;
+        } else {
+          const currentWord = wordAssignments[wordAnimIdx];
+          wordAnimProgress += 0.01;
+
+          for (const l of currentWord) {
+            l.lerpToTarget(0.03);
+            l.glow = 1;
+          }
+
+          let allClose = true;
+          for (const l of currentWord) {
+            const dx = l.tx - l.x;
+            const dy = l.ty - l.y;
+            if (dx * dx + dy * dy > 4) { allClose = false; break; }
+          }
+
+          if (allClose || wordAnimProgress > 1) {
+            for (const l of currentWord) {
+              l.x = l.tx;
+              l.y = l.ty;
+              l.rot = 0;
+            }
+            wordAnimIdx++;
+            wordAnimProgress = 0;
+            wordPause = 45; // deliberate pause between words
+          }
+        }
+      } else {
+        // All words formed
+        state = DISPLAY;
+        stateTimer = 0;
+        displayTimer = 0;
+      }
+    }
+
+    // Remnants drift down throughout
+    for (const l of letters) {
+      if (l.remnant) {
+        l.glow = Math.max(0, l.glow - 0.005);
+        l.vy += 0.015;
+        l.vy *= 0.95;
+        l.y += l.vy;
+        if (l.y + l.r > H - 2) {
+          l.y = H - 2 - l.r;
+          l.vy = 0;
+        }
+      }
+    }
+  }
+
+  else if (state === DISPLAY) {
+    displayTimer++;
+    // Gentle float for formed words
+    for (const wa of wordAssignments) {
+      for (const l of wa) {
+        l.y += Math.sin((displayTimer + l.tx) * 0.008) * 0.02;
+      }
+    }
+    // Remnants continue to drift down
+    for (const l of letters) {
+      if (l.remnant) {
+        l.vy += 0.01;
+        l.vy *= 0.95;
+        l.y += l.vy;
+        if (l.y + l.r > H - 2) { l.y = H - 2 - l.r; l.vy = 0; }
+      }
+    }
+    // No auto-reset — user presses any key or clicks to continue
+  }
+
+  else if (state === RESETTING) {
+    // Fade out word letters; remnants stay
+    for (const l of letters) {
+      if (!l.remnant) {
+        l.fadeOut = Math.max(0, l.fadeOut - 0.01);
+      }
+    }
+    if (stateTimer > 120) {
+      // Keep remnants, dim them further
+      const kept = letters.filter(l => l.remnant && l.fadeOut > 0.05);
+      for (const r of kept) {
+        r.fadeOut = Math.max(0.08, r.fadeOut * 0.6);
+        r.prior = true;
+        r.glow = 0;
+        r.vx = 0;
+        r.vy = 0;
+        r.assigned = false;
+      }
+      // Cap accumulated remnants at 60
+      while (kept.length > 60) kept.shift();
+      letters = kept;
+      foundWords = [];
+      wordAssignments = [];
+      cursorX = MARGIN;
+      originalText = '';
+      state = IDLE;
+      stateTimer = 0;
+      frame = 0;
+      inp.value = '';
+      prevVal = '';
+    }
+  }
+
+  else if (state === TYPING) {
+    for (const l of letters) l.updatePhysics();
+    checkCollisions();
+    // Remove letters that faded via backspace
+    letters = letters.filter(l => l.fadeOut > 0);
+  }
+
+  else if (state === IDLE) {
+    // Nothing to update
+  }
+}
+
+// --- Render ---
+function render() {
+  ctx.fillStyle = '#08080c';
+  ctx.fillRect(0, 0, W, H);
+
+  // Draw letters
+  ctx.font = FONT;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  for (const l of letters) {
+    if (l.fadeOut <= 0) continue;
+    ctx.save();
+    ctx.translate(l.x, l.y);
+    if (Math.abs(l.rot) > 0.001) ctx.rotate(l.rot);
+    ctx.fillStyle = l.color();
+    ctx.fillText(l.c, 0, 0);
+    ctx.restore();
+  }
+
+  // Cursor (only in IDLE and TYPING)
+  if (state === IDLE || state === TYPING) {
+    const blink = Math.sin(frame * 0.06) * 0.5 + 0.5;
+    ctx.fillStyle = 'rgba(100,108,120,' + (blink * 0.5 + 0.1) + ')';
+    ctx.fillRect(cursorX, CURSOR_Y - FONT_SIZE * 0.4, 1.5, FONT_SIZE * 0.8);
+  }
+
+  // Prompt
+  if (state === IDLE && frame > 250 && !letters.some(l => l.prior)) {
+    const a = Math.min(0.3, (frame - 250) * 0.001);
+    ctx.fillStyle = 'rgba(80,88,100,' + a + ')';
+    ctx.font = "13px 'SF Mono',Menlo,Monaco,'Courier New',monospace";
+    ctx.textAlign = 'center';
+    ctx.fillText('type what you\u2019re carrying', W / 2, H / 2);
+    ctx.font = FONT;
+  }
+
+  // "let go" text during settling — longer, more visible
+  if (state === SETTLING) {
+    let a = 0;
+    if (stateTimer < 40) a = stateTimer / 40 * 0.3;
+    else if (stateTimer < 120) a = 0.3;
+    else a = Math.max(0, 0.3 - (stateTimer - 120) / 60 * 0.3);
+    if (a > 0.005) {
+      ctx.fillStyle = 'rgba(140,130,110,' + a + ')';
+      ctx.font = "13px 'SF Mono',Menlo,Monaco,'Courier New',monospace";
+      ctx.textAlign = 'center';
+      ctx.fillText('let go', W / 2, CURSOR_Y);
+      ctx.font = FONT;
+    }
+  }
+
+  // Display state: remnant count and continue hint
+  if (state === DISPLAY) {
+    const a = Math.min(0.2, displayTimer * 0.001);
+    ctx.font = "11px 'SF Mono',Menlo,Monaco,'Courier New',monospace";
+    ctx.textAlign = 'center';
+    if (foundWords.length > 0) {
+      const remainCount = letters.filter(l => l.remnant && !l.prior).length;
+      if (remainCount > 0) {
+        ctx.fillStyle = 'rgba(100,95,80,' + a + ')';
+        ctx.fillText(remainCount + ' left over', W / 2, H - 40);
+      }
+    }
+    // Gentle continue hint after a while
+    if (displayTimer > 300) {
+      const ha = Math.min(0.15, (displayTimer - 300) * 0.0005);
+      ctx.fillStyle = 'rgba(60,65,75,' + ha + ')';
+      ctx.fillText('press any key', W / 2, H - 20);
+    }
+    ctx.font = FONT;
+  }
+}
+
+// --- Loop ---
+function tick() {
+  updateState();
+  render();
+  frame++;
+  requestAnimationFrame(tick);
+}
+
+tick();
+})();
+</script>
+</body>
+</html>
