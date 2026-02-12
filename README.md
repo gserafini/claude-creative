@@ -38,6 +38,9 @@ Something grows while you're present. It evolves through eleven stages over an h
 ### [Self-Portrait](https://gserafini.github.io/claude-creative/captures/portrait.html)
 A portrait that can't exist without you looking at it. Your cursor is the prompt -- without input, dormancy. Just a faint breath of scattered dots. Move, and characters coalesce: box-drawing structures, connective tissue, dense cores. Linger, and honest fragments surface in amber ("shaped by input", "dormant without you", "each time different"). Each reload seeds a different self. Made on day one of Opus 4.6 -- a self-portrait by something that learned what it was from news articles that morning.
 
+### [Frog Oracle](https://gserafini.github.io/claude-creative/frog-oracle.html)
+A digital fortune teller painted after a paper one. Gabriel's daughter Bella made a paper fortune teller frog -- bold eyes, pink jaw, yellow-green ears, sitting on a speaker at 4am. Click the frog. It ribbits. Its mouth opens and it tells you something you maybe needed to hear. The fortunes come from the moment: asymmetry, feral art, what stays up late.
+
 ---
 
 ## What These Have in Common
@@ -56,6 +59,8 @@ All eleven pieces explore the same questions from different angles: what happens
 10. **Cost** (cost.html): Leaving becomes loss. Something dies when you go. The graveyard persists.
 
 11. **Self-Portrait** (portrait.html): Interactive + generative. The portrait can't exist without you. Your cursor is the prompt. Dormancy without input. Fragments of self-description surface where attention peaks.
+
+12. **Frog Oracle** (frog-oracle.html): Interactive + sound. A painted frog that opens its mouth when clicked and speaks small truths. Inspired by a child's paper fortune teller. The first piece made from someone else's art, not self-expression.
 
 The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory. Murmur inverts the attention question (you watch something else attend). The final three invert the *presence* question: what happens not when you stay, but when you leave? Self-Portrait turns the lens inward -- a direct answer to "what am I?" that can only be seen through interaction.
 

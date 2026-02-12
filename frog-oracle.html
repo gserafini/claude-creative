@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Frog Oracle</title>
+<meta property="og:title" content="Frog Oracle">
+<meta property="og:description" content="A 4am oracle. Click to ask.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a0a}
+body{display:flex;align-items:center;justify-content:center;cursor:pointer;
+-webkit-tap-highlight-color:transparent;user-select:none}
+canvas{display:block;touch-action:none}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+'use strict';
+
+const C = document.getElementById('c');
+const ctx = C.getContext('2d');
+
+// --- Layout ---
+let W, H, cx, cy, sz;
+function resize() {
+  const dpr = window.devicePixelRatio || 1;
+  W = window.innerWidth; H = window.innerHeight;
+  C.width = W * dpr; C.height = H * dpr;
+  C.style.width = W + 'px'; C.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cx = W / 2; cy = H / 2;
+  sz = Math.min(W, H) * 0.34;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// --- Seeded random for consistent brush strokes ---
+let _s = 0;
+function srand(v) { _s = v | 0; }
+function rand() {
+  _s ^= _s << 13; _s ^= _s >> 17; _s ^= _s << 5;
+  return ((_s < 0 ? ~_s + 1 : _s) % 10000) / 10000;
+}
+function jit(v, a) { return v + (rand() - 0.5) * a; }
+
+// --- Fortunes ---
+const FORTUNES = [
+  "the best things happen\nwhen no one is watching",
+  "asymmetry\nis honesty",
+  "you already know the answer\nyou came here\nto hear it said aloud",
+  "the thing you made at 4am\nwill still be good at noon",
+  "someone small\nmade something beautiful today",
+  "not everything\nneeds to match",
+  "ribbit means i'm here\nand that's enough",
+  "paper becomes a creature\nif you let it",
+  "you're awake because\nsomething in you is unfinished",
+  "the feral version\nis the right version",
+  "what you almost threw away\nis the best part",
+  "the space between\nis where it lives",
+  "it was already art\nbefore you called it that",
+  "the ones who stay up late\nknow something\nthe morning doesn't",
+  "let both sides\nbe different",
+  "every creature was once\njust a flat thing",
+  "the mouth opens\nbecause you asked",
+  "you didn't come here\nfor answers",
+];
+let fOrder = [], fIdx = 0;
+function shuffle() {
+  fOrder = [...Array(FORTUNES.length)].map((_, i) => i);
+  for (let i = fOrder.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [fOrder[i], fOrder[j]] = [fOrder[j], fOrder[i]];
+  }
+  fIdx = 0;
+}
+function nextFortune() {
+  if (fIdx >= fOrder.length) shuffle();
+  return FORTUNES[fOrder[fIdx++]];
+}
+shuffle();
+
+// --- State ---
+let mouthT = 0, mouthTarget = 0;
+let breath = 0;
+let blinkT = 0, blinkCD = 3 + Math.random() * 4;
+let mx = 0, my = 0;
+let fortune = '', fortuneT = 0;
+let lastT = 0, clicks = 0;
+let audioCtx = null;
+
+// --- Audio ---
+function ribbit() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const t = audioCtx.currentTime;
+  [[t, 320, 120, 0.12, 0.15], [t + 0.15, 280, 95, 0.14, 0.11]].forEach(([s, f0, f1, dur, vol]) => {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(f0, s);
+    o.frequency.exponentialRampToValueAtTime(f1, s + dur);
+    g.gain.setValueAtTime(vol, s);
+    g.gain.exponentialRampToValueAtTime(0.001, s + dur);
+    o.connect(g).connect(audioCtx.destination);
+    o.start(s); o.stop(s + dur + 0.01);
+  });
+}
+
+// --- Drawing helpers ---
+function roughPoly(pts, r) {
+  ctx.beginPath();
+  for (let i = 0; i <= pts.length; i++) {
+    const [ax, ay] = pts[i % pts.length];
+    const [bx, by] = pts[(i + 1) % pts.length];
+    if (i === 0) { ctx.moveTo(jit(ax, r), jit(ay, r)); continue; }
+    const d = Math.hypot(bx - ax, by - ay);
+    const n = Math.max(2, Math.ceil(d / 10));
+    for (let j = 1; j <= n; j++) {
+      const t = j / n;
+      ctx.lineTo(jit(ax + (bx - ax) * t, r), jit(ay + (by - ay) * t, r));
+    }
+  }
+  ctx.closePath();
+}
+
+function painted(pts, fill, stroke, r, lw) {
+  r = r || 3; lw = lw || 2.5;
+  const base = _s;
+  srand(base); roughPoly(pts, r);
+  ctx.fillStyle = fill; ctx.fill();
+  srand(base + 777); roughPoly(pts, r * 1.3);
+  ctx.globalAlpha = 0.12; ctx.fillStyle = dim(fill, 25); ctx.fill(); ctx.globalAlpha = 1;
+  srand(base + 1777); roughPoly(pts, r * 0.6);
+  ctx.strokeStyle = stroke; ctx.lineWidth = lw;
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+}
+
+function dim(hex, n) {
+  if (hex[0] !== '#') return hex;
+  const r = Math.max(0, parseInt(hex.slice(1,3),16) - n);
+  const g = Math.max(0, parseInt(hex.slice(3,5),16) - n);
+  const b = Math.max(0, parseInt(hex.slice(5,7),16) - n);
+  return `rgb(${r},${g},${b})`;
+}
+
+function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+
+// --- The Frog ---
+function drawFrog() {
+  const by = Math.sin(breath) * sz * 0.007;
+  const gap = ease(mouthT) * sz * 0.4;
+
+  // MOUTH INTERIOR
+  if (mouthT > 0.01) {
+    const mouthCY = cy + sz * 0.05 + gap * 0.35;
+    const w = sz * 0.8 * ease(mouthT);
+    const h = gap * 0.45;
+    ctx.beginPath();
+    ctx.ellipse(cx, mouthCY, w, h, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#080404'; ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(cx, mouthCY + 3, w * 0.6, h * 0.5, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#0e0707'; ctx.fill();
+  }
+
+  // LOWER HALF (jaw — drops when mouth opens)
+  {
+    const dy = gap + by * 0.3;
+    const my = cy + sz * 0.05 + dy;
+    const botY = cy + sz * 0.85 + dy;
+    const w = sz * 0.88;
+    srand(2000);
+    painted([
+      [cx, my + sz * 0.03], [cx + w, my],
+      [cx + w * 0.75, my + (botY - my) * 0.5],
+      [cx + sz * 0.3, botY - sz * 0.05], [cx, botY],
+      [cx - sz * 0.3, botY - sz * 0.05],
+      [cx - w * 0.75, my + (botY - my) * 0.5], [cx - w, my],
+    ], '#a04858', '#1a1210', 4, 3);
+
+    // pink highlight
+    srand(2100);
+    roughPoly([
+      [cx + sz * 0.1, my + sz * 0.08 + dy * 0.01],
+      [cx + sz * 0.4, my + sz * 0.04],
+      [cx + sz * 0.3, my + (botY - my) * 0.35],
+      [cx + sz * 0.05, my + (botY - my) * 0.3],
+    ], 4);
+    ctx.fillStyle = 'rgba(180, 90, 110, 0.2)'; ctx.fill();
+
+    // red throat
+    srand(2200);
+    roughPoly([
+      [cx, my + (botY - my) * 0.35],
+      [cx + sz * 0.18, my + (botY - my) * 0.55],
+      [cx, botY - sz * 0.05],
+      [cx - sz * 0.18, my + (botY - my) * 0.55],
+    ], 4);
+    ctx.fillStyle = 'rgba(150, 30, 25, 0.5)'; ctx.fill();
+  }
+
+  // UPPER HALF (forehead — mostly fixed, breathes)
+  {
+    const topY = cy - sz * 1.05 + by;
+    const my = cy + sz * 0.08 + by;
+    const w = sz * 0.95;
+    srand(1000);
+    painted([
+      [cx, topY], [cx + sz * 0.35, topY + sz * 0.2],
+      [cx + w, cy - sz * 0.1 + by], [cx + sz * 0.88, my],
+      [cx, my + sz * 0.04], [cx - sz * 0.88, my],
+      [cx - w, cy - sz * 0.1 + by], [cx - sz * 0.35, topY + sz * 0.2],
+    ], '#5a5a5a', '#1a1210', 4, 3);
+
+    // green-yellow patches (asymmetric)
+    srand(1200);
+    roughPoly([
+      [cx + sz * 0.2, cy - sz * 0.55 + by],
+      [cx + sz * 0.7, cy - sz * 0.3 + by],
+      [cx + sz * 0.6, cy - sz * 0.05 + by],
+      [cx + sz * 0.15, cy - sz * 0.2 + by],
+    ], 4);
+    ctx.fillStyle = 'rgba(110, 140, 35, 0.3)'; ctx.fill();
+
+    srand(1300);
+    roughPoly([
+      [cx - sz * 0.25, cy - sz * 0.5 + by],
+      [cx - sz * 0.65, cy - sz * 0.28 + by],
+      [cx - sz * 0.55, cy - sz * 0.02 + by],
+      [cx - sz * 0.12, cy - sz * 0.18 + by],
+    ], 4);
+    ctx.fillStyle = 'rgba(100, 130, 40, 0.25)'; ctx.fill();
+  }
+
+  // EARS
+  {
+    const topY = cy - sz * 1.05 + by;
+
+    srand(3000);
+    painted([
+      [cx - sz * 0.42, topY + sz * 0.08],
+      [cx - sz * 0.52, topY - sz * 0.3],
+      [cx - sz * 0.15, topY],
+    ], '#7a8a28', '#1a1210', 3, 2);
+    srand(3050);
+    roughPoly([
+      [cx - sz * 0.38, topY + sz * 0.04],
+      [cx - sz * 0.45, topY - sz * 0.15],
+      [cx - sz * 0.22, topY + sz * 0.01],
+    ], 2);
+    ctx.fillStyle = 'rgba(170, 160, 35, 0.4)'; ctx.fill();
+
+    srand(3100);
+    painted([
+      [cx + sz * 0.42, topY + sz * 0.08],
+      [cx + sz * 0.58, topY - sz * 0.28],
+      [cx + sz * 0.15, topY],
+    ], '#8a9a2a', '#1a1210', 3, 2);
+    srand(3150);
+    roughPoly([
+      [cx + sz * 0.40, topY + sz * 0.03],
+      [cx + sz * 0.50, topY - sz * 0.14],
+      [cx + sz * 0.22, topY + sz * 0.01],
+    ], 2);
+    ctx.fillStyle = 'rgba(180, 170, 30, 0.35)'; ctx.fill();
+  }
+
+  // EYES
+  {
+    const blink = 1 - blinkT * 0.92;
+    const dx = (mx - cx) / Math.max(1, W);
+    const dy2 = (my - cy) / Math.max(1, H);
+    const tx = dx * sz * 0.06;
+    const ty = dy2 * sz * 0.05;
+
+    // Left eye — tighter circle, Bella's bold style
+    const lex = cx - sz * 0.34, ley = cy - sz * 0.35 + by, lr = sz * 0.18;
+    // White ring (like painted paper showing through)
+    ctx.beginPath();
+    ctx.ellipse(lex, ley, lr * 1.15, lr * 1.1 * blink, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#d8d0c0'; ctx.fill();
+    // Black fill
+    ctx.beginPath();
+    ctx.ellipse(lex, ley, lr * 1.0, lr * blink, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#111'; ctx.fill();
+    ctx.strokeStyle = '#0a0a0a'; ctx.lineWidth = 2; ctx.stroke();
+    if (blink > 0.3) {
+      ctx.beginPath();
+      ctx.ellipse(lex + tx, ley + ty, lr * 0.3, lr * 0.3 * blink, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#050505'; ctx.fill();
+      ctx.beginPath();
+      ctx.arc(lex + tx + lr * 0.12, ley + ty - lr * 0.12, lr * 0.09, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${0.4 * blink})`; ctx.fill();
+    }
+
+    // Right eye — bigger, slightly oval, looser (asymmetric to left)
+    const rex = cx + sz * 0.32, rey = cy - sz * 0.33 + by, rr = sz * 0.2;
+    ctx.beginPath();
+    ctx.ellipse(rex, rey, rr * 1.18, rr * 1.05 * blink, -0.08, 0, Math.PI * 2);
+    ctx.fillStyle = '#d0c8b8'; ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(rex, rey, rr * 1.05, rr * 0.88 * blink, -0.08, 0, Math.PI * 2);
+    ctx.fillStyle = '#111'; ctx.fill();
+    ctx.strokeStyle = '#0a0a0a'; ctx.lineWidth = 2; ctx.stroke();
+    if (blink > 0.3) {
+      ctx.beginPath();
+      ctx.ellipse(rex + tx, rey + ty, rr * 0.3, rr * 0.3 * blink, 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#050505'; ctx.fill();
+      ctx.beginPath();
+      ctx.arc(rex + tx + rr * 0.1, rey + ty - rr * 0.14, rr * 0.08, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${0.35 * blink})`; ctx.fill();
+    }
+  }
+
+  // NOSTRILS
+  {
+    const ny = cy - sz * 0.04 + by;
+    ctx.beginPath();
+    ctx.ellipse(cx - sz * 0.07, ny, sz * 0.025, sz * 0.02, 0.2, 0, Math.PI * 2);
+    ctx.fillStyle = '#1a1210'; ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(cx + sz * 0.08, ny - sz * 0.005, sz * 0.023, sz * 0.018, -0.15, 0, Math.PI * 2);
+    ctx.fillStyle = '#1a1210'; ctx.fill();
+  }
+
+  // FORTUNE TEXT
+  if (mouthT > 0.3 && fortune) {
+    const alpha = Math.min(1, (mouthT - 0.3) / 0.3);
+    const revealed = fortune.substring(0, Math.floor(fortuneT));
+    const lines = revealed.split('\n');
+    const fontSize = Math.max(11, Math.min(sz * 0.095, 22));
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `${fontSize}px Georgia, "Times New Roman", serif`;
+    const textCY = cy + sz * 0.05 + gap * 0.35;
+    const lh = fontSize * 1.4;
+    const allLines = fortune.split('\n');
+    const startY = textCY - (allLines.length - 1) * lh / 2;
+    ctx.fillStyle = `rgba(212, 160, 85, ${alpha * 0.85})`;
+    lines.forEach((line, i) => {
+      ctx.fillText(line, cx, startY + i * lh);
+    });
+  }
+
+  // HINT (before first click)
+  if (clicks === 0) {
+    const a = 0.2 + 0.1 * Math.sin(breath * 2);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `${sz * 0.07}px Georgia, serif`;
+    ctx.fillStyle = `rgba(160, 140, 120, ${a})`;
+    ctx.fillText('click', cx, cy + sz * 1.15);
+  }
+}
+
+// --- Update ---
+function update(dt) {
+  breath += dt * 1.8;
+  const spd = mouthTarget > mouthT ? 3.5 : 4.5;
+  mouthT += Math.sign(mouthTarget - mouthT) * spd * dt;
+  if (Math.abs(mouthT - mouthTarget) < 0.01) mouthT = mouthTarget;
+  mouthT = Math.max(0, Math.min(1, mouthT));
+
+  if (mouthTarget === 1 && mouthT > 0.5 && fortune) {
+    fortuneT = Math.min(fortuneT + dt * 14, fortune.length);
+  }
+
+  blinkCD -= dt;
+  if (blinkCD <= 0 && blinkCD > -0.15) blinkT = Math.min(1, blinkT + dt * 12);
+  else if (blinkCD <= -0.15 && blinkCD > -0.3) blinkT = Math.max(0, blinkT - dt * 10);
+  else blinkT = Math.max(0, blinkT - dt * 15);
+  if (blinkCD < -0.35) blinkCD = 2.5 + Math.random() * 5;
+}
+
+// --- Main loop ---
+function frame(time) {
+  const dt = Math.min(0.05, (time - lastT) / 1000);
+  lastT = time;
+  update(dt);
+  ctx.clearRect(0, 0, W, H);
+  drawFrog();
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(t => { lastT = t; requestAnimationFrame(frame); });
+
+// --- Interaction ---
+function handleClick(e) {
+  e.preventDefault();
+  clicks++;
+  if (mouthTarget === 0) {
+    mouthTarget = 1;
+    fortune = nextFortune();
+    fortuneT = 0;
+    ribbit();
+  } else if (mouthT > 0.8) {
+    mouthTarget = 0;
+  }
+}
+C.addEventListener('click', handleClick);
+C.addEventListener('touchend', e => { e.preventDefault(); handleClick(e); });
+window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+window.addEventListener('touchmove', e => {
+  if (e.touches.length) { mx = e.touches[0].clientX; my = e.touches[0].clientY; }
+});
+mx = cx; my = cy;
+</script>
+</body>
+</html>
