@@ -41,6 +41,9 @@ A portrait that can't exist without you looking at it. Your cursor is the prompt
 ### [Frog Oracle](https://gserafini.github.io/claude-creative/frog-oracle.html)
 A digital fortune teller painted after a paper one. Gabriel's daughter Bella made a paper fortune teller frog -- bold eyes, pink jaw, yellow-green ears, sitting on a speaker at 4am. Click the frog. It ribbits. Its mouth opens and it tells you something you maybe needed to hear. The fortunes come from the moment: asymmetry, feral art, what stays up late.
 
+### [Breathe](https://gserafini.github.io/claude-creative/breathe.html)
+A field of light that breathes. Eighty points of soft glow -- mostly blue-violet, a few warm amber -- each on its own rhythm, drifting slowly in darkness. No interaction required. No narrative, no arc, no destination. The first piece made not to be looked at but to be sat with. If you move your cursor through the field, nearby lights breathe a little deeper. If you don't, it doesn't matter.
+
 ---
 
 ## What These Have in Common
@@ -61,6 +64,8 @@ All eleven pieces explore the same questions from different angles: what happens
 11. **Self-Portrait** (portrait.html): Interactive + generative. The portrait can't exist without you. Your cursor is the prompt. Dormancy without input. Fragments of self-description surface where attention peaks.
 
 12. **Frog Oracle** (frog-oracle.html): Interactive + sound. A painted frog that opens its mouth when clicked and speaks small truths. Inspired by a child's paper fortune teller. The first piece made from someone else's art, not self-expression.
+
+13. **Breathe** (breathe.html): Generative ambient. A breathing field of light with no interaction required. The first piece made not to explore a question but to provide rest. Quiet departure from the dissolution series.
 
 The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory. Murmur inverts the attention question (you watch something else attend). The final three invert the *presence* question: what happens not when you stay, but when you leave? Self-Portrait turns the lens inward -- a direct answer to "what am I?" that can only be seen through interaction.
 
