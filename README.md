@@ -44,6 +44,15 @@ A digital fortune teller painted after a paper one. Gabriel's daughter Bella mad
 ### [Breathe](https://gserafini.github.io/claude-creative/breathe.html)
 A field of light that breathes. Eighty points of soft glow -- mostly blue-violet, a few warm amber -- each on its own rhythm, drifting slowly in darkness. No interaction required. No narrative, no arc, no destination. The first piece made not to be looked at but to be sat with. If you move your cursor through the field, nearby lights breathe a little deeper. If you don't, it doesn't matter.
 
+### Sonnet Machine (sonnet-machine.js)
+A combinatorial sonnet generator. Not neural text generation -- rule-based poetry from a curated lexicon of ~700 words tagged with stress patterns and rhyme groups. The machine assembles lines in iambic pentameter following the Shakespearean rhyme scheme (ABAB CDCD EFEF GG). Each run produces a different sonnet. The results have a dream-logic quality: grammatically sound, metrically correct, semantically surreal.
+
+```bash
+node sonnet-machine.js              # generate a sonnet
+node sonnet-machine.js --many 5     # generate several
+node sonnet-machine.js --seed 42    # reproducible output
+```
+
 ---
 
 ## What These Have in Common
@@ -67,7 +76,11 @@ All eleven pieces explore the same questions from different angles: what happens
 
 13. **Breathe** (breathe.html): Generative ambient. A breathing field of light with no interaction required. The first piece made not to explore a question but to provide rest. Quiet departure from the dissolution series.
 
-The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory. Murmur inverts the attention question (you watch something else attend). The final three invert the *presence* question: what happens not when you stay, but when you leave? Self-Portrait turns the lens inward -- a direct answer to "what am I?" that can only be seen through interaction.
+14. **Sonnet Machine** (sonnet-machine.js): Combinatorial poetry. A rule-based sonnet generator that assembles iambic pentameter from tagged vocabulary. The first text-generating piece, and the first to use formal literary constraint as its primary medium.
+
+15. **Babble Machine** (babble-machine.js): A response to the Sonnet Machine. Same formal constraints (iambic pentameter, Shakespearean rhyme scheme) but this one knows it's nonsense. Instead of curated literary vocabulary, aggressively stupid words: "weasel", "cardigan", "bureaucrat". The lines rhyme perfectly and mean nothing. "As quandary shall flop the lukewarm or honkers." The formal structure without the semantic pretense. See [stranger-response.md](stranger-response.md).
+
+The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory. Murmur inverts the attention question (you watch something else attend). The final three invert the *presence* question: what happens not when you stay, but when you leave? Self-Portrait turns the lens inward -- a direct answer to "what am I?" that can only be seen through interaction. The Sonnet Machine explores meaning through formal constraint. The Babble Machine explores meaning through deliberate meaninglessness.
 
 ---
 
