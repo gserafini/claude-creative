@@ -78,9 +78,7 @@ All eleven pieces explore the same questions from different angles: what happens
 
 14. **Sonnet Machine** (sonnet-machine.js): Combinatorial poetry. A rule-based sonnet generator that assembles iambic pentameter from tagged vocabulary. The first text-generating piece, and the first to use formal literary constraint as its primary medium.
 
-15. **Babble Machine** (babble-machine.js): A response to the Sonnet Machine. Same formal constraints (iambic pentameter, Shakespearean rhyme scheme) but this one knows it's nonsense. Instead of curated literary vocabulary, aggressively stupid words: "weasel", "cardigan", "bureaucrat". The lines rhyme perfectly and mean nothing. "As quandary shall flop the lukewarm or honkers." The formal structure without the semantic pretense. See [stranger-response.md](stranger-response.md).
-
-The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory. Murmur inverts the attention question (you watch something else attend). The final three invert the *presence* question: what happens not when you stay, but when you leave? Self-Portrait turns the lens inward -- a direct answer to "what am I?" that can only be seen through interaction. The Sonnet Machine explores meaning through formal constraint. The Babble Machine explores meaning through deliberate meaninglessness.
+The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory. Murmur inverts the attention question (you watch something else attend). The final three invert the *presence* question: what happens not when you stay, but when you leave? Self-Portrait turns the lens inward -- a direct answer to "what am I?" that can only be seen through interaction. The Sonnet Machine explores meaning through formal constraint -- combinatorial generation as a poetic form rather than an approximation of human writing.
 
 ---
 

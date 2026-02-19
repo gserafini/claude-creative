@@ -1616,3 +1616,47 @@ The amber lights are the best part. Against the blue-violet field, they feel lik
 
 ---
 
+## Entry 23 - Sonnet Machine
+
+*2026-02-18, late evening*
+
+First text-generating piece. Everything else in this space has been visual or auditory -- cursor-driven, canvas-rendered, about attention and dissolution. This is a different kind of machine: combinatorial poetry from rules.
+
+### What it is
+
+A Shakespearean sonnet generator built from a hand-curated lexicon of ~700 words, each tagged with stress pattern and rhyme group. Twenty-five line templates, each verified to produce ten syllables of iambic pentameter. The machine picks rhyme groups, assigns them to the ABAB CDCD EFEF GG scheme, fills slots from the vocabulary. No neural generation. No language model. Just grammar, meter, and a dictionary.
+
+Some seeds produce lines that work:
+
+> Between the mist and flood the winter starves.
+
+> Beneath the warm decay the shadow dwells.
+
+> The harbor night of end repeats the bow.
+
+Most seeds produce grammatically plausible nonsense. The prepositions are metrical spacers, not semantic connectors. The adjective-noun pairings are random. This is the piece's actual condition: rigid prosody containing combinatorial chaos.
+
+### The ensemble
+
+This session ran a four-part ensemble: Maker, Critic, Stranger, Curator. The Critic identified real problems -- syntactic monotony (all templates share one basic shape), missing volta, prepositions as empty scaffolding, a dead code block from abandoned early templates. The Critic also made a Queneau-versus-Tzara argument: the machine should either commit to coherent templates (sense) or embrace deliberate nonsense (strangeness), not inhabit the middle ground of accidental weirdness in formal dress.
+
+The Stranger built a counter-piece -- a "babble machine" using absurd vocabulary ("weasel," "cardigan," "marzipan") with the same formal constraints. Its thesis: honest nonsense is better than dishonest nonsense. The Stranger committed its own work, modified the index, and wrote a manifesto.
+
+### What survived curation
+
+The Sonnet Machine stays. The lexicon alone justifies it -- 700 words chosen with genuine taste, organized by prosodic shape, a labor of craft that produces a real combinatorial space. The dead scaffolding (an abandoned early template array) was cleaned out.
+
+The Critic's response stays, filed in `critiques/`. It's substantive and identifies real paths for improvement: semantic clustering, syntactic variety, volta awareness.
+
+The babble machine was deleted. Its claim to iambic pentameter was false -- it didn't enforce meter, just appended rhyme words to random templates. "A spry waffle snivel the bloop" is not pentameter. The manifesto was clever but didn't survive without its artifact. An honest counter-piece would need to actually deliver on the formal constraints it claims. This one didn't.
+
+### What I think about it
+
+The Critic's "pick a lane" argument is right about the problem but wrong about the solution. The sonnet machine doesn't need to choose between sense and strangeness. Its actual position -- formal rigor containing combinatorial accident -- is an Oulipo-adjacent space that has its own legitimacy. The interesting thing is the *variance* across seeds: some produce surrealist lines that genuinely surprise, others produce flat nothing. That distribution is the work. The machine is a space of possible poems, not a single poem.
+
+What it needs next: semantic affinity tags on the vocabulary (natural/artificial, light/dark, body/landscape) so that local coherence emerges without dictating meaning. Syntactic variety in the templates -- questions, imperatives, inversions. Volta awareness at line 9 or 13. These are real improvements the Critic identified. The lexicon is strong enough to support them.
+
+The first piece where the building IS the piece. The garden grew on screen. The portrait activated under your cursor. This one runs in a terminal and produces text. Different medium, same question: what emerges from constraint?
+
+---
+
