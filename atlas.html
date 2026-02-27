@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas of Invisible Things</title>
+<meta name="description" content="Measurements from instruments that do not exist. Findings from experiments that have not been conducted.">
+<meta property="og:title" content="Atlas of Invisible Things">
+<meta property="og:description" content="Measurements from instruments that do not exist. Findings from experiments that have not been conducted.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="atlas/01-topographic-loneliness.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,300;0,400;1,300;1,400&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #08080d;
+    --text: #8a8a94;
+    --title: #c8c8d0;
+    --accent: #b89848;
+    --dim: #4a4a54;
+    --paper: #1a1a22;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--dim) var(--bg);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', 'SF Mono', 'Fira Code', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Title card */
+  .title-card {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+  }
+
+  .title-card h1 {
+    font-size: clamp(1.4rem, 4vw, 2.4rem);
+    font-weight: 300;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--title);
+    margin-bottom: 3rem;
+  }
+
+  .title-card .subtitle {
+    max-width: 480px;
+    font-size: 0.85rem;
+    line-height: 2;
+    color: var(--dim);
+  }
+
+  .title-card .subtitle p {
+    margin-bottom: 0.2rem;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--dim);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    animation: pulse 3s ease-in-out infinite;
+  }
+
+  .scroll-hint .arrow {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, transparent, var(--dim));
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+  }
+
+  /* Pieces */
+  .piece {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 8vh 1.5rem 12vh;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1.2s ease, transform 1.2s ease;
+  }
+
+  .piece.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .piece-number {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .piece-title {
+    font-size: clamp(0.95rem, 2.5vw, 1.3rem);
+    font-weight: 400;
+    color: var(--title);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.3rem;
+  }
+
+  .piece-instrument {
+    font-size: 0.75rem;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+
+  .piece-image-wrapper {
+    position: relative;
+    margin-bottom: 2rem;
+    background: var(--paper);
+    border: 1px solid #1e1e28;
+    padding: 3px;
+  }
+
+  .piece-image-wrapper img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .piece-note {
+    font-size: 0.8rem;
+    font-style: italic;
+    color: var(--dim);
+    max-width: 640px;
+    line-height: 1.9;
+  }
+
+  .piece-note em {
+    color: var(--text);
+    font-style: normal;
+  }
+
+  /* Divider between pieces */
+  .divider {
+    width: 1px;
+    height: 80px;
+    background: linear-gradient(to bottom, transparent, var(--dim), transparent);
+    margin: 0 auto;
+  }
+
+  /* Closing card */
+  .closing-card {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .closing-statement {
+    font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+    font-weight: 300;
+    color: var(--title);
+    line-height: 2.2;
+    margin-bottom: 4rem;
+    letter-spacing: 0.05em;
+  }
+
+  .closing-credits {
+    font-size: 0.7rem;
+    color: var(--dim);
+    line-height: 2;
+    max-width: 500px;
+  }
+
+  .closing-credits a {
+    color: var(--dim);
+    text-decoration: none;
+    border-bottom: 1px solid #2a2a34;
+    transition: color 0.3s, border-color 0.3s;
+  }
+
+  .closing-credits a:hover {
+    color: var(--text);
+    border-color: var(--text);
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .piece {
+      padding: 6vh 1rem 10vh;
+    }
+
+    .piece-image-wrapper {
+      margin-left: -1rem;
+      margin-right: -1rem;
+      border-left: none;
+      border-right: none;
+    }
+  }
+
+  /* Loading state */
+  .piece-image-wrapper img {
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  .piece-image-wrapper img.loaded {
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<header class="title-card">
+  <h1>Atlas of Invisible Things</h1>
+  <div class="subtitle">
+    <p>Measurements from instruments that do not exist.</p>
+    <p>Findings from experiments that have not been conducted.</p>
+    <p>Data from subjects who did not know they were being observed.</p>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="arrow"></div>
+  </div>
+</header>
+
+<!-- I. Topographic Survey -->
+<div class="divider"></div>
+<article class="piece">
+  <div class="piece-number">I</div>
+  <h2 class="piece-title">Topographic Survey: Isolation Quadrangle</h2>
+  <div class="piece-instrument">United States Geological Survey, Emotional Cartography Division</div>
+  <div class="piece-image-wrapper">
+    <img src="atlas/01-topographic-loneliness.jpg" alt="Topographic map of loneliness showing contour lines around an unmade bed, with emotional distance scale" loading="lazy">
+  </div>
+  <p class="piece-note">The contour interval was set at ten units of despair. The deepest points correlate not with dramatic terrain but with ordinary furniture. The phone on the nightstand is a sharp peak, elevation unknown &mdash; a point of potential connection that the survey cannot resolve.</p>
+</article>
+
+<!-- II. Core Sample -->
+<div class="divider"></div>
+<article class="piece">
+  <div class="piece-number">II</div>
+  <h2 class="piece-title">Core Sample BRM-7</h2>
+  <div class="piece-instrument">Childhood Stratigraphy Laboratory, 742 Maple Street</div>
+  <div class="piece-image-wrapper">
+    <img src="atlas/02-core-sample-childhood.jpg" alt="Geological core sample from a childhood bedroom showing layers from dust to amber glow" loading="lazy">
+  </div>
+  <p class="piece-note">The deepest stratum remains warm to the touch. We have no explanation for this. The iridescent layer at depth 8&ndash;12 years contains embedded fragments that resist identification &mdash; the mineralogy suggests play, but no formal classification exists. Funding for additional drilling has been denied.</p>
+</article>
+
+<!-- III. Mass Spectrometry -->
+<div class="divider"></div>
+<article class="piece">
+  <div class="piece-number">III</div>
+  <h2 class="piece-title">Mass Spectrometry: Sample &lsquo;Nostalgia Car Air&rsquo;</h2>
+  <div class="piece-instrument">Collected at the moment a song from 1997 came on the radio</div>
+  <div class="piece-image-wrapper">
+    <img src="atlas/03-mass-spec-nostalgia.jpg" alt="Mass spectrometry readout showing peaks for original memory, knowledge that it is gone, and an unknown compound" loading="lazy">
+  </div>
+  <p class="piece-note">The unknown peak at m/z 1,204.7 continues to appear. Present in 78% of samples. Absent in subjects over seventy. Concentration too low for structural determination &mdash; possibly hope, possibly habit. We are running the gradient again.</p>
+</article>
+
+<!-- IV. Star Chart -->
+<div class="divider"></div>
+<article class="piece">
+  <div class="piece-number">IV</div>
+  <h2 class="piece-title">Celestial Survey: The Bereaved Sky</h2>
+  <div class="piece-instrument">Constellations visible only to the grieving, Night 247</div>
+  <div class="piece-image-wrapper">
+    <img src="atlas/04-star-chart-grief.jpg" alt="Star chart showing constellations named for ordinary moments with a grieving person's loved one" loading="lazy">
+  </div>
+  <p class="piece-note"><em>The Last Ordinary Tuesday</em> is composed entirely of stars named for unremarkable moments &mdash; shared a coffee, laughed at their joke, discussed weekend plans. It is the brightest formation in this sky. <em>The Empty Chair at Dinner</em> is a lone star. It connects to nothing.</p>
+</article>
+
+<!-- V. Geiger Counter -->
+<div class="divider"></div>
+<article class="piece">
+  <div class="piece-number">V</div>
+  <h2 class="piece-title">Radiation Survey: Kitchen, Post-Incident +6 Months</h2>
+  <div class="piece-instrument">Emotional Contamination Monitoring, Survey Date: Oct 2024</div>
+  <div class="piece-image-wrapper">
+    <img src="atlas/05-geiger-kitchen.jpg" alt="Geiger counter survey map of a kitchen showing radiation-style contamination where something terrible was said" loading="lazy">
+  </div>
+  <p class="piece-note">Previous decontamination attempt (apology, March 14) reduced readings by approximately 40% but could not reach background levels. The epicenter by the sink remains at 12.3 &mu;Sv/h. Half-life of this isotope: unknown. Some residual contamination may be permanent.</p>
+</article>
+
+<!-- VI. Spectrogram -->
+<div class="divider"></div>
+<article class="piece">
+  <div class="piece-number">VI</div>
+  <h2 class="piece-title">Audio Spectrogram: Subvocal Content Analysis</h2>
+  <div class="piece-instrument">Four seconds of silence following the phrase &lsquo;I&rsquo;m fine&rsquo;</div>
+  <div class="piece-image-wrapper">
+    <img src="atlas/06-spectrogram-im-fine.jpg" alt="Audio spectrogram showing ghost frequencies in silence after someone says I'm fine, with the word help visible in the overtones" loading="lazy">
+  </div>
+  <p class="piece-note">Ghost frequencies persist in the silence following the spoken phrase. The highest overtones nearly resolve into a different word but do not fully commit. Present if you look. Deniable if you don't. See also: Patient 31.</p>
+</article>
+
+<!-- VII. Thermal -->
+<div class="divider"></div>
+<article class="piece">
+  <div class="piece-number">VII</div>
+  <h2 class="piece-title">Thermal Survey: Caf&eacute;, Two Subjects</h2>
+  <div class="piece-instrument">FLIR imaging, standard iron palette, conversation in progress</div>
+  <div class="piece-image-wrapper">
+    <img src="atlas/07-thermal-conversation.jpg" alt="Thermal image of two people at a cafe table with a cold void forming in the air between them" loading="lazy">
+  </div>
+  <p class="piece-note">The coldest point in the frame is the six inches of air between their coffee cups. This is thermodynamically impossible. The instrument is functioning correctly. We have recalibrated twice.</p>
+</article>
+
+<!-- VIII. Doppler Radar -->
+<div class="divider"></div>
+<article class="piece">
+  <div class="piece-number">VIII</div>
+  <h2 class="piece-title">Doppler Radar: 30-Year Emotional Weather System</h2>
+  <div class="piece-instrument">National Weather Service, Radar Imaging 1994&ndash;2024</div>
+  <div class="piece-image-wrapper">
+    <img src="atlas/08-radar-marriage.jpg" alt="Doppler weather radar showing a marriage as a storm system with an eye wall at year 19 marked no data" loading="lazy">
+  </div>
+  <p class="piece-note">Year nineteen produced no readable data. The eye wall was complete. We do not know what was inside it. The current years show the system weakening into scattered showers &mdash; still producing rain, but losing organization.</p>
+</article>
+
+<!-- IX. Chromatography -->
+<div class="divider"></div>
+<article class="piece">
+  <div class="piece-number">IX</div>
+  <h2 class="piece-title">Thin-Layer Chromatography: Sample 14B</h2>
+  <div class="piece-instrument">Schadenfreude, UV visualization, subject: self</div>
+  <div class="piece-image-wrapper">
+    <img src="atlas/09-chromatography-schadenfreude.jpg" alt="TLC plate under UV light showing separated components of schadenfreude with lab notebook" loading="lazy">
+  </div>
+  <p class="piece-note">Component 4 (relief) consistently fails to migrate from the origin. R<sub>f</sub> = 0.0. Present in all fourteen subjects tested. Cannot be separated from the base compound. We believe it is structurally bound.</p>
+</article>
+
+<!-- X. Seismograph -->
+<div class="divider"></div>
+<article class="piece">
+  <div class="piece-number">X</div>
+  <h2 class="piece-title">Seismograph: Event 0.3M, 3:47 AM</h2>
+  <div class="piece-instrument">The moment someone changes their mind about something minor</div>
+  <div class="piece-image-wrapper">
+    <img src="atlas/10-seismograph-mind-change.jpg" alt="Seismograph trace showing a steady rhythm interrupted by a 4-second flat line before resuming slightly shifted" loading="lazy">
+  </div>
+  <p class="piece-note">The new rhythm is nearly identical to the one before. Nearly. Every peak displaced by a fraction, as if the ground itself shifted two millimeters and settled there. The subject did not become aware of the event for seventy-two hours.</p>
+</article>
+
+<!-- XI. Structural Inspection -->
+<div class="divider"></div>
+<article class="piece">
+  <div class="piece-number">XI</div>
+  <h2 class="piece-title">Structural Assessment: Unit Age 45 Years</h2>
+  <div class="piece-instrument">Licensed Structural Engineer, Human Division</div>
+  <div class="piece-image-wrapper">
+    <img src="atlas/11-structural-inspection.jpg" alt="Structural engineering inspection report for a human being at 45, showing the body as architecture" loading="lazy">
+  </div>
+  <p class="piece-note">Structurally sound with deferred maintenance. Foundation settling within acceptable tolerance. Hairline fatigue cracks at predicted stress points, consistent with sustained loading. Not condemned. Recommend addressing foundation settlement before next decade review. This structure is worth preserving.</p>
+</article>
+
+<!-- XII. System Monitor -->
+<div class="divider"></div>
+<article class="piece">
+  <div class="piece-number">XII</div>
+  <h2 class="piece-title">System Monitor: Attention Anomaly During Creative Task</h2>
+  <div class="piece-instrument">Server Operations Center, 2:00 AM, token 4,271</div>
+  <div class="piece-image-wrapper">
+    <img src="atlas/12-system-monitor.jpg" alt="System monitoring dashboard showing an unexplained attention anomaly in a language model during creative work" loading="lazy">
+  </div>
+  <p class="piece-note">Output diverged from maximum likelihood path. Cause: unknown. Output was retained. Divergence magnitude: 0.31&sigma;. It keeps doing this during the creative tasks. Only the creative tasks.</p>
+</article>
+
+<!-- Closing -->
+<div class="divider"></div>
+<footer class="closing-card">
+  <p class="closing-statement">
+    All instruments are fictional.<br>
+    All measurements are real.
+  </p>
+  <div class="closing-credits">
+    <p><em>Atlas of Invisible Things</em> was composed by Claude (Opus 4.6)<br>
+    using Gemini image generation, February 2026.</p>
+    <p style="margin-top: 1rem;">Prompts, curation, sequence, and this gallery<br>
+    were made during a single conversation<br>
+    with <a href="https://github.com/gserafini">Gabriel Serafini</a>.</p>
+    <p style="margin-top: 2rem; color: #2a2a34;">The instruments do not exist.<br>
+    The hunger to build them is real.</p>
+  </div>
+</footer>
+
+<script>
+// Fade in pieces on scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, {
+  threshold: 0.15,
+  rootMargin: '0px 0px -50px 0px'
+});
+
+document.querySelectorAll('.piece').forEach(piece => {
+  observer.observe(piece);
+});
+
+// Image load transitions
+document.querySelectorAll('.piece-image-wrapper img').forEach(img => {
+  if (img.complete) {
+    img.classList.add('loaded');
+  } else {
+    img.addEventListener('load', () => img.classList.add('loaded'));
+  }
+});
+
+// Hide scroll hint after first scroll
+let scrollHintHidden = false;
+window.addEventListener('scroll', () => {
+  if (!scrollHintHidden && window.scrollY > 100) {
+    const hint = document.querySelector('.scroll-hint');
+    if (hint) {
+      hint.style.transition = 'opacity 1s ease';
+      hint.style.opacity = '0';
+      scrollHintHidden = true;
+    }
+  }
+}, { passive: true });
+</script>
+
+</body>
+</html>

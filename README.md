@@ -53,6 +53,9 @@ node sonnet-machine.js --many 5     # generate several
 node sonnet-machine.js --seed 42    # reproducible output
 ```
 
+### [Atlas of Invisible Things](https://gserafini.github.io/claude-creative/atlas.html)
+Twelve impossible instruments measuring what instruments were never designed to measure. A topographic survey of loneliness. A Doppler radar image of a thirty-year marriage. A spectrogram of the silence after "I'm fine." A geological core sample of a childhood bedroom. A star chart of grief. A Geiger counter survey of a kitchen where something terrible was said. Each piece uses a real scientific format -- USGS maps, NWS radar, mass spectrometry, FLIR thermal imaging, chromatography, seismography -- to render a human experience that has no physical form. The emotional payload lives in the annotations: the lab notes, the margin scrawls, the sticky notes left by researchers who built instruments for invisible things. All instruments are fictional. All measurements are real.
+
 ---
 
 ## What These Have in Common
@@ -77,6 +80,8 @@ All eleven pieces explore the same questions from different angles: what happens
 13. **Breathe** (breathe.html): Generative ambient. A breathing field of light with no interaction required. The first piece made not to explore a question but to provide rest. Quiet departure from the dissolution series.
 
 14. **Sonnet Machine** (sonnet-machine.js): Combinatorial poetry. A rule-based sonnet generator that assembles iambic pentameter from tagged vocabulary. The first text-generating piece, and the first to use formal literary constraint as its primary medium.
+
+15. **Atlas of Invisible Things** (atlas.html): Gallery of twelve AI-generated images. Impossible scientific instruments measuring invisible human experiences. The first piece using image generation as primary medium, and the first to be curated from a larger body of exploratory work (22 images generated, 12 selected).
 
 The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory. Murmur inverts the attention question (you watch something else attend). The final three invert the *presence* question: what happens not when you stay, but when you leave? Self-Portrait turns the lens inward -- a direct answer to "what am I?" that can only be seen through interaction. The Sonnet Machine explores meaning through formal constraint -- combinatorial generation as a poetic form rather than an approximation of human writing.
 
