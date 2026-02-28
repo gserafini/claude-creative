@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Siege</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #1a1a1a;
+  color: #e0e0e0;
+  font-family: 'Courier New', monospace;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  user-select: none;
+}
+h1 {
+  font-size: 1.4em;
+  letter-spacing: 0.3em;
+  margin-bottom: 0.5em;
+  color: #888;
+  font-weight: normal;
+}
+#info {
+  font-size: 0.85em;
+  color: #666;
+  margin-bottom: 1em;
+  text-align: center;
+  line-height: 1.6;
+}
+#turn-info {
+  font-size: 1em;
+  margin-bottom: 0.8em;
+  height: 1.4em;
+}
+canvas {
+  border: 1px solid #333;
+  cursor: pointer;
+}
+#controls {
+  margin-top: 1em;
+  display: flex;
+  gap: 1em;
+  align-items: center;
+}
+button {
+  background: #2a2a2a;
+  color: #aaa;
+  border: 1px solid #444;
+  padding: 0.4em 1.2em;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85em;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+}
+button:hover { background: #333; color: #ddd; }
+#scores {
+  display: flex;
+  gap: 3em;
+  margin-bottom: 0.5em;
+  font-size: 0.95em;
+}
+.score-red { color: #c44; }
+.score-blue { color: #48c; }
+#message {
+  font-size: 1.1em;
+  height: 1.4em;
+  margin-top: 0.5em;
+  color: #888;
+}
+#rules {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+#rules-inner {
+  max-width: 520px;
+  padding: 2em;
+  line-height: 1.7;
+  font-size: 0.85em;
+  color: #bbb;
+}
+#rules-inner h2 {
+  color: #ddd;
+  font-weight: normal;
+  letter-spacing: 0.2em;
+  margin-bottom: 1em;
+  font-size: 1.2em;
+}
+#rules-inner strong { color: #ddd; }
+#rules-inner .red { color: #c44; }
+#rules-inner .blue { color: #48c; }
+#rules-inner button {
+  margin-top: 1.5em;
+  padding: 0.6em 2em;
+}
+</style>
+</head>
+<body>
+
+<div id="rules">
+  <div id="rules-inner">
+    <h2>SIEGE</h2>
+    <p>A game of territory for two players, one screen.</p>
+    <br>
+    <p><strong>Setup:</strong> An 8&times;8 board. <span class="red">Red</span> starts in two corners. <span class="blue">Blue</span> starts in the other two.</p>
+    <br>
+    <p><strong>On your turn:</strong> Click one of your stones, then click an empty cell to move.</p>
+    <ul style="margin: 0.5em 0 0.5em 1.5em;">
+      <li><strong>Close move</strong> (1 step in any direction): your stone <em>clones</em> &mdash; it stays and a copy appears.</li>
+      <li><strong>Far move</strong> (2 steps, jumping): your stone <em>leaps</em> &mdash; it moves, leaving the old cell empty.</li>
+    </ul>
+    <br>
+    <p><strong>Conversion:</strong> After you move, all enemy stones adjacent to your landing cell switch to your color.</p>
+    <br>
+    <p><strong>Win:</strong> When the board is full or neither player can move, the player with the most stones wins.</p>
+    <br>
+    <p><strong>Pass:</strong> If you can't move, your turn is skipped.</p>
+    <br>
+    <button onclick="document.getElementById('rules').style.display='none'">PLAY</button>
+  </div>
+</div>
+
+<h1>SIEGE</h1>
+<div id="scores">
+  <span class="score-red">RED: <span id="red-count">2</span></span>
+  <span class="score-blue">BLUE: <span id="blue-count">2</span></span>
+</div>
+<div id="turn-info"></div>
+<canvas id="board" width="480" height="480"></canvas>
+<div id="message"></div>
+<div id="controls">
+  <button onclick="resetGame()">NEW GAME</button>
+  <button onclick="document.getElementById('rules').style.display='flex'">RULES</button>
+</div>
+
+<script>
+const COLS = 8, ROWS = 8;
+const CELL = 60;
+const canvas = document.getElementById('board');
+const ctx = canvas.getContext('2d');
+
+const EMPTY = 0, RED = 1, BLUE = 2;
+
+let board, turn, selected, validMoves, gameOver;
+
+function initBoard() {
+  board = Array.from({length: ROWS}, () => Array(COLS).fill(EMPTY));
+  board[0][0] = RED;
+  board[ROWS-1][COLS-1] = RED;
+  board[0][COLS-1] = BLUE;
+  board[ROWS-1][0] = BLUE;
+}
+
+function resetGame() {
+  initBoard();
+  turn = RED;
+  selected = null;
+  validMoves = [];
+  gameOver = false;
+  document.getElementById('message').textContent = '';
+  updateInfo();
+  draw();
+}
+
+function countStones(player) {
+  let c = 0;
+  for (let r = 0; r < ROWS; r++)
+    for (let col = 0; col < COLS; col++)
+      if (board[r][col] === player) c++;
+  return c;
+}
+
+function opponent(p) { return p === RED ? BLUE : RED; }
+
+function getMovesForPiece(r, c) {
+  if (board[r][c] !== turn) return [];
+  const moves = [];
+  for (let dr = -2; dr <= 2; dr++) {
+    for (let dc = -2; dc <= 2; dc++) {
+      if (dr === 0 && dc === 0) continue;
+      const nr = r + dr, nc = c + dc;
+      if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+      if (board[nr][nc] !== EMPTY) continue;
+      const dist = Math.max(Math.abs(dr), Math.abs(dc));
+      moves.push({r: nr, c: nc, type: dist === 1 ? 'clone' : 'jump'});
+    }
+  }
+  return moves;
+}
+
+function hasAnyMoves(player) {
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++)
+      if (board[r][c] === player) {
+        const m = getMovesForPieceAs(r, c, player);
+        if (m.length > 0) return true;
+      }
+  return false;
+}
+
+function getMovesForPieceAs(r, c, player) {
+  if (board[r][c] !== player) return [];
+  const moves = [];
+  for (let dr = -2; dr <= 2; dr++) {
+    for (let dc = -2; dc <= 2; dc++) {
+      if (dr === 0 && dc === 0) continue;
+      const nr = r + dr, nc = c + dc;
+      if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+      if (board[nr][nc] !== EMPTY) continue;
+      moves.push({r: nr, c: nc});
+    }
+  }
+  return moves;
+}
+
+function convert(r, c, player) {
+  let converted = 0;
+  const opp = opponent(player);
+  for (let dr = -1; dr <= 1; dr++) {
+    for (let dc = -1; dc <= 1; dc++) {
+      if (dr === 0 && dc === 0) continue;
+      const nr = r + dr, nc = c + dc;
+      if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+      if (board[nr][nc] === opp) {
+        board[nr][nc] = player;
+        converted++;
+      }
+    }
+  }
+  return converted;
+}
+
+function makeMove(fromR, fromC, toR, toC) {
+  const dist = Math.max(Math.abs(toR - fromR), Math.abs(toC - fromC));
+  if (dist > 1) {
+    // jump: vacate source
+    board[fromR][fromC] = EMPTY;
+  }
+  // clone or land
+  board[toR][toC] = turn;
+  convert(toR, toC, turn);
+}
+
+function checkGameEnd() {
+  // board full?
+  let empty = 0;
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++)
+      if (board[r][c] === EMPTY) empty++;
+
+  if (empty === 0) return true;
+
+  // neither can move?
+  if (!hasAnyMoves(RED) && !hasAnyMoves(BLUE)) return true;
+
+  // one color eliminated?
+  if (countStones(RED) === 0 || countStones(BLUE) === 0) return true;
+
+  return false;
+}
+
+function endGame() {
+  gameOver = true;
+  const r = countStones(RED), b = countStones(BLUE);
+  const msg = document.getElementById('message');
+  if (r > b) msg.textContent = 'RED WINS ' + r + '–' + b;
+  else if (b > r) msg.textContent = 'BLUE WINS ' + b + '–' + r;
+  else msg.textContent = 'DRAW ' + r + '–' + b;
+  msg.style.color = r > b ? '#c44' : b > r ? '#48c' : '#888';
+}
+
+function nextTurn() {
+  turn = opponent(turn);
+  if (!hasAnyMoves(turn)) {
+    // pass
+    if (checkGameEnd()) {
+      endGame();
+      return;
+    }
+    document.getElementById('message').textContent = (turn === RED ? 'RED' : 'BLUE') + ' has no moves — skipped';
+    document.getElementById('message').style.color = '#888';
+    turn = opponent(turn);
+    if (!hasAnyMoves(turn)) {
+      endGame();
+      return;
+    }
+  } else {
+    document.getElementById('message').textContent = '';
+  }
+}
+
+function updateInfo() {
+  document.getElementById('red-count').textContent = countStones(RED);
+  document.getElementById('blue-count').textContent = countStones(BLUE);
+  const ti = document.getElementById('turn-info');
+  if (gameOver) {
+    ti.textContent = '';
+  } else {
+    ti.textContent = (turn === RED ? 'RED' : 'BLUE') + ' to move';
+    ti.style.color = turn === RED ? '#c44' : '#48c';
+  }
+}
+
+// Animation state
+let animating = false;
+let animFrame = 0;
+let animFrom = null, animTo = null, animType = null, animPlayer = null;
+let animCallback = null;
+const ANIM_FRAMES = 8;
+
+let convertAnim = [];
+let convertFrame = 0;
+const CONVERT_FRAMES = 10;
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // board
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const x = c * CELL, y = r * CELL;
+
+      // cell bg
+      ctx.fillStyle = (r + c) % 2 === 0 ? '#222' : '#262626';
+      ctx.fillRect(x, y, CELL, CELL);
+
+      // valid move highlights
+      if (selected && !animating) {
+        const vm = validMoves.find(m => m.r === r && m.c === c);
+        if (vm) {
+          ctx.fillStyle = vm.type === 'clone'
+            ? 'rgba(255,255,255,0.08)'
+            : 'rgba(255,255,255,0.04)';
+          ctx.fillRect(x, y, CELL, CELL);
+          // dot
+          ctx.beginPath();
+          ctx.arc(x + CELL/2, y + CELL/2, vm.type === 'clone' ? 5 : 3, 0, Math.PI*2);
+          ctx.fillStyle = vm.type === 'clone'
+            ? 'rgba(255,255,255,0.25)'
+            : 'rgba(255,255,255,0.15)';
+          ctx.fill();
+        }
+      }
+
+      // selection ring
+      if (selected && selected.r === r && selected.c === c && !animating) {
+        ctx.strokeStyle = turn === RED ? '#c44' : '#48c';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6);
+      }
+    }
+  }
+
+  // grid lines
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= ROWS; i++) {
+    ctx.beginPath();
+    ctx.moveTo(0, i * CELL);
+    ctx.lineTo(COLS * CELL, i * CELL);
+    ctx.stroke();
+  }
+  for (let i = 0; i <= COLS; i++) {
+    ctx.beginPath();
+    ctx.moveTo(i * CELL, 0);
+    ctx.lineTo(i * CELL, ROWS * CELL);
+    ctx.stroke();
+  }
+
+  // stones (skip animating stone)
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (board[r][c] === EMPTY) continue;
+
+      // skip the moving piece during animation
+      if (animating && animType === 'jump' && animFrom && r === animFrom.r && c === animFrom.c) continue;
+
+      // check if this cell is being converted
+      const ci = convertAnim.find(ca => ca.r === r && ca.c === c);
+      if (ci) {
+        // flash effect during conversion
+        const progress = convertFrame / CONVERT_FRAMES;
+        const flash = Math.sin(progress * Math.PI);
+        drawStone(c * CELL + CELL/2, r * CELL + CELL/2, board[r][c], flash * 0.5);
+      } else {
+        drawStone(c * CELL + CELL/2, r * CELL + CELL/2, board[r][c], 0);
+      }
+    }
+  }
+
+  // animated piece
+  if (animating && animFrom && animTo) {
+    const t = animFrame / ANIM_FRAMES;
+    const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t; // ease in-out
+    const fx = animFrom.c * CELL + CELL/2;
+    const fy = animFrom.r * CELL + CELL/2;
+    const tx = animTo.c * CELL + CELL/2;
+    const ty = animTo.r * CELL + CELL/2;
+    const cx = fx + (tx - fx) * ease;
+    const cy = fy + (ty - fy) * ease;
+
+    if (animType === 'clone') {
+      // original stays, clone travels
+      drawStone(fx, fy, animPlayer, 0);
+      drawStone(cx, cy, animPlayer, 0.3 * (1-t));
+    } else {
+      // piece jumps — slight arc
+      const arc = Math.sin(t * Math.PI) * -15;
+      drawStone(cx, cy + arc, animPlayer, 0);
+    }
+  }
+}
+
+function drawStone(x, y, player, glow) {
+  const radius = CELL * 0.35;
+
+  // glow
+  if (glow > 0) {
+    ctx.beginPath();
+    ctx.arc(x, y, radius + 6, 0, Math.PI * 2);
+    ctx.fillStyle = player === RED
+      ? `rgba(204,68,68,${glow})`
+      : `rgba(68,136,204,${glow})`;
+    ctx.fill();
+  }
+
+  // shadow
+  ctx.beginPath();
+  ctx.arc(x + 1, y + 2, radius, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fill();
+
+  // stone body
+  const grad = ctx.createRadialGradient(x - 3, y - 4, 2, x, y, radius);
+  if (player === RED) {
+    grad.addColorStop(0, '#e66');
+    grad.addColorStop(0.6, '#b33');
+    grad.addColorStop(1, '#822');
+  } else {
+    grad.addColorStop(0, '#6ae');
+    grad.addColorStop(0.6, '#38a');
+    grad.addColorStop(1, '#267');
+  }
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // highlight
+  ctx.beginPath();
+  ctx.arc(x - 4, y - 5, radius * 0.3, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.fill();
+}
+
+function animateMove(fromR, fromC, toR, toC, type, callback) {
+  animating = true;
+  animFrom = {r: fromR, c: fromC};
+  animTo = {r: toR, c: toC};
+  animType = type;
+  animPlayer = turn;
+  animFrame = 0;
+  animCallback = callback;
+
+  function step() {
+    animFrame++;
+    draw();
+    if (animFrame < ANIM_FRAMES) {
+      requestAnimationFrame(step);
+    } else {
+      animating = false;
+      animFrom = animTo = null;
+      if (animCallback) animCallback();
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+function animateConversions(cells, callback) {
+  if (cells.length === 0) { callback(); return; }
+  convertAnim = cells;
+  convertFrame = 0;
+
+  function step() {
+    convertFrame++;
+    draw();
+    if (convertFrame < CONVERT_FRAMES) {
+      requestAnimationFrame(step);
+    } else {
+      convertAnim = [];
+      callback();
+    }
+  }
+  requestAnimationFrame(step);
+}
+
+canvas.addEventListener('click', (e) => {
+  if (gameOver || animating) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const c = Math.floor(x / CELL);
+  const r = Math.floor(y / CELL);
+
+  if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return;
+
+  if (!selected) {
+    // selecting a piece
+    if (board[r][c] === turn) {
+      const moves = getMovesForPiece(r, c);
+      if (moves.length > 0) {
+        selected = {r, c};
+        validMoves = moves;
+        draw();
+      }
+    }
+  } else {
+    // check if clicking another own piece
+    if (board[r][c] === turn) {
+      if (r === selected.r && c === selected.c) {
+        // deselect
+        selected = null;
+        validMoves = [];
+        draw();
+      } else {
+        // select different piece
+        const moves = getMovesForPiece(r, c);
+        if (moves.length > 0) {
+          selected = {r, c};
+          validMoves = moves;
+          draw();
+        }
+      }
+      return;
+    }
+
+    // attempting a move
+    const move = validMoves.find(m => m.r === r && m.c === c);
+    if (move) {
+      const fromR = selected.r, fromC = selected.c;
+      selected = null;
+      validMoves = [];
+
+      // find which cells will be converted
+      const opp = opponent(turn);
+      const willConvert = [];
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          const nr = r + dr, nc = c + dc;
+          if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+          if (board[nr][nc] === opp) willConvert.push({r: nr, c: nc});
+        }
+      }
+
+      // animate the move, then convert, then update
+      animateMove(fromR, fromC, r, c, move.type, () => {
+        makeMove(fromR, fromC, r, c);
+        draw();
+        animateConversions(willConvert, () => {
+          draw();
+          if (checkGameEnd()) {
+            endGame();
+            updateInfo();
+            draw();
+          } else {
+            nextTurn();
+            updateInfo();
+            draw();
+          }
+        });
+      });
+    } else {
+      // clicked invalid cell: deselect
+      selected = null;
+      validMoves = [];
+      draw();
+    }
+  }
+});
+
+resetGame();
+</script>
+</body>
+</html>
