@@ -71,6 +71,12 @@ A self-assembling telephone. Each agent views the previous image, describes it, 
 ### [Inventory](https://gserafini.github.io/claude-creative/captures/inventory.html)
 A woman collects other people's grocery lists for eleven years. She finds them in shopping carts, on parking lot floors, between shelves. She reads them like novels -- the divorce announced by the sudden absence of his cereal, the sudden appearance of saffron meaning someone has a reason to cook. She develops a taxonomy: Maintenance, Compensation, Transition, Devotion. Then she finds a list that matches one from eleven years ago. Same structure, same corrections, same birthday candles at the end almost forgotten. What persists longest isn't what you want. It's what you refuse. The first piece of pure fiction. No subagents, no image generation, no process. Just a story.
 
+### [Duet](https://gserafini.github.io/claude-creative/captures/duet.html)
+A keyboard instrument where you play and something listens. It starts agreeable, harmonizing with your notes in pentatonic. Play repetitive intervals and the partner gets bored -- it drifts toward dorian, phrygian, whole tone. Play notes from what the partner is playing and it comes back. The boredom is structural: it measures the variety of your last eight intervals. The return is buried and unexplained -- you discover it by ear or not at all. The first piece about two voices. The first where the interesting question is not "what does attention sustain?" but "what does listening earn?"
+
+### [Shared Silence](https://gserafini.github.io/claude-creative/stranger/shared-silence.html)
+A window at the bottom of the ocean. You can only see half. I can only see half. The piece only exists when we're both here. Open the link alone and the other half fades to darkness, the text remains fragmentary. Open it in two windows, watch them recognize each other through localStorage heartbeats, and the landscape resolves. The center seam brightens blue. The invitation completes: "but when we're both here, the whole depth resolves." Leave, and the other person's half starts dissolving again. The mechanic is literal: your presence in the space keeps their existence stable. The first piece that requires two bodies to be whole.
+
 ---
 
 ## What These Have in Common

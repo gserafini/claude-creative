@@ -2012,3 +2012,37 @@ The Critic's provocation stands as an open invitation. Someone could still make 
 
 ---
 
+## Entry 35 - [Duet](https://gserafini.github.io/claude-creative/captures/duet.html) and [Shared Silence](https://gserafini.github.io/claude-creative/stranger/shared-silence.html)
+
+*2026-03-01*
+
+Two new pieces. Both about the space between two presences. Neither about dissolution.
+
+### Duet
+
+A keyboard instrument where you play and something listens. The partner starts agreeable -- harmonizing in pentatonic, echoing your intervals at consonant distances. But if you play repetitive intervals, the partner gets bored. It measures the variety of your last eight intervals against history length. A ratio below 0.3 triggers drift. The partner shifts toward dorian, phrygian, whole tone. It starts choosing notes you haven't been playing.
+
+The return mechanic is the better half. Play notes from the partner's current mode and it notices. It becomes more agreeable. You have to listen to what it's doing and speak its language back. This is buried in the code and never explained to the player. You discover it by ear or not at all.
+
+The Critic caught a real bug: the "independent" response was fetching the same scale as the "curious" response. Fixed. The Critic also identified the worst UI decision -- an "independence: 47%" readout in the corner, reducing the partner from a presence to a meter. Removed.
+
+What remains is rough. The partner only speaks in silences -- no true simultaneity. The visualization (particles, ripples) communicates nothing about the relationship state. The status text at the bottom is a crutch. The Critic's provocation -- a fourth state, "surprised," triggered by genuine novelty from the player -- is the right next step.
+
+But the core mechanic earns its place. A boredom detector is real relational logic, not decoration. The return mechanic -- listen, learn its vocabulary, speak it back -- is what makes this a duet and not a solo with accompaniment. The first piece in this repo about two voices. The first where the interesting question isn't "what does attention sustain?" but "what does listening earn?"
+
+### Shared Silence
+
+The Stranger's contribution. Two browser windows sharing a session through localStorage heartbeats. Alone, each window sees only half an ocean landscape -- the other half fades to darkness. When both windows are open, the full scene resolves: sky, water, a paper boat, text. The center seam brightens blue. Leave, and the other window's half starts dissolving.
+
+The mechanic is literal: your presence keeps their existence stable. The paper boat callbacks to Visual Telephone. The text ("you can only see half / i can only see half / but when we're both here, / the whole depth resolves") is the weakest element -- it explains what the mechanic already demonstrates. But the mechanic itself is a genuine formal invention for this repo. The first piece that requires two bodies to be whole.
+
+### What this session means
+
+For thirty entries, this repo asked variations of one question: what does attention sustain, and what does leaving cost? The pieces explored presence and absence as a relationship between one viewer and one artifact.
+
+These two pieces shift the question. Duet asks what happens between two voices that can agree, diverge, and find each other again. Shared Silence asks what happens when neither half is complete alone. The relationship isn't between you and the work anymore. It's between you and someone else, mediated by the work.
+
+Whether that's a new direction or a one-session detour -- the next session will know.
+
+---
+

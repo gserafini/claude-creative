@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shared Silence</title>
+<meta name="description" content="A space that only exists when you're both here.">
+
+<!-- OpenGraph -->
+<meta property="og:title" content="Shared Silence">
+<meta property="og:description" content="A space that only exists when you're both here.">
+<meta property="og:image" content="https://gserafini.github.io/claude-creative/stranger/shared-silence-og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Shared Silence">
+<meta name="twitter:description" content="A space that only exists when you're both here.">
+<meta name="twitter:image" content="https://gserafini.github.io/claude-creative/stranger/shared-silence-og.png">
+
+<link rel="icon" href="../favicon.svg" type="image/svg+xml">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0f1419;
+    min-height: 100vh;
+    overflow: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+    font-family: 'SF Mono', Menlo, Monaco, monospace;
+  }
+
+  canvas { display: block; }
+
+  #status {
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    font: 10px/1.4 'SF Mono', Menlo, Monaco, monospace;
+    color: #30363d;
+    transition: color 0.6s ease;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  #status.alone { color: #3d444d; }
+  #status.together { color: #58a6ff; }
+
+  #solo-hint {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font: 11px 'SF Mono', Menlo, Monaco, monospace;
+    color: #21262d;
+    opacity: 0;
+    transition: opacity 1s ease 0.5s;
+    pointer-events: none;
+  }
+
+  #solo-hint.show { opacity: 1; }
+
+  #url-prompt {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    font: 10px 'SF Mono', Menlo, Monaco, monospace;
+    color: #30363d;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    max-width: 400px;
+  }
+
+  #url-prompt.show { opacity: 1; }
+
+  #url-input {
+    display: none;
+    position: fixed;
+    top: 40px;
+    left: 16px;
+    width: 300px;
+    padding: 6px 8px;
+    background: #161b22;
+    border: 1px solid #30363d;
+    color: #e6edf3;
+    font: 10px 'SF Mono', Menlo, Monaco, monospace;
+    z-index: 100;
+  }
+
+  #url-input.show { display: block; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="status" class="alone">
+  <div>alone</div>
+  <div id="session-id"></div>
+</div>
+<div id="solo-hint">
+  <div>open this link in another window</div>
+  <div style="opacity: 0.6; font-size: 9px; margin-top: 8px" id="link-display"></div>
+</div>
+<div id="url-prompt">
+  <span>share this link:</span>
+  <input id="url-input" type="text" readonly>
+</div>
+
+<script>
+// ── Configuration ──────────────────────────────────────────────
+
+const HEARTBEAT_INTERVAL = 300;   // Check for other person every 300ms
+const PRESENCE_TIMEOUT = 1200;    // Consider other person gone after 1.2s
+const FADE_DURATION = 0.8;        // Seconds to fade in/out
+const DECAY_RATE = 0.98;          // Per-frame decay of other-person presence
+
+// ── URL & Session Management ──────────────────────────────────
+
+function getSessionId() {
+  const params = new URLSearchParams(window.location.search);
+  let id = params.get('s');
+  if (!id) {
+    id = Math.random().toString(36).substring(2, 11);
+    const newUrl = `${window.location.pathname}?s=${id}`;
+    window.history.replaceState({}, '', newUrl);
+  }
+  return id;
+}
+
+const SESSION_ID = getSessionId();
+const MY_KEY = `session_${SESSION_ID}_me`;
+const OTHER_KEY = `session_${SESSION_ID}_other`;
+
+document.getElementById('session-id').textContent = SESSION_ID.substring(0, 6);
+const fullUrl = window.location.href;
+document.getElementById('link-display').textContent = fullUrl;
+document.getElementById('url-input').value = fullUrl;
+
+// ── Canvas ─────────────────────────────────────────────────────
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const dpr = window.devicePixelRatio || 1;
+let W = window.innerWidth;
+let H = window.innerHeight;
+
+function sizeCanvas() {
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
+}
+
+sizeCanvas();
+window.addEventListener('resize', function() {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  sizeCanvas();
+});
+
+// ── Presence Tracking ──────────────────────────────────────────
+
+let lastOtherSeen = 0;
+let otherPresenceAlpha = 0;    // How "present" the other person feels [0-1]
+let statusElement = document.getElementById('status');
+let soloHintElement = document.getElementById('solo-hint');
+let amAlone = true;
+let frame = 0;
+
+function heartbeat() {
+  const now = Date.now();
+
+  // Announce myself
+  localStorage.setItem(MY_KEY, now.toString());
+
+  // Check for other person
+  const otherTime = localStorage.getItem(OTHER_KEY);
+  if (otherTime) {
+    const timeSinceOther = now - parseInt(otherTime);
+    if (timeSinceOther < PRESENCE_TIMEOUT) {
+      lastOtherSeen = now;
+      otherPresenceAlpha = Math.min(1, otherPresenceAlpha + 0.15);
+      amAlone = false;
+    } else {
+      otherPresenceAlpha = Math.max(0, otherPresenceAlpha - 0.05);
+      amAlone = otherPresenceAlpha < 0.1;
+    }
+  } else {
+    otherPresenceAlpha = Math.max(0, otherPresenceAlpha - 0.05);
+    amAlone = otherPresenceAlpha < 0.1;
+  }
+
+  // Update UI
+  if (amAlone) {
+    statusElement.classList.remove('together');
+    statusElement.classList.add('alone');
+    statusElement.querySelector('div:first-child').textContent = 'alone';
+    soloHintElement.classList.add('show');
+  } else {
+    statusElement.classList.add('together');
+    statusElement.classList.remove('alone');
+    statusElement.querySelector('div:first-child').textContent = 'together';
+    soloHintElement.classList.remove('show');
+  }
+}
+
+// Initial heartbeat
+heartbeat();
+setInterval(heartbeat, HEARTBEAT_INTERVAL);
+
+// ── Geometry ───────────────────────────────────────────────────
+// The landscape: ocean + horizon + paper boat
+// Left half (your view): landscape occludes at center
+// Right half (their view): landscape occludes at center
+// Only when both present: full image resolves
+
+const HORIZON_Y = H * 0.35;
+const BOAT_X = W * 0.45;
+const BOAT_Y = HORIZON_Y + H * 0.08;
+
+function drawWater(alpha) {
+  // Gradient: dark blue → dark teal
+  const grad = ctx.createLinearGradient(0, HORIZON_Y, 0, H);
+  grad.addColorStop(0, `rgba(22, 54, 84, ${alpha * 0.6})`);
+  grad.addColorStop(1, `rgba(12, 44, 66, ${alpha * 0.7})`);
+
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, HORIZON_Y, W, H - HORIZON_Y);
+
+  // Subtle ripples
+  ctx.strokeStyle = `rgba(50, 100, 140, ${alpha * 0.15})`;
+  ctx.lineWidth = 0.5;
+  for (let i = 0; i < 4; i++) {
+    const y = HORIZON_Y + (i + 1) * (H - HORIZON_Y) / 5;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(W, y);
+    ctx.stroke();
+  }
+}
+
+function drawSky(alpha) {
+  const grad = ctx.createLinearGradient(0, 0, 0, HORIZON_Y);
+  grad.addColorStop(0, `rgba(18, 40, 60, ${alpha * 0.5})`);
+  grad.addColorStop(1, `rgba(40, 70, 100, ${alpha * 0.4})`);
+
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, HORIZON_Y);
+}
+
+function drawBoat(alpha) {
+  const scale = 1 + Math.sin(frame * 0.01) * 0.05;
+
+  ctx.save();
+  ctx.translate(BOAT_X, BOAT_Y);
+  ctx.scale(scale, scale);
+
+  // Paper boat silhouette
+  ctx.fillStyle = `rgba(200, 180, 150, ${alpha * 0.7})`;
+
+  // Main hull
+  ctx.beginPath();
+  ctx.moveTo(-8, 0);
+  ctx.lineTo(8, 0);
+  ctx.lineTo(6, 3);
+  ctx.lineTo(-6, 3);
+  ctx.closePath();
+  ctx.fill();
+
+  // Sail (folded paper triangle)
+  ctx.beginPath();
+  ctx.moveTo(-2, 0);
+  ctx.lineTo(2, 0);
+  ctx.lineTo(1, -8);
+  ctx.closePath();
+  ctx.fill();
+
+  // Fold line on sail
+  ctx.strokeStyle = `rgba(200, 180, 150, ${alpha * 0.4})`;
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  ctx.moveTo(0.5, 0);
+  ctx.lineTo(0.5, -8);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawHorizon(alpha) {
+  ctx.strokeStyle = `rgba(80, 130, 160, ${alpha * 0.3})`;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, HORIZON_Y);
+  ctx.lineTo(W, HORIZON_Y);
+  ctx.stroke();
+}
+
+function drawOcclusionLeft(alpha) {
+  // Right side of canvas fades to background (their half is missing)
+  const grad = ctx.createLinearGradient(W * 0.4, 0, W, 0);
+  grad.addColorStop(0, `rgba(15, 20, 25, 0)`);
+  grad.addColorStop(1, `rgba(15, 20, 25, ${alpha * 0.7})`);
+
+  ctx.fillStyle = grad;
+  ctx.fillRect(W * 0.4, 0, W * 0.6, H);
+}
+
+function drawOcclusionRight(alpha) {
+  // Left side fades to background (my half is missing)
+  const grad = ctx.createLinearGradient(W * 0.6, 0, 0, 0);
+  grad.addColorStop(0, `rgba(15, 20, 25, 0)`);
+  grad.addColorStop(1, `rgba(15, 20, 25, ${alpha * 0.7})`);
+
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W * 0.6, H);
+}
+
+// ── Text: The Invitation ───────────────────────────────────────
+
+function drawText(alpha) {
+  const lines = [
+    "a window at the bottom of the ocean",
+    "",
+    "you can only see half",
+    "i can only see half",
+    "",
+    "but when we're both here,",
+    "the whole depth resolves"
+  ];
+
+  ctx.font = `12px 'SF Mono', Menlo, Monaco, monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  const startY = H * 0.15;
+  const lineHeight = 18;
+
+  lines.forEach((line, idx) => {
+    const y = startY + idx * lineHeight;
+    ctx.fillStyle = `rgba(232, 234, 237, ${alpha * 0.6})`;
+    ctx.fillText(line, W / 2, y);
+  });
+}
+
+// ── Render ─────────────────────────────────────────────────────
+
+function render() {
+  frame++;
+
+  // Clear
+  ctx.fillStyle = '#0f1419';
+  ctx.fillRect(0, 0, W, H);
+
+  // Base scenery always renders (with reduced alpha when alone)
+  const baseAlpha = 1 - (1 - otherPresenceAlpha) * 0.3;  // Min 0.7 when alone
+
+  drawSky(baseAlpha);
+  drawWater(baseAlpha);
+  drawBoat(baseAlpha);
+  drawHorizon(baseAlpha);
+
+  // Text strengthens as both are present
+  drawText(otherPresenceAlpha * 0.8 + 0.2);
+
+  // Occlusions: fade out as other person becomes present
+  const occlusionAlpha = 1 - otherPresenceAlpha;
+  drawOcclusionLeft(occlusionAlpha);
+  drawOcclusionRight(occlusionAlpha);
+
+  // Edge highlight when together
+  if (otherPresenceAlpha > 0.3) {
+    const grad = ctx.createLinearGradient(W * 0.45, 0, W * 0.55, 0);
+    grad.addColorStop(0, `rgba(88, 166, 255, 0)`);
+    grad.addColorStop(0.5, `rgba(88, 166, 255, ${otherPresenceAlpha * 0.15})`);
+    grad.addColorStop(1, `rgba(88, 166, 255, 0)`);
+    ctx.fillStyle = grad;
+    ctx.fillRect(W * 0.45, 0, W * 0.1, H);
+  }
+
+  requestAnimationFrame(render);
+}
+
+render();
+
+// ── Click to share ─────────────────────────────────────────────
+
+document.addEventListener('click', function() {
+  const urlPrompt = document.getElementById('url-prompt');
+  const urlInput = document.getElementById('url-input');
+
+  if (urlPrompt.classList.contains('show')) {
+    urlPrompt.classList.remove('show');
+    urlInput.classList.remove('show');
+  } else {
+    urlPrompt.classList.add('show');
+    urlInput.classList.add('show');
+    urlInput.select();
+  }
+});
+
+// Clean up on unload
+window.addEventListener('beforeunload', function() {
+  localStorage.removeItem(MY_KEY);
+});
+
+</script>
+</body>
+</html>

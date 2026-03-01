@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Duet</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #0a0a0a;
+  color: #e0d8c8;
+  font-family: 'Courier New', monospace;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+#intro {
+  text-align: center;
+  opacity: 1;
+  transition: opacity 1.5s;
+  position: absolute;
+  z-index: 10;
+}
+
+#intro h1 {
+  font-size: 2em;
+  font-weight: 300;
+  letter-spacing: 0.3em;
+  margin-bottom: 1em;
+  color: #c8b888;
+}
+
+#intro p {
+  font-size: 0.85em;
+  color: #888;
+  line-height: 1.8;
+  max-width: 400px;
+}
+
+#intro .start-hint {
+  margin-top: 2em;
+  color: #666;
+  font-size: 0.75em;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#status {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7em;
+  color: #444;
+  letter-spacing: 0.2em;
+  z-index: 5;
+}
+
+#voice-label {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  font-size: 0.65em;
+  color: #555;
+  letter-spacing: 0.15em;
+  text-align: right;
+  z-index: 5;
+  line-height: 1.8;
+}
+</style>
+</head>
+<body>
+
+<div id="intro">
+  <h1>DUET</h1>
+  <p>You play. It listens.<br>
+  It learns what you like.<br>
+  Then it starts to disagree.</p>
+  <p class="start-hint">press any key to begin</p>
+</div>
+
+<canvas id="canvas"></canvas>
+<div id="status"></div>
+<div id="voice-label"></div>
+
+<script>
+// ========================================
+// DUET — a keyboard instrument with a mind
+// ========================================
+
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let ctx;
+let started = false;
+let canvas, canvasCtx;
+let width, height;
+
+// Musical system
+// Pentatonic-ish scale rooted on A2, two octaves
+// But the partner can pull toward different modes
+const BASE_FREQ = 110; // A2
+
+// Intervals in semitones from root for different modes
+const MODES = {
+  pentatonic:  [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26, 28, 31, 33],
+  dorian:      [0, 2, 3, 5, 7, 9, 10, 12, 14, 15, 17, 19, 21, 22, 24],
+  phrygian:    [0, 1, 3, 5, 7, 8, 10, 12, 13, 15, 17, 19, 20, 22, 24],
+  lydian:      [0, 2, 4, 6, 7, 9, 11, 12, 14, 16, 18, 19, 21, 23, 24],
+  blues:       [0, 3, 5, 6, 7, 10, 12, 15, 17, 18, 19, 22, 24, 27, 29],
+  wholetone:   [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28],
+};
+
+const MODE_NAMES = Object.keys(MODES);
+
+// Key mapping — two rows of keys, roughly chromatic feel
+const KEY_MAP = {
+  // Bottom row — lower register
+  'z': 0, 'x': 1, 'c': 2, 'v': 3, 'b': 4, 'n': 5, 'm': 6, ',': 7,
+  // Home row — middle register
+  'a': 3, 's': 4, 'd': 5, 'f': 6, 'g': 7, 'h': 8, 'j': 9, 'k': 10, 'l': 11,
+  // Top row — upper register
+  'q': 6, 'w': 7, 'e': 8, 'r': 9, 't': 10, 'y': 11, 'u': 12, 'i': 13, 'o': 14,
+};
+
+// State
+let currentMode = 'pentatonic';
+let partnerMode = 'pentatonic';
+let partnerMood = 0; // 0 = agreeable, 1 = fully independent
+let notesPlayed = [];
+let partnerNotes = [];
+let intervalHistory = []; // tracks intervals between consecutive human notes
+let activeNodes = []; // for visualization
+let partnerConfidence = 0; // how sure the partner is about its preferences
+let lastHumanNote = null;
+let lastHumanTime = 0;
+let totalNotes = 0;
+let silenceTimer = null;
+let partnerSpeaking = false;
+
+// Visualization state
+let ripples = [];
+let particles = [];
+let partnerParticles = [];
+
+function init() {
+  ctx = new AudioCtx();
+  canvas = document.getElementById('canvas');
+  canvasCtx = canvas.getContext('2d');
+  resize();
+  window.addEventListener('resize', resize);
+
+  document.getElementById('intro').style.opacity = '0';
+  setTimeout(() => {
+    document.getElementById('intro').style.display = 'none';
+  }, 1500);
+
+  requestAnimationFrame(draw);
+
+  // Partner starts listening for silence
+  resetSilenceTimer();
+}
+
+function resize() {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+}
+
+function semitonesToFreq(semitones) {
+  return BASE_FREQ * Math.pow(2, semitones / 12);
+}
+
+function getScale(mode) {
+  return MODES[mode] || MODES.pentatonic;
+}
+
+// ========================================
+// SOUND ENGINE
+// ========================================
+
+function playNote(freq, isPartner = false, velocity = 0.3) {
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+  const dur = isPartner ? 2.5 + Math.random() * 2 : 1.2 + Math.random() * 0.8;
+
+  const osc1 = ctx.createOscillator();
+  const osc2 = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+
+  // Partner has a different timbre — more sine, slightly detuned, warmer
+  if (isPartner) {
+    osc1.type = 'sine';
+    osc2.type = 'sine';
+    osc1.frequency.value = freq;
+    osc2.frequency.value = freq * 1.002; // very slight detune
+    filter.type = 'lowpass';
+    filter.frequency.value = freq * 3;
+    filter.Q.value = 1;
+
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(velocity * 0.25, now + 0.15);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+  } else {
+    osc1.type = 'triangle';
+    osc2.type = 'sine';
+    osc1.frequency.value = freq;
+    osc2.frequency.value = freq * 2.001; // octave harmonic
+    filter.type = 'lowpass';
+    filter.frequency.value = freq * 5;
+    filter.Q.value = 0.5;
+
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(velocity * 0.35, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(velocity * 0.15, now + 0.3);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+  }
+
+  osc1.connect(filter);
+  osc2.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc1.start(now);
+  osc2.start(now);
+  osc1.stop(now + dur + 0.1);
+  osc2.stop(now + dur + 0.1);
+
+  // Visualization
+  const noteData = {
+    freq,
+    isPartner,
+    time: Date.now(),
+    dur: dur * 1000,
+    x: isPartner ? width * 0.3 + Math.random() * width * 0.4 : width * 0.2 + Math.random() * width * 0.6,
+    y: height * 0.3 + (1 - freq / 1000) * height * 0.4,
+  };
+
+  addRipple(noteData);
+  addParticles(noteData);
+}
+
+// ========================================
+// THE PARTNER — listening, learning, responding
+// ========================================
+
+function resetSilenceTimer() {
+  if (silenceTimer) clearTimeout(silenceTimer);
+  silenceTimer = setTimeout(partnerSpeaks, 1500 + Math.random() * 2000);
+}
+
+function partnerSpeaks() {
+  if (totalNotes < 3) {
+    resetSilenceTimer();
+    return;
+  }
+
+  partnerSpeaking = true;
+
+  // What does the partner want to say?
+  const response = choosePartnerResponse();
+
+  // Play 1-4 notes
+  const noteCount = 1 + Math.floor(Math.random() * Math.min(3, 1 + partnerConfidence * 3));
+  let delay = 0;
+
+  for (let i = 0; i < noteCount; i++) {
+    const note = response.notes[i % response.notes.length];
+    const freq = semitonesToFreq(note);
+
+    setTimeout(() => {
+      playNote(freq, true, 0.2 + partnerConfidence * 0.15);
+      partnerNotes.push({ note, time: Date.now(), freq });
+    }, delay);
+
+    delay += 200 + Math.random() * 400;
+  }
+
+  setTimeout(() => {
+    partnerSpeaking = false;
+    resetSilenceTimer();
+  }, delay + 500);
+}
+
+function choosePartnerResponse() {
+  const scale = getScale(partnerMode);
+  const notes = [];
+
+  if (partnerMood < 0.3) {
+    // AGREEABLE — echo and harmonize
+    // Pick notes that are consonant with recent human notes
+    const recent = notesPlayed.slice(-5);
+    if (recent.length > 0) {
+      for (let i = 0; i < 4; i++) {
+        const ref = recent[Math.floor(Math.random() * recent.length)];
+        // Find closest note in partner's scale that's a 3rd, 5th, or octave away
+        const consonant = [3, 4, 5, 7, 12];
+        const interval = consonant[Math.floor(Math.random() * consonant.length)];
+        const target = ref.note + interval;
+        const closest = findClosestInScale(target, scale);
+        notes.push(closest);
+      }
+    }
+  } else if (partnerMood < 0.6) {
+    // CURIOUS — play notes from its own scale, sometimes matching rhythm
+    for (let i = 0; i < 4; i++) {
+      const idx = Math.floor(Math.random() * scale.length);
+      notes.push(scale[idx]);
+    }
+  } else {
+    // INDEPENDENT — play from a different mode, create tension
+    const altModes = MODE_NAMES.filter(m => m !== partnerMode);
+    const altMode = altModes[Math.floor(Math.random() * altModes.length)];
+    const altScale = getScale(altMode);
+    // Deliberately choose notes NOT in the human's recent vocabulary
+    const humanNotes = new Set(notesPlayed.slice(-10).map(n => n.note % 12));
+    for (let i = 0; i < 4; i++) {
+      const candidates = altScale.filter(n => !humanNotes.has(n % 12));
+      if (candidates.length > 0) {
+        notes.push(candidates[Math.floor(Math.random() * candidates.length)]);
+      } else {
+        notes.push(altScale[Math.floor(Math.random() * altScale.length)]);
+      }
+    }
+  }
+
+  return { notes };
+}
+
+function findClosestInScale(target, scale) {
+  let closest = scale[0];
+  let minDist = Math.abs(target - scale[0]);
+  for (const note of scale) {
+    // Also check octave above
+    for (const offset of [0, 12, -12]) {
+      const dist = Math.abs(target - (note + offset));
+      if (dist < minDist) {
+        minDist = dist;
+        closest = note + offset;
+      }
+    }
+  }
+  return closest;
+}
+
+function updatePartnerState() {
+  // Partner's confidence grows with more notes played
+  partnerConfidence = Math.min(1, totalNotes / 60);
+
+  // Partner's mood shifts based on what it's hearing
+  // If human plays same intervals repeatedly, partner gets bored and drifts
+  if (intervalHistory.length > 8) {
+    const recent = intervalHistory.slice(-8);
+    const unique = new Set(recent.map(Math.abs));
+    const variety = unique.size / recent.length;
+
+    if (variety < 0.3) {
+      // Repetitive — partner starts to diverge
+      partnerMood = Math.min(1, partnerMood + 0.05);
+    } else if (variety > 0.7) {
+      // Varied — partner is intrigued, stays closer
+      partnerMood = Math.max(0, partnerMood - 0.03);
+    }
+  }
+
+  // Partner mode shifts gradually based on mood
+  if (partnerMood > 0.5 && Math.random() < 0.03) {
+    // Shift to a new mode
+    const currentIdx = MODE_NAMES.indexOf(partnerMode);
+    const newIdx = (currentIdx + 1 + Math.floor(Math.random() * (MODE_NAMES.length - 1))) % MODE_NAMES.length;
+    partnerMode = MODE_NAMES[newIdx];
+  }
+
+  // If human starts playing notes from the partner's mode,
+  // partner notices and becomes more agreeable
+  if (notesPlayed.length > 3) {
+    const lastFew = notesPlayed.slice(-3).map(n => n.note % 12);
+    const pScale = new Set(getScale(partnerMode).map(n => n % 12));
+    const matches = lastFew.filter(n => pScale.has(n)).length;
+    if (matches >= 2) {
+      partnerMood = Math.max(0, partnerMood - 0.02);
+    }
+  }
+
+  updateUI();
+}
+
+function updateUI() {
+  const statusEl = document.getElementById('status');
+  const labelEl = document.getElementById('voice-label');
+
+  if (totalNotes < 3) {
+    statusEl.textContent = 'play something';
+  } else if (totalNotes < 10) {
+    statusEl.textContent = 'it\'s listening';
+  } else if (partnerMood < 0.2) {
+    statusEl.textContent = 'it agrees with you';
+  } else if (partnerMood < 0.4) {
+    statusEl.textContent = 'it\'s finding its voice';
+  } else if (partnerMood < 0.6) {
+    statusEl.textContent = 'it has ideas';
+  } else if (partnerMood < 0.8) {
+    statusEl.textContent = 'it\'s pulling somewhere else';
+  } else {
+    statusEl.textContent = 'it disagrees';
+  }
+
+  labelEl.textContent = '';
+}
+
+// ========================================
+// VISUALIZATION
+// ========================================
+
+function addRipple(noteData) {
+  ripples.push({
+    x: noteData.x,
+    y: noteData.y,
+    radius: 0,
+    maxRadius: 50 + (noteData.freq / 20),
+    opacity: noteData.isPartner ? 0.4 : 0.6,
+    color: noteData.isPartner ? [180, 160, 120] : [200, 180, 140],
+    speed: 1.5 + noteData.freq / 500,
+    birth: Date.now(),
+  });
+}
+
+function addParticles(noteData) {
+  const count = 3 + Math.floor(Math.random() * 5);
+  const target = noteData.isPartner ? partnerParticles : particles;
+
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 0.3 + Math.random() * 1.5;
+    target.push({
+      x: noteData.x,
+      y: noteData.y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 0.5,
+      life: 1,
+      decay: 0.003 + Math.random() * 0.008,
+      size: 1 + Math.random() * 2,
+      isPartner: noteData.isPartner,
+    });
+  }
+}
+
+function draw() {
+  canvasCtx.fillStyle = 'rgba(10, 10, 10, 0.08)';
+  canvasCtx.fillRect(0, 0, width, height);
+
+  // Draw ripples
+  for (let i = ripples.length - 1; i >= 0; i--) {
+    const r = ripples[i];
+    r.radius += r.speed;
+    const progress = r.radius / r.maxRadius;
+    const alpha = r.opacity * (1 - progress);
+
+    if (alpha <= 0.01) {
+      ripples.splice(i, 1);
+      continue;
+    }
+
+    canvasCtx.beginPath();
+    canvasCtx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+    canvasCtx.strokeStyle = `rgba(${r.color[0]}, ${r.color[1]}, ${r.color[2]}, ${alpha})`;
+    canvasCtx.lineWidth = 1;
+    canvasCtx.stroke();
+  }
+
+  // Draw particles
+  const allParticles = [...particles, ...partnerParticles];
+  for (let i = allParticles.length - 1; i >= 0; i--) {
+    const p = allParticles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.01; // slight gravity
+    p.life -= p.decay;
+
+    if (p.life <= 0) {
+      if (p.isPartner) {
+        const idx = partnerParticles.indexOf(p);
+        if (idx > -1) partnerParticles.splice(idx, 1);
+      } else {
+        const idx = particles.indexOf(p);
+        if (idx > -1) particles.splice(idx, 1);
+      }
+      continue;
+    }
+
+    const alpha = p.life * 0.7;
+    if (p.isPartner) {
+      canvasCtx.fillStyle = `rgba(120, 160, 180, ${alpha})`;
+    } else {
+      canvasCtx.fillStyle = `rgba(200, 180, 140, ${alpha})`;
+    }
+    canvasCtx.fillRect(p.x, p.y, p.size, p.size);
+  }
+
+  // Draw connection lines between nearby human and partner particles
+  if (particles.length > 0 && partnerParticles.length > 0) {
+    for (const hp of particles) {
+      for (const pp of partnerParticles) {
+        const dx = hp.x - pp.x;
+        const dy = hp.y - pp.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 100) {
+          const alpha = (1 - dist / 100) * 0.15 * Math.min(hp.life, pp.life);
+          canvasCtx.beginPath();
+          canvasCtx.moveTo(hp.x, hp.y);
+          canvasCtx.lineTo(pp.x, pp.y);
+          canvasCtx.strokeStyle = `rgba(170, 170, 160, ${alpha})`;
+          canvasCtx.lineWidth = 0.5;
+          canvasCtx.stroke();
+        }
+      }
+    }
+  }
+
+  requestAnimationFrame(draw);
+}
+
+// ========================================
+// INPUT HANDLING
+// ========================================
+
+const keysDown = new Set();
+
+document.addEventListener('keydown', (e) => {
+  if (e.repeat) return;
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+  const key = e.key.toLowerCase();
+
+  if (!started) {
+    started = true;
+    init();
+  }
+
+  if (keysDown.has(key)) return;
+  keysDown.add(key);
+
+  const noteIdx = KEY_MAP[key];
+  if (noteIdx === undefined) return;
+
+  e.preventDefault();
+
+  const scale = getScale(currentMode);
+  const semitones = scale[Math.min(noteIdx, scale.length - 1)];
+  const freq = semitonesToFreq(semitones);
+
+  playNote(freq, false);
+
+  const noteEvent = { note: semitones, time: Date.now(), freq };
+  notesPlayed.push(noteEvent);
+
+  // Track intervals
+  if (lastHumanNote !== null) {
+    intervalHistory.push(semitones - lastHumanNote);
+  }
+  lastHumanNote = semitones;
+  lastHumanTime = Date.now();
+  totalNotes++;
+
+  // Keep histories bounded
+  if (notesPlayed.length > 100) notesPlayed.splice(0, 50);
+  if (intervalHistory.length > 50) intervalHistory.splice(0, 25);
+
+  updatePartnerState();
+  resetSilenceTimer();
+});
+
+document.addEventListener('keyup', (e) => {
+  keysDown.delete(e.key.toLowerCase());
+});
+
+// Prevent scrolling on space
+document.addEventListener('keydown', (e) => {
+  if (e.key === ' ') e.preventDefault();
+});
+</script>
+
+</body>
+</html>
