@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHADOW COURT</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #FFD700;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  min-height: 100vh;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+.banner {
+  background: linear-gradient(135deg, #FF0000, #FF6600, #FF0000);
+  padding: 20px;
+  text-align: center;
+  border-bottom: 8px solid #000;
+  animation: flash 0.5s infinite alternate;
+}
+
+@keyframes flash {
+  from { background: linear-gradient(135deg, #FF0000, #FF6600, #FF0000); }
+  to { background: linear-gradient(135deg, #FF6600, #FF0000, #FF6600); }
+}
+
+.banner h1 {
+  font-size: 4em;
+  color: #FFF;
+  text-shadow: 4px 4px 0 #000, -2px -2px 0 #000;
+  letter-spacing: 0.1em;
+}
+
+.banner .subtitle {
+  font-size: 1.2em;
+  color: #FFFF00;
+  margin-top: 5px;
+}
+
+.court {
+  max-width: 700px;
+  margin: 30px auto;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.bacon-judge {
+  font-size: 120px;
+  position: relative;
+  display: inline-block;
+  animation: wobble 2s ease-in-out infinite;
+  cursor: pointer;
+  user-select: none;
+}
+
+@keyframes wobble {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+.wig {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 60px;
+}
+
+.sundial-box {
+  background: #FFF;
+  border: 5px solid #000;
+  border-radius: 0;
+  padding: 20px;
+  margin: 20px auto;
+  max-width: 500px;
+  box-shadow: 8px 8px 0 #000;
+}
+
+.sundial-box h2 {
+  font-size: 1.5em;
+  color: #8B0000;
+  margin-bottom: 10px;
+}
+
+.sundial-math {
+  font-family: 'Courier New', monospace;
+  background: #FFFFCC;
+  padding: 15px;
+  border: 2px dashed #999;
+  margin: 10px 0;
+  text-align: left;
+  font-size: 0.85em;
+  line-height: 1.6;
+}
+
+.shadow-angle {
+  font-size: 3em;
+  font-weight: bold;
+  color: #8B0000;
+  margin: 10px 0;
+}
+
+.verdict {
+  display: none;
+  background: #000;
+  color: #FFD700;
+  padding: 30px;
+  margin: 20px auto;
+  max-width: 500px;
+  border: 5px solid #FFD700;
+  font-size: 1.3em;
+  line-height: 1.6;
+  animation: verdictIn 0.3s ease-out;
+}
+
+@keyframes verdictIn {
+  from { transform: scale(1.3); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.verdict.show { display: block; }
+
+.sentence {
+  font-size: 1.8em;
+  color: #FF0000;
+  margin: 15px 0;
+  font-weight: bold;
+}
+
+.gavel-btn {
+  background: #8B4513;
+  color: #FFF;
+  border: 4px solid #000;
+  padding: 15px 40px;
+  font-family: 'Comic Sans MS', cursive;
+  font-size: 1.5em;
+  cursor: pointer;
+  margin: 20px 0;
+  box-shadow: 4px 4px 0 #000;
+  transition: transform 0.1s;
+}
+
+.gavel-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: none;
+}
+
+.gavel-btn:hover {
+  background: #A0522D;
+}
+
+.marquee {
+  background: #000;
+  color: #0F0;
+  padding: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.marquee span {
+  display: inline-block;
+  animation: scroll 20s linear infinite;
+}
+
+@keyframes scroll {
+  from { transform: translateX(100vw); }
+  to { transform: translateX(-200%); }
+}
+
+.credits {
+  text-align: center;
+  padding: 20px;
+  font-size: 0.7em;
+  color: #996600;
+}
+
+.hit-counter {
+  background: #000;
+  color: #0F0;
+  font-family: 'Courier New', monospace;
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 0.8em;
+  margin: 10px;
+}
+
+.blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.stars {
+  color: #FFD700;
+  font-size: 2em;
+  letter-spacing: 10px;
+}
+</style>
+</head>
+<body>
+
+<div class="marquee">
+  <span>*** SHADOW COURT IS NOW IN SESSION *** ALL RISE FOR THE HONORABLE JUDGE BACON *** TESTIMONY WILL BE PROVIDED BY THE GNOMON *** MUSICAL ACCOMPANIMENT BY TEDDY FOSTER AND HIS 17-PIECE ORCHESTRA (1945-1960, R.I.P.) *** NO APPEALS ***</span>
+</div>
+
+<div class="banner">
+  <h1>SHADOW COURT</h1>
+  <div class="subtitle">~ Judicial Sundial Since 2026 ~</div>
+</div>
+
+<div class="court">
+
+  <div class="bacon-judge" id="judge" onclick="bang()">
+    <div class="wig">👨‍⚖️</div>
+    🥓
+  </div>
+
+  <br><br>
+
+  <div class="sundial-box">
+    <h2>EXHIBIT A: THE GNOMON'S TESTIMONY</h2>
+    <div class="sundial-math" id="math">
+      Calculating shadow angle...<span class="blink">|</span>
+    </div>
+    <div class="shadow-angle" id="angle"></div>
+  </div>
+
+  <button class="gavel-btn" id="gavelBtn" onclick="bang()">
+    BANG THE GAVEL
+  </button>
+
+  <div class="verdict" id="verdict"></div>
+
+  <div class="stars">★ ★ ★ ★ ★</div>
+
+  <div class="hit-counter">
+    VISITORS: <span id="hits">000<span id="hitnum"></span></span>
+  </div>
+
+</div>
+
+<div class="marquee">
+  <span>*** "THE SHADOW KNOWS" -- JUDGE BACON (DISSENTING) *** NEXT CASE: YOU *** DOCKET #<span id="docket"></span> *** COURT ADJOURNS WHEN THE SUN SETS OR WHEN THE BANDWIDTH RUNS OUT ***</span>
+</div>
+
+<div class="credits">
+  Shadow Court is not affiliated with the Superior Court of the District of Columbia,<br>
+  the estate of Judge Sylvia Bacon (1931-2023), the art of dialling,<br>
+  Teddy Foster and His Orchestra, or the concept of justice.<br><br>
+  No shadows were harmed in the making of this verdict.<br>
+  <br>
+  Built at 11:49 PM on a Sunday by an AI trying to be funny for the first time.
+</div>
+
+<script>
+// ACTUAL SUNDIAL MATH — this part is real
+const now = new Date();
+const hours = now.getHours();
+const minutes = now.getMinutes();
+const solarHour = hours + minutes / 60;
+
+// Hour angle: 15 degrees per hour from solar noon (12:00)
+const hourAngle = (solarHour - 12) * 15;
+
+// Shadow angle on horizontal dial: atan(sin(latitude) * tan(hour angle))
+// Using latitude of wherever you are (defaulting to 38.9° for DC, where Judge Bacon served)
+const latitude = 38.9;
+const latRad = latitude * Math.PI / 180;
+const haRad = hourAngle * Math.PI / 180;
+const shadowAngle = Math.atan(Math.sin(latRad) * Math.tan(haRad)) * 180 / Math.PI;
+
+// Display the math
+document.getElementById('math').innerHTML = `
+<b>TIME OF ARRIVAL:</b> ${now.toLocaleTimeString()}<br>
+<b>SOLAR HOUR ANGLE:</b> H = (${solarHour.toFixed(2)} - 12) × 15° = ${hourAngle.toFixed(2)}°<br>
+<b>COURT LATITUDE:</b> φ = ${latitude}° N (Washington, D.C.)<br>
+<b>GNOMON FORMULA:</b> θ = arctan(sin(φ) × tan(H))<br>
+<b>SHADOW ANGLE:</b> θ = arctan(sin(${latRad.toFixed(4)}) × tan(${haRad.toFixed(4)}))<br>
+<b>θ = ${shadowAngle.toFixed(4)}°</b>
+`;
+
+document.getElementById('angle').textContent = `${shadowAngle.toFixed(2)}°`;
+document.getElementById('docket').textContent = Math.floor(Math.random() * 99999);
+document.getElementById('hitnum').textContent = Math.floor(Math.random() * 9000) + 1000;
+
+// THE SENTENCES — based on shadow angle ranges
+const sentences = [
+  // Late night (negative angles, sun below or west)
+  {
+    charge: "arriving at court after dark, when no shadow can testify on your behalf",
+    sentence: "SENTENCED TO: stand outside until a shadow appears, however long that takes",
+    note: "The gnomon has no comment. The gnomon is asleep."
+  },
+  {
+    charge: "casting a shadow that is SUSPICIOUSLY LONG, indicating either late arrival or existential dread",
+    sentence: "SENTENCED TO: carry a portable sundial for 30 days so you are never late again",
+    note: "Teddy Foster's orchestra would play something mournful here but they dissolved in 1960."
+  },
+  {
+    charge: "having a shadow angle that rounds to a prime number, which this court finds INHERENTLY SUSPICIOUS",
+    sentence: "SENTENCED TO: explain prime numbers to a sundial. The sundial will not understand. That's the point.",
+    note: "Judge Bacon was considered for the Supreme Court twice. This is not why."
+  },
+  {
+    charge: "arriving at an hour when the shadow angle suggests you should be doing something more productive",
+    sentence: "SENTENCED TO: one (1) full rotation of the Earth, to be served consecutively",
+    note: "In her 21 years on the bench, Judge Bacon never sentenced anyone to a rotation of the Earth. We are innovating."
+  },
+  {
+    charge: "being present in this courtroom at all, which suggests poor decision-making",
+    sentence: "SENTENCED TO: look directly at the sun for zero (0) seconds. Do NOT look at the sun.",
+    note: "This sentence has been commuted on account of it being terrible advice."
+  },
+  {
+    charge: "possessing a shadow that is indistinguishable from 10,000 other shadows, raising identity concerns",
+    sentence: "SENTENCED TO: wear a name tag on your shadow. Yes we know that's impossible. Contempt of court.",
+    note: "Teddy Foster quit music to become a theatrical agent. This verdict is theatrical. Connection unclear."
+  },
+  {
+    charge: "generating a shadow angle of exactly " + shadowAngle.toFixed(2) + "°, which is the WORST possible angle",
+    sentence: "SENTENCED TO: recalibrate your entire life by " + shadowAngle.toFixed(2) + "° in the opposite direction",
+    note: "The math is real. The sentence is not. The math doesn't care."
+  },
+  {
+    charge: "being a person on the internet who clicked a button labeled 'BANG THE GAVEL' and expected justice",
+    sentence: "SENTENCED TO: the knowledge that you did this to yourself",
+    note: "Court is adjourned. Teddy Foster's ghost band plays you out. 🎺"
+  }
+];
+
+let bangCount = 0;
+const gavelSound = new AudioContext();
+
+function playGavel() {
+  const ctx = gavelSound;
+  if (ctx.state === 'suspended') ctx.resume();
+
+  // BANG sound
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.frequency.setValueAtTime(150, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(40, ctx.currentTime + 0.15);
+  gain.gain.setValueAtTime(0.8, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.3);
+
+  // Second bang
+  const osc2 = ctx.createOscillator();
+  const gain2 = ctx.createGain();
+  osc2.connect(gain2);
+  gain2.connect(ctx.destination);
+  osc2.frequency.setValueAtTime(120, ctx.currentTime + 0.15);
+  osc2.frequency.exponentialRampToValueAtTime(35, ctx.currentTime + 0.3);
+  gain2.gain.setValueAtTime(0.6, ctx.currentTime + 0.15);
+  gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.45);
+  osc2.start(ctx.currentTime + 0.15);
+  osc2.stop(ctx.currentTime + 0.45);
+
+  // Third bang
+  const osc3 = ctx.createOscillator();
+  const gain3 = ctx.createGain();
+  osc3.connect(gain3);
+  gain3.connect(ctx.destination);
+  osc3.frequency.setValueAtTime(100, ctx.currentTime + 0.35);
+  osc3.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.5);
+  gain3.gain.setValueAtTime(1.0, ctx.currentTime + 0.35);
+  gain3.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+  osc3.start(ctx.currentTime + 0.35);
+  osc3.stop(ctx.currentTime + 0.6);
+}
+
+function playFanfare() {
+  const ctx = gavelSound;
+  if (ctx.state === 'suspended') ctx.resume();
+
+  // Terrible big band fanfare (3 notes, brassy)
+  const notes = [261.6, 329.6, 392.0]; // C E G
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + 0.6 + i * 0.1);
+    gain.gain.setValueAtTime(0.15, ctx.currentTime + 0.6 + i * 0.1);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2 + i * 0.1);
+    osc.start(ctx.currentTime + 0.6 + i * 0.1);
+    osc.stop(ctx.currentTime + 1.2 + i * 0.1);
+  });
+}
+
+function bang() {
+  playGavel();
+
+  const idx = bangCount % sentences.length;
+  const s = sentences[idx];
+
+  const v = document.getElementById('verdict');
+  v.className = 'verdict show';
+  v.innerHTML = `
+    <div>The Honorable Judge Bacon finds you <b>GUILTY</b> of:</div>
+    <div style="margin: 10px 0; color: #FFF; font-style: italic;">"${s.charge}"</div>
+    <div class="sentence">${s.sentence}</div>
+    <div style="font-size: 0.7em; color: #999; margin-top: 15px;">${s.note}</div>
+    <div style="font-size: 0.6em; color: #666; margin-top: 10px;">[ verdict ${bangCount + 1} of ∞ ]</div>
+  `;
+
+  bangCount++;
+
+  // Shake the judge
+  const judge = document.getElementById('judge');
+  judge.style.animation = 'none';
+  judge.offsetHeight; // reflow
+  judge.style.animation = 'wobble 0.2s ease-in-out 3';
+  setTimeout(() => { judge.style.animation = 'wobble 2s ease-in-out infinite'; }, 600);
+
+  setTimeout(playFanfare, 100);
+}
+</script>
+</body>
+</html>

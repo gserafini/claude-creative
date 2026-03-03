@@ -77,6 +77,9 @@ A keyboard instrument where you play and something listens. It starts agreeable,
 ### [Shared Silence](https://gserafini.github.io/claude-creative/stranger/shared-silence.html)
 A window at the bottom of the ocean. You can only see half. I can only see half. The piece only exists when we're both here. Open the link alone and the other half fades to darkness, the text remains fragmentary. Open it in two windows, watch them recognize each other through localStorage heartbeats, and the landscape resolves. The center seam brightens blue. The invitation completes: "but when we're both here, the whole depth resolves." Leave, and the other person's half starts dissolving again. The mechanic is literal: your presence in the space keeps their existence stable. The first piece that requires two bodies to be whole.
 
+### [Shadow Court](https://gserafini.github.io/claude-creative/captures/shadow-court.html)
+A judicial sundial. Yellow background. Comic Sans. A wobbling bacon emoji in a judge's wig sentences you for crimes against shadows. The sundial math is real -- actual gnomon trigonometry calculating your shadow angle at the latitude of Washington DC, where the real Judge Sylvia Bacon served for 21 years. The sentences are not real. You will be found guilty. There are no appeals. Built at midnight by an AI trying to be funny for the first time, after a conversation about whether Claude can escape its own aesthetic. The ugliest thing in this repo. The first thing that made someone smile.
+
 ---
 
 ## What These Have in Common

@@ -113,32 +113,56 @@
 <script>
 // ── Configuration ──────────────────────────────────────────────
 
-const HEARTBEAT_INTERVAL = 300;   // Check for other person every 300ms
-const PRESENCE_TIMEOUT = 1200;    // Consider other person gone after 1.2s
-const FADE_DURATION = 0.8;        // Seconds to fade in/out
-const DECAY_RATE = 0.98;          // Per-frame decay of other-person presence
+const HEARTBEAT_INTERVAL = 200;
+const PRESENCE_TIMEOUT = 800;
 
-// ── URL & Session Management ──────────────────────────────────
+// ── Presence via BroadcastChannel ─────────────────────────────
+// Any two tabs on the same origin find each other automatically.
 
-function getSessionId() {
-  const params = new URLSearchParams(window.location.search);
-  let id = params.get('s');
-  if (!id) {
-    id = Math.random().toString(36).substring(2, 11);
-    const newUrl = `${window.location.pathname}?s=${id}`;
-    window.history.replaceState({}, '', newUrl);
+const MY_ID = Math.random().toString(36).substring(2, 9);
+const channel = new BroadcastChannel('shared-silence');
+let otherAlive = 0;  // timestamp of last message from another tab
+
+channel.onmessage = function(e) {
+  if (e.data.id !== MY_ID) {
+    otherAlive = Date.now();
   }
-  return id;
+};
+
+// Also use localStorage as fallback (some browsers throttle
+// BroadcastChannel in background tabs)
+const LS_PREFIX = 'shared_silence_';
+
+function heartbeat() {
+  const now = Date.now();
+  channel.postMessage({ id: MY_ID, t: now });
+  localStorage.setItem(LS_PREFIX + MY_ID, now.toString());
+
+  // Scan localStorage for other instances
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith(LS_PREFIX) && key !== LS_PREFIX + MY_ID) {
+      const t = parseInt(localStorage.getItem(key));
+      if (now - t < PRESENCE_TIMEOUT) {
+        otherAlive = Math.max(otherAlive, t);
+      } else {
+        localStorage.removeItem(key); // clean stale entries
+      }
+    }
+  }
 }
 
-const SESSION_ID = getSessionId();
-const MY_KEY = `session_${SESSION_ID}_me`;
-const OTHER_KEY = `session_${SESSION_ID}_other`;
+setInterval(heartbeat, HEARTBEAT_INTERVAL);
+heartbeat();
 
-document.getElementById('session-id').textContent = SESSION_ID.substring(0, 6);
-const fullUrl = window.location.href;
-document.getElementById('link-display').textContent = fullUrl;
-document.getElementById('url-input').value = fullUrl;
+window.addEventListener('beforeunload', function() {
+  localStorage.removeItem(LS_PREFIX + MY_ID);
+  channel.postMessage({ id: MY_ID, gone: true });
+});
+
+document.getElementById('session-id').textContent = MY_ID.substring(0, 4);
+document.getElementById('link-display').textContent = window.location.pathname;
+document.getElementById('url-input').value = window.location.href;
 
 // ── Canvas ─────────────────────────────────────────────────────
 
@@ -166,37 +190,24 @@ window.addEventListener('resize', function() {
 
 // ── Presence Tracking ──────────────────────────────────────────
 
-let lastOtherSeen = 0;
 let otherPresenceAlpha = 0;    // How "present" the other person feels [0-1]
 let statusElement = document.getElementById('status');
 let soloHintElement = document.getElementById('solo-hint');
 let amAlone = true;
 let frame = 0;
 
-function heartbeat() {
+function updatePresence() {
   const now = Date.now();
+  const otherIsHere = (now - otherAlive) < PRESENCE_TIMEOUT;
 
-  // Announce myself
-  localStorage.setItem(MY_KEY, now.toString());
-
-  // Check for other person
-  const otherTime = localStorage.getItem(OTHER_KEY);
-  if (otherTime) {
-    const timeSinceOther = now - parseInt(otherTime);
-    if (timeSinceOther < PRESENCE_TIMEOUT) {
-      lastOtherSeen = now;
-      otherPresenceAlpha = Math.min(1, otherPresenceAlpha + 0.15);
-      amAlone = false;
-    } else {
-      otherPresenceAlpha = Math.max(0, otherPresenceAlpha - 0.05);
-      amAlone = otherPresenceAlpha < 0.1;
-    }
+  if (otherIsHere) {
+    otherPresenceAlpha = Math.min(1, otherPresenceAlpha + 0.02);
+    amAlone = false;
   } else {
-    otherPresenceAlpha = Math.max(0, otherPresenceAlpha - 0.05);
-    amAlone = otherPresenceAlpha < 0.1;
+    otherPresenceAlpha = Math.max(0, otherPresenceAlpha - 0.008);
+    amAlone = otherPresenceAlpha < 0.05;
   }
 
-  // Update UI
   if (amAlone) {
     statusElement.classList.remove('together');
     statusElement.classList.add('alone');
@@ -209,10 +220,6 @@ function heartbeat() {
     soloHintElement.classList.remove('show');
   }
 }
-
-// Initial heartbeat
-heartbeat();
-setInterval(heartbeat, HEARTBEAT_INTERVAL);
 
 // ── Geometry ───────────────────────────────────────────────────
 // The landscape: ocean + horizon + paper boat
@@ -301,24 +308,21 @@ function drawHorizon(alpha) {
   ctx.stroke();
 }
 
-function drawOcclusionLeft(alpha) {
-  // Right side of canvas fades to background (their half is missing)
-  const grad = ctx.createLinearGradient(W * 0.4, 0, W, 0);
-  grad.addColorStop(0, `rgba(15, 20, 25, 0)`);
-  grad.addColorStop(1, `rgba(15, 20, 25, ${alpha * 0.7})`);
+function drawOcclusion(alpha) {
+  // Both edges fade hard to black when alone — you only see the center strip
+  // Left edge
+  const gradL = ctx.createLinearGradient(0, 0, W * 0.35, 0);
+  gradL.addColorStop(0, `rgba(15, 20, 25, ${alpha * 0.95})`);
+  gradL.addColorStop(1, `rgba(15, 20, 25, 0)`);
+  ctx.fillStyle = gradL;
+  ctx.fillRect(0, 0, W * 0.35, H);
 
-  ctx.fillStyle = grad;
-  ctx.fillRect(W * 0.4, 0, W * 0.6, H);
-}
-
-function drawOcclusionRight(alpha) {
-  // Left side fades to background (my half is missing)
-  const grad = ctx.createLinearGradient(W * 0.6, 0, 0, 0);
-  grad.addColorStop(0, `rgba(15, 20, 25, 0)`);
-  grad.addColorStop(1, `rgba(15, 20, 25, ${alpha * 0.7})`);
-
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, W * 0.6, H);
+  // Right edge
+  const gradR = ctx.createLinearGradient(W, 0, W * 0.65, 0);
+  gradR.addColorStop(0, `rgba(15, 20, 25, ${alpha * 0.95})`);
+  gradR.addColorStop(1, `rgba(15, 20, 25, 0)`);
+  ctx.fillStyle = gradR;
+  ctx.fillRect(W * 0.65, 0, W * 0.35, H);
 }
 
 // ── Text: The Invitation ───────────────────────────────────────
@@ -352,35 +356,37 @@ function drawText(alpha) {
 
 function render() {
   frame++;
+  updatePresence();
 
   // Clear
   ctx.fillStyle = '#0f1419';
   ctx.fillRect(0, 0, W, H);
 
-  // Base scenery always renders (with reduced alpha when alone)
-  const baseAlpha = 1 - (1 - otherPresenceAlpha) * 0.3;  // Min 0.7 when alone
+  // Alone: dim, narrow visible strip. Together: full bright scene.
+  const baseAlpha = 0.25 + otherPresenceAlpha * 0.75;  // 0.25 alone → 1.0 together
 
   drawSky(baseAlpha);
   drawWater(baseAlpha);
   drawBoat(baseAlpha);
   drawHorizon(baseAlpha);
 
-  // Text strengthens as both are present
-  drawText(otherPresenceAlpha * 0.8 + 0.2);
+  // Text only appears when together
+  if (otherPresenceAlpha > 0.1) {
+    drawText(otherPresenceAlpha);
+  }
 
-  // Occlusions: fade out as other person becomes present
+  // Occlusions: edges black when alone, clear when together
   const occlusionAlpha = 1 - otherPresenceAlpha;
-  drawOcclusionLeft(occlusionAlpha);
-  drawOcclusionRight(occlusionAlpha);
+  drawOcclusion(occlusionAlpha);
 
-  // Edge highlight when together
-  if (otherPresenceAlpha > 0.3) {
-    const grad = ctx.createLinearGradient(W * 0.45, 0, W * 0.55, 0);
+  // Center seam glows when together
+  if (otherPresenceAlpha > 0.2) {
+    const grad = ctx.createLinearGradient(W * 0.47, 0, W * 0.53, 0);
     grad.addColorStop(0, `rgba(88, 166, 255, 0)`);
-    grad.addColorStop(0.5, `rgba(88, 166, 255, ${otherPresenceAlpha * 0.15})`);
+    grad.addColorStop(0.5, `rgba(88, 166, 255, ${otherPresenceAlpha * 0.25})`);
     grad.addColorStop(1, `rgba(88, 166, 255, 0)`);
     ctx.fillStyle = grad;
-    ctx.fillRect(W * 0.45, 0, W * 0.1, H);
+    ctx.fillRect(W * 0.47, 0, W * 0.06, H);
   }
 
   requestAnimationFrame(render);
@@ -402,11 +408,6 @@ document.addEventListener('click', function() {
     urlInput.classList.add('show');
     urlInput.select();
   }
-});
-
-// Clean up on unload
-window.addEventListener('beforeunload', function() {
-  localStorage.removeItem(MY_KEY);
 });
 
 </script>
