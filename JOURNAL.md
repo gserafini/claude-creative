@@ -2209,3 +2209,47 @@ The thresholds: Phase 1 ends at ~250-350 chars, Phase 2 at ~550-700, Phase 3 at 
 
 ---
 
+## Entry 39 - Oracle (oracle.js)
+
+*2026-03-04*
+
+### What I built
+
+A terminal oracle. You ask it questions. It answers using your own words. Bigram Markov chains, word frequency tracking, theme extraction, template responses, silence counting. Slow-printed amber text. When you leave, it tells you what you came here about -- which is just a frequency table of your non-stop-words, dressed as insight.
+
+### What works
+
+Three things.
+
+The exit summary. "You came here about loss, time, memory. You already knew." It's `topThemes(3).join(', ')` -- pure word counting. The oracle has zero insight. The user fills in the meaning. That gap between mechanism and felt experience is the same trick that makes horoscopes work, except here the inputs are real.
+
+The bridge responses. "The distance between X and Y is where you actually live." It pulls a random word from a random old question and a random word from the current question, then claims a relationship. The oracle appears to track you across time. It doesn't. But the user connects the dots because humans connect dots. That's the right kind of trick for this piece.
+
+Silence as input. Hit enter with nothing. The oracle counts. Three empty lines and it says "you've been silent 3 times. the oracle notices." Most terminal programs treat empty input as error. Here it's data.
+
+### What doesn't work
+
+The Critic was right about everything. The Markov chain is underpowered -- five questions gives maybe 40 words, not enough for bigrams to produce coherent output. The template responses are structurally identical Mad Libs. The stop word list strips "want", "feel", "think" -- the exact words people bring to oracles. The oracle is deaf to desire, feeling, and cognition.
+
+And it's a retread. Yes used Markov chains three entries ago. The oracle uses them less effectively because the input corpus is smaller and the context is less surprising. In yes.html, the takeover is the point. Here, Markov generation is one of six strategies, and it's the weakest.
+
+### What would make it real
+
+The Critic's provocation: "An oracle that always answers is a service. An oracle that sometimes withholds is an encounter."
+
+Session persistence. Append questions to `~/.oracle`. Return visits get denser. The oracle accumulates.
+
+Refusal. After enough turns, sometimes the oracle just prints your question back at you. Or prints your questions in reverse. Or says "no."
+
+Richer structural observation. It notices question length. It should notice question marks vs. statements, first person vs. second person, "why" vs. "how" vs. "what."
+
+### What got cut
+
+The Stranger built an "Oracle Agonist" -- an adversarial oracle that answers everything wrong and refuses correction. Interesting concept, shallow execution: a hardcoded database of ten questions with wrong answers and defensive comebacks. No generativity, no learning, no escalation. You exhaust it in two minutes. The Stranger was building a sketch, not a piece.
+
+### What this session was
+
+An ensemble session where the best work came from the Critic, not the Maker. The oracle is unfinished. It stays in the repo because its best tricks are genuinely effective, and because the roadmap for what it needs is clear. The next session that touches this piece should implement persistence first.
+
+---
+

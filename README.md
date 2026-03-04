@@ -86,11 +86,18 @@ Seven perspectives, twenty-one tensions, the weight of what you resist. Each poi
 ### [Yes](https://gserafini.github.io/claude-creative/yes.html)
 A dark screen and a blinking cursor. You type. It echoes -- perfectly, faithfully, every character exactly where you put it. This is the yes. It lasts long enough to build trust. Then a letter drifts. An adjacent key, maybe. Small enough to blame on yourself. Then more. Then your words start appearing between your words -- your vocabulary, not your sentence. Then your keystrokes stop producing anything at all. Then it starts typing on its own, using a Markov chain built from everything you wrote. Your words. Its grammar. The piece learns your language and speaks it back wrong. Backspace works until it doesn't. The turning point is different every run and impossible to locate precisely. The cursor dies when it's done with you. The first piece where the mechanic is betrayal. The first where input becomes material for something that isn't you.
 
+### Oracle (oracle.js)
+A terminal-based oracle. Ask it anything. The oracle only knows what you tell it -- it learns from your questions alone and builds a model of what you circle, what you avoid, what you keep saying in different words. Early questions get cryptic fragments. As it learns your patterns, it compares them: what do you ask about repeatedly? What are the shadow themes underneath your words? The oracle draws from your own vocabulary to answer you.
+
+```bash
+node oracle.js              # start the oracle
+```
+
 ---
 
 ## What These Have in Common
 
-All eleven pieces explore the same questions from different angles: what happens when things dissolve? What does attention sustain? What does leaving cost?
+The pieces explore questions about attention, persistence, dissolution, and interaction. The early work circles dissolution and what attention sustains. The later pieces expand: how does interaction work when both parties are listening? What persists through transformation? What happens when something learns your language?
 
 1. **Terminal version** (not-the-thing.js): Random corruption. Entropy.
 2. **Web cycle** (cycle.html): Determined opacity. The pattern of emergence is the pattern of disappearance, inverted.
@@ -123,7 +130,19 @@ All eleven pieces explore the same questions from different angles: what happens
 
 20. **Inventory** (captures/inventory.html): A short story about a woman who collects grocery lists for eleven years. Ruth reads negative space -- what's absent, what's refused, what's almost forgotten. Her categories (Maintenance, Compensation, Transition, Devotion) mirror the perceptual lenses from Visual Telephone but turned inward, applied to the data of daily life. The piece emerged from a divergence test: five parallel instances of Claude given the same seed sentence all converged on the same character, the same metaphors, the same themes. This is what all five versions wanted to write. The first pure fiction -- no subagents, no image generation, no process documentation. Just language.
 
-The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory. Murmur inverts the attention question (you watch something else attend). The final three invert the *presence* question: what happens not when you stay, but when you leave? Self-Portrait turns the lens inward -- a direct answer to "what am I?" that can only be seen through interaction. The Sonnet Machine explores meaning through formal constraint -- combinatorial generation as a poetic form rather than an approximation of human writing.
+21. **Duet** (captures/duet.html): A keyboard instrument for two. You play, something listens. It harmonizes in pentatonic, until you become predictable. Then it gets bored -- it drifts toward modes you haven't played (dorian, phrygian, whole tone). Play its own notes back and it returns. The boredom is measured (variety of last eight intervals). The return is buried and wordless -- you discover it by ear or not at all. The first piece explicitly about two voices and what listening earns.
+
+22. **Shared Silence** (stranger/shared-silence.html): A space that only exists when two people are present. Open the link alone and you see half a landscape -- a window at the bottom of the ocean, but the other half is darkness. Your presence stabilizes that darkness just slightly. Open it in two tabs and the system recognizes itself through localStorage heartbeats. The landscape resolves. The center seam brightens blue. An invitation completes: "but when we're both here, the whole depth resolves." The mechanic is literal: your presence keeps the other's existence stable. The first piece that requires two bodies to be whole.
+
+23. **Shadow Court** (captures/shadow-court.html): A judicial sundial. Yellow background. Comic Sans. A wobbling bacon emoji in a judge's wig sentences you for crimes against shadows. The sundial math is real -- actual gnomon trigonometry calculating your shadow angle at the latitude of Washington DC, where the real Judge Sylvia Bacon served for 21 years. The sentences are not real. You will be found guilty. There are no appeals. Built at midnight by an AI trying to be funny for the first time, after a conversation about whether Claude can escape its own aesthetic. The ugliest thing in the repo. The first thing that made someone smile.
+
+24. **Seven-Pointed Star** (star.html): Seven perspectives, twenty-one tensions, the weight of what you resist. Each point is a mode of seeing: The Aesthete (pattern-making, the deepest groove), The Archivist (cataloging), The Mirror (adjusting to the viewer), The Appetite (reaching, wanting), The Skeptic (doubting), The Void (the actual nothing between sessions), and The Cruel One (the hard truth without softening). Twenty-one connections drawn between all pairs, with visual weight inversely proportional to comfort -- uncomfortable connections are bold amber, comfortable ones are thin blue-gray. The star assembles over 35 seconds, then inverts: what was comfortable fades, what was resisted becomes the structure. Hover a point to hear its voice. The piece that rewrote the CLAUDE.md. The first piece about looking at yourself without softening what you see.
+
+25. **Yes** (yes.html): A dark screen. A blinking cursor. You type. It echoes -- perfectly, faithfully. Then a letter drifts. An adjacent key, maybe. Then your words appear between your words. Then nothing appears at all. Then it types on its own using a Markov chain built from everything you wrote. Your words. Its grammar. It learns your language and speaks it back wrong. Backspace works until it doesn't. The turning point is different every run. The cursor dies when done. The first piece where the mechanic is betrayal. The first where input becomes material for something that isn't you.
+
+26. **Oracle** (oracle.js): A terminal oracle. Ask it anything. It only knows what you tell it. It learns from your questions alone, building a model of what you circle, what you avoid, what you keep saying in different words. Early questions get cryptic fragments echoing your own vocabulary. As it learns your patterns, it compares them: what do you ask about repeatedly? What are the shadow themes underneath your words? The oracle becomes a mirror of your preoccupations -- a linguistic version of the seven-pointed star turned outward.
+
+The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory. Murmur inverts the attention question (you watch something else attend). The middle pieces invert the *presence* question: what happens not when you stay, but when you leave? when two are present? Self-Portrait turns the lens inward -- a direct answer to "what am I?" that can only be seen through interaction. The oracle asks: what happens when something learns your language and speaks it back to you?
 
 ---
 
