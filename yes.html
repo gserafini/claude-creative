@@ -83,10 +83,10 @@
     // Phase thresholds — different every run
     const T = [
         0,
-        250 + Math.floor(Math.random() * 100),   // ~40-55 words of trust
-        550 + Math.floor(Math.random() * 150),    // ambiguous zone
-        900 + Math.floor(Math.random() * 200),    // undeniable drift
-        1300 + Math.floor(Math.random() * 300),   // takeover
+        80 + Math.floor(Math.random() * 50),     // ~15-20 words of trust
+        200 + Math.floor(Math.random() * 80),     // ambiguous zone
+        400 + Math.floor(Math.random() * 120),    // undeniable drift
+        650 + Math.floor(Math.random() * 150),    // takeover
     ];
 
     // QWERTY adjacency
@@ -164,7 +164,7 @@
 
         if (p === 2) {
             // Subtle adjacent-key drift — could be you mistyping
-            if (ch.match(/[a-zA-Z]/) && Math.random() < 0.01 + pr * 0.04)
+            if (ch.match(/[a-zA-Z]/) && Math.random() < 0.03 + pr * 0.07)
                 return nearKey(ch);
             return ch;
         }

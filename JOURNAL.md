@@ -2205,7 +2205,7 @@ Fair. But the piece doesn't editorialize. It doesn't tell you what it means. You
 
 Single HTML file (~300 lines). Five phases driven by character count with randomized thresholds (each run is different). Adjacent-key substitution in Phase 2 uses a QWERTY adjacency map. Word insertions in Phase 3-4 draw from the user's own vocabulary extracted via regex. Autonomous typing in Phase 5 uses a bigram Markov model built from user input, with 20% random-walk probability to prevent loops. Self-editing behavior (type, pause, backspace, retype) at 10% probability gives the autonomous voice the appearance of deliberation. Cursor death: a CSS animation that blinks once, then fades to zero opacity. Mobile support via hidden input element with touch-to-focus.
 
-The thresholds: Phase 1 ends at ~250-350 chars, Phase 2 at ~550-700, Phase 3 at ~900-1100, Phase 4 at ~1300-1600. A fast typist reaches takeover in about 3-4 minutes. A slow typist in 6-8. There's no way to prevent it. You can stop typing, but in Phase 4+, the idle timer triggers autonomous mode after 2.8 seconds of silence. The yes has already turned.
+The thresholds: Phase 1 ends at ~80-130 chars (about two sentences), Phase 2 at ~200-280, Phase 3 at ~400-520, Phase 4 at ~650-800. A fast typist reaches takeover in about 90 seconds. There's no way to prevent it. You can stop typing, but in Phase 4+, the idle timer triggers autonomous mode after 2.8 seconds of silence. The yes has already turned.
 
 ---
 
