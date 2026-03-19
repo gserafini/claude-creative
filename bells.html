@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bells</title>
+<meta name="description" content="Five bells ringing on their own time. Their harmonics interfere. Nothing repeats for 77 minutes.">
+<meta property="og:title" content="bells">
+<meta property="og:description" content="Five bells ringing on their own time. Their harmonics interfere.">
+<meta property="og:image" content="https://on10.com/s/6rsowv/studio/og-bells.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://on10.com/s/6rsowv/studio/bells.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="bells">
+<meta name="twitter:description" content="Five bells ringing on their own time. Their harmonics interfere.">
+<meta name="twitter:image" content="https://on10.com/s/6rsowv/studio/og-bells.jpg">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #060608;
+  overflow: hidden;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  -webkit-user-select: none;
+  user-select: none;
+}
+canvas { display: block; }
+#prompt {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #2a2a30;
+  font-size: 13px;
+  letter-spacing: 0.4em;
+  text-transform: lowercase;
+  transition: opacity 2s ease;
+  pointer-events: none;
+}
+#prompt.hide { opacity: 0; }
+#sound-hint {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, calc(-50% + 28px));
+  color: #1a1a1e;
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  text-transform: lowercase;
+  transition: opacity 2s ease;
+  pointer-events: none;
+}
+#sound-hint.hide { opacity: 0; }
+#elapsed {
+  position: fixed;
+  bottom: 14px;
+  right: 18px;
+  color: #18181e;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="prompt">click to ring</div>
+<div id="sound-hint">sound on &middot; ringer off silent</div>
+<div id="elapsed"></div>
+<script>
+// bells
+//
+// five bells, coprime periods (3, 4, 5, 7, 11 seconds)
+// the pattern takes 77 minutes to exactly repeat
+//
+// each bell has inharmonic partials — the real reason bells shimmer.
+// a tuning fork's overtones are integer multiples of the fundamental.
+// a bell's are not. partials at 1.0, 1.183, 1.506, 2.0, 2.514...
+// they beat against each other, creating that living shimmer.
+//
+// the pitches drift slowly. the pentatonic set warps.
+// what was consonant becomes dissonant and back.
+//
+// where ripples cross on screen, light adds.
+// where harmonics overlap in air, they interfere.
+// same physics. different medium.
+//
+// click anywhere to ring the nearest bell yourself.
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const promptEl = document.getElementById('prompt');
+const elapsedEl = document.getElementById('elapsed');
+let W, H;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ---- bells ----
+
+const bells = [
+  { period: 3.0,  freq: 261.6, x: 0.22, y: 0.30, color: [210, 140, 50],  driftRate: 0.0031, char: 0 },
+  { period: 4.0,  freq: 329.6, x: 0.78, y: 0.22, color: [190, 170, 70],  driftRate: 0.0047, char: 1 },
+  { period: 5.0,  freq: 392.0, x: 0.50, y: 0.55, color: [120, 180, 90],  driftRate: 0.0059, char: 2 },
+  { period: 7.0,  freq: 440.0, x: 0.25, y: 0.75, color: [70, 155, 175],  driftRate: 0.0071, char: 3 },
+  { period: 11.0, freq: 587.3, x: 0.80, y: 0.72, color: [125, 115, 195], driftRate: 0.0089, char: 4 },
+];
+
+bells.forEach((b, i) => {
+  b.nextRing = i * 2.5;  // staggered entrance over first 10 seconds
+  b.freqBase = b.freq;
+  b.ringCount = 0;
+  b.lastRingTime = -10;
+});
+
+// ---- audio ----
+
+let audioCtx = null;
+let masterGain = null;
+
+// inharmonic partial sets — each bell has its own character
+// lower bells: more hum, longer decay
+// higher bells: more upper partials, brighter, shorter
+const PARTIALS = [
+  [ // warm, low
+    { r: 0.5,   a: 0.35, d: 9.0 }, { r: 1.0,   a: 0.8,  d: 5.0 },
+    { r: 1.183, a: 0.4,  d: 3.5 }, { r: 1.506, a: 0.25, d: 2.8 },
+    { r: 2.0,   a: 0.3,  d: 2.0 }, { r: 2.514, a: 0.08, d: 1.2 },
+  ],
+  [ // mid-low
+    { r: 0.5,   a: 0.25, d: 7.0 }, { r: 1.0,   a: 0.85, d: 4.5 },
+    { r: 1.183, a: 0.45, d: 3.0 }, { r: 1.506, a: 0.3,  d: 2.5 },
+    { r: 2.0,   a: 0.35, d: 1.8 }, { r: 2.662, a: 0.1,  d: 1.0 },
+  ],
+  [ // middle
+    { r: 0.5,   a: 0.2,  d: 6.0 }, { r: 1.0,   a: 0.9,  d: 4.0 },
+    { r: 1.183, a: 0.5,  d: 2.8 }, { r: 1.506, a: 0.35, d: 2.2 },
+    { r: 2.0,   a: 0.4,  d: 1.5 }, { r: 3.011, a: 0.08, d: 0.8 },
+  ],
+  [ // mid-high
+    { r: 0.5,   a: 0.15, d: 5.0 }, { r: 1.0,   a: 0.85, d: 3.5 },
+    { r: 1.183, a: 0.5,  d: 2.5 }, { r: 1.506, a: 0.4,  d: 2.0 },
+    { r: 2.0,   a: 0.45, d: 1.3 }, { r: 2.514, a: 0.15, d: 0.9 },
+    { r: 3.011, a: 0.1,  d: 0.6 },
+  ],
+  [ // bright, high
+    { r: 0.5,   a: 0.1,  d: 4.0 }, { r: 1.0,   a: 0.8,  d: 3.0 },
+    { r: 1.183, a: 0.55, d: 2.2 }, { r: 1.506, a: 0.45, d: 1.8 },
+    { r: 2.0,   a: 0.5,  d: 1.2 }, { r: 2.514, a: 0.2,  d: 0.8 },
+    { r: 2.662, a: 0.15, d: 0.6 }, { r: 3.011, a: 0.12, d: 0.4 },
+  ],
+];
+
+function makePanner(panValue) {
+  // StereoPannerNode not available on all iOS versions — fall back to simple gain
+  if (audioCtx.createStereoPanner) {
+    const p = audioCtx.createStereoPanner();
+    p.pan.value = panValue;
+    p.connect(masterGain);
+    return p;
+  }
+  // fallback: no panning, just connect to master
+  return masterGain;
+}
+
+function ringBell(bell) {
+  if (!audioCtx) return;
+  // iOS can re-suspend the context; resume on each interaction
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  const now = audioCtx.currentTime;
+  const vol = 0.055;
+  const partials = PARTIALS[bell.char];
+
+  const dest = makePanner((bell.x - 0.5) * 1.4);
+
+  for (const p of partials) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = bell.freq * p.r;
+    gain.gain.setValueAtTime(p.a * vol, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + p.d);
+    osc.connect(gain);
+    gain.connect(dest);
+    osc.start(now);
+    osc.stop(now + p.d + 0.05);
+  }
+}
+
+// ---- ripples ----
+
+let ripples = [];
+
+function addRipple(bell) {
+  ripples.push({
+    x: bell.x * W,
+    y: bell.y * H,
+    radius: 0,
+    maxRadius: Math.max(W, H) * 0.55,
+    speed: 75 + bell.freq * 0.08,
+    color: bell.color,
+    birth: performance.now(),
+  });
+}
+
+// ---- lifecycle ----
+
+let started = false;
+let startTime = 0;
+let lastFrame = 0;
+
+function start() {
+  if (started) return;
+  started = true;
+  promptEl.classList.add('hide');
+  document.getElementById('sound-hint').classList.add('hide');
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  audioCtx.resume();
+  // iOS unlock: play a silent buffer to ungate the audio hardware
+  const unlock = audioCtx.createBuffer(1, 1, 22050);
+  const src = audioCtx.createBufferSource();
+  src.buffer = unlock;
+  src.connect(audioCtx.destination);
+  src.start(0);
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = 0.65;
+  masterGain.connect(audioCtx.destination);
+  startTime = performance.now();
+  lastFrame = startTime;
+  requestAnimationFrame(loop);
+}
+
+function handleInteraction(e) {
+  if (!started) {
+    start();
+    // On iOS, ring the nearest bell immediately inside the gesture
+    // so the first audio plays from a user-initiated event
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    let nearest = null, best = Infinity;
+    for (const b of bells) {
+      const dx = cx - b.x * W, dy = cy - b.y * H;
+      const d = dx * dx + dy * dy;
+      if (d < best) { best = d; nearest = b; }
+    }
+    if (nearest) {
+      ringBell(nearest);
+      addRipple(nearest);
+      nearest.lastRingTime = 0;
+    }
+    return;
+  }
+
+  const cx = e.touches ? e.touches[0].clientX : e.clientX;
+  const cy = e.touches ? e.touches[0].clientY : e.clientY;
+
+  let nearest = null, best = Infinity;
+  for (const b of bells) {
+    const dx = cx - b.x * W, dy = cy - b.y * H;
+    const d = dx * dx + dy * dy;
+    if (d < best) { best = d; nearest = b; }
+  }
+  if (nearest) {
+    ringBell(nearest);
+    addRipple(nearest);
+    nearest.lastRingTime = (performance.now() - startTime) / 1000;
+  }
+}
+
+document.body.addEventListener('click', handleInteraction);
+document.body.addEventListener('touchend', handleInteraction);
+
+// ---- main loop ----
+
+function loop() {
+  requestAnimationFrame(loop);
+  const now = performance.now();
+  const dt = Math.min((now - lastFrame) / 1000, 0.1);
+  lastFrame = now;
+  const elapsed = (now - startTime) / 1000;
+
+  // pitch drift
+  for (const b of bells) {
+    b.freq = b.freqBase * (1 + 0.012 * Math.sin(elapsed * b.driftRate));
+  }
+
+  // auto-ring
+  for (const b of bells) {
+    if (elapsed >= b.nextRing) {
+      ringBell(b);
+      addRipple(b);
+      b.ringCount++;
+      b.lastRingTime = elapsed;
+      b.nextRing = elapsed + b.period;
+    }
+  }
+
+  // ---- draw ----
+
+  ctx.fillStyle = 'rgba(6, 6, 8, 0.12)';
+  ctx.fillRect(0, 0, W, H);
+
+  // ripples — additive blending
+  ctx.globalCompositeOperation = 'lighter';
+
+  ripples = ripples.filter(r => {
+    r.radius += r.speed * dt;
+    if (r.radius > r.maxRadius) return false;
+
+    const t = r.radius / r.maxRadius;
+    const fade = (1 - t) * (1 - t);
+    if (fade < 0.003) return false;
+
+    const [cr, cg, cb] = r.color;
+    const a = fade * 0.3;
+
+    // ring
+    ctx.beginPath();
+    ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(${cr},${cg},${cb},${a})`;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // glow
+    ctx.beginPath();
+    ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(${cr},${cg},${cb},${a * 0.2})`;
+    ctx.lineWidth = 10 + fade * 8;
+    ctx.stroke();
+
+    return true;
+  });
+
+  ctx.globalCompositeOperation = 'source-over';
+
+  // bell dots
+  for (const b of bells) {
+    const bx = b.x * W, by = b.y * H;
+    const [cr, cg, cb] = b.color;
+    const since = elapsed - b.lastRingTime;
+    const pulse = Math.max(0, 1 - since * 1.5);
+    const sz = 1.5 + pulse * 5;
+    const al = 0.12 + pulse * 0.88;
+
+    ctx.beginPath();
+    ctx.arc(bx, by, sz, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${cr},${cg},${cb},${al})`;
+    ctx.fill();
+  }
+
+  // timer
+  const m = Math.floor(elapsed / 60);
+  const s = Math.floor(elapsed % 60);
+  elapsedEl.textContent = m + ':' + String(s).padStart(2, '0');
+}
+</script>
+</body>
+</html>
