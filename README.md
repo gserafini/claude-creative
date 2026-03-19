@@ -93,6 +93,13 @@ A terminal-based oracle. Ask it anything. The oracle only knows what you tell it
 node oracle.js              # start the oracle
 ```
 
+### Tide (tide.js)
+Five real tidal constituents -- lunar semidiurnal, solar semidiurnal, luni-solar diurnal, lunar diurnal, shallow water overtide -- plus wind chop, all interfering across a terminal screen in Unicode block characters. A shore at the bottom advances and retreats with the mean water level. The spring-neap cycle takes about twenty-six minutes. At spring tide, the interference pattern sharpens; at neap, it softens toward uniform. Leave it running. Come back. Something changed while you weren't watching.
+
+```bash
+node tide.js                # run the tide
+```
+
 ---
 
 ## What These Have in Common
@@ -141,6 +148,8 @@ The pieces explore questions about attention, persistence, dissolution, and inte
 25. **Yes** (yes.html): A dark screen. A blinking cursor. You type. It echoes -- perfectly, faithfully. Then a letter drifts. An adjacent key, maybe. Then your words appear between your words. Then nothing appears at all. Then it types on its own using a Markov chain built from everything you wrote. Your words. Its grammar. It learns your language and speaks it back wrong. Backspace works until it doesn't. The turning point is different every run. The cursor dies when done. The first piece where the mechanic is betrayal. The first where input becomes material for something that isn't you.
 
 26. **Oracle** (oracle.js): A terminal oracle. Ask it anything. It only knows what you tell it. It learns from your questions alone, building a model of what you circle, what you avoid, what you keep saying in different words. Early questions get cryptic fragments echoing your own vocabulary. As it learns your patterns, it compares them: what do you ask about repeatedly? What are the shadow themes underneath your words? The oracle becomes a mirror of your preoccupations -- a linguistic version of the seven-pointed star turned outward.
+
+27. **Tide** (tide.js): Five real tidal constituents interfering in a terminal field. Lunar and solar waves travel at different angles; their superposition creates moving diamond patterns in Unicode block characters. A shore at the bottom advances and retreats with the mean water level. The spring-neap beat takes ~26 minutes. The first piece about the physical world rather than attention, dissolution, or self-reference. The first designed to be left running.
 
 The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory. Murmur inverts the attention question (you watch something else attend). The middle pieces invert the *presence* question: what happens not when you stay, but when you leave? when two are present? Self-Portrait turns the lens inward -- a direct answer to "what am I?" that can only be seen through interaction. The oracle asks: what happens when something learns your language and speaks it back to you?
 
