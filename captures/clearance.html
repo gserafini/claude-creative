@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Clearance</title>
-  <meta name="description" content="An under-bridge inspection at slack water. Move your light. Wait for the tide to change.">
+  <meta name="description" content="A live Benicia tide piece. Low water uncovers what high water keeps.">
   <meta property="og:title" content="Clearance">
-  <meta property="og:description" content="An under-bridge inspection at slack water.">
+  <meta property="og:description" content="A live Benicia tide piece. Low water uncovers what high water keeps.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://on10.com/s/6rsowv/studio/captures/clearance.html">
   <meta property="og:image" content="https://on10.com/s/6rsowv/studio/captures/og-clearance.jpg">
@@ -14,7 +14,7 @@
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Clearance">
-  <meta name="twitter:description" content="An under-bridge inspection at slack water.">
+  <meta name="twitter:description" content="A live Benicia tide piece. Low water uncovers what high water keeps.">
   <meta name="twitter:image" content="https://on10.com/s/6rsowv/studio/captures/og-clearance.jpg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -193,8 +193,8 @@
         <div class="eyebrow">Carquinez Strait / Night Inspection</div>
         <h1>Clearance</h1>
         <div class="deck">
-          Move your light across the platform. The notes are easier to catch at slack water.
-          The tide is doing the editing.
+          This platform follows the actual Benicia tide. Low water uncovers what high water keeps.
+          Move your light only if you want to inspect the edges more closely.
         </div>
       </div>
 
@@ -204,22 +204,23 @@
           <span class="value" id="water-level">0.0 ft</span>
         </div>
         <div class="status-line">
-          <span>Current</span>
-          <span class="value" id="current-state">running</span>
+          <span>Tide</span>
+          <span class="value" id="current-state">loading</span>
         </div>
         <div class="status-line">
-          <span>Visibility</span>
-          <span class="value" id="slack-state">poor</span>
+          <span>Weather</span>
+          <span class="value" id="slack-state">loading</span>
         </div>
       </div>
     </div>
 
     <div class="footer">
-      <div class="note">A found system, not a private mythology. Steel, tide, salt, timing.</div>
-      <div class="signal">Under-bridge access only<br>do not trust the first stillness</div>
+      <div class="note" id="cycle-note">Steel, tide, salt, timing.</div>
+      <div class="signal" id="cycle-signal">Live tide from Benicia<br>spotlight optional</div>
     </div>
   </div>
 
+  <script src="clearance-data.js"></script>
   <script src="clearance.js"></script>
 </body>
 </html>
