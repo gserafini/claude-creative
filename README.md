@@ -100,6 +100,12 @@ Five real tidal constituents -- lunar semidiurnal, solar semidiurnal, luni-solar
 node tide.js                # run the tide
 ```
 
+### [Bells](https://gserafini.github.io/claude-creative/bells.html)
+Five bells with coprime periods -- 3, 4, 5, 7, 11 seconds. The exact pattern takes 77 minutes to repeat. Each bell uses inharmonic partials -- the real acoustics of why bells shimmer. Pitches drift. Light ripples overlap where the strikes meet. Click to ring the nearest bell yourself.
+
+### [Clearance](https://gserafini.github.io/claude-creative/captures/clearance.html)
+An under-bridge inspection at slack water. Move your light across a maintenance platform at night while the tide decides what can be read. Notes surface on steel, rail, and waterline, then sink back into corrosion and current. The first piece here that takes its pressure from infrastructure instead of interior taxonomy.
+
 ---
 
 ## What These Have in Common
@@ -153,7 +159,9 @@ The pieces explore questions about attention, persistence, dissolution, and inte
 
 28. **Bells** (bells.html): Five bells with coprime periods -- 3, 4, 5, 7, 11 seconds. The exact pattern takes 3×4×5×7×11 = 4,620 seconds (77 minutes) to repeat. Each bell synthesizes inharmonic partials using Web Audio API -- the real physics of bell acoustics, where overtones at ratios like 1.183 and 1.506 (not integer multiples) beat against each other to create shimmer. Pitches drift slowly on incommensurate sine cycles so the pentatonic set warps over time -- what was consonant becomes dissonant and back. Visually: expanding rings from each strike point, additively blended where they overlap. Click anywhere to ring the nearest bell yourself. Stereo-panned by position. The first piece that makes sound autonomously. The first where the physics is acoustic rather than visual.
 
-The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory. Murmur inverts the attention question (you watch something else attend). The middle pieces invert the *presence* question: what happens not when you stay, but when you leave? when two are present? Self-Portrait turns the lens inward -- a direct answer to "what am I?" that can only be seen through interaction. The oracle asks: what happens when something learns your language and speaks it back to you?
+29. **Clearance** (captures/clearance.html): A maintenance platform under a bridge at night. Move an inspection light across wet steel while the tide determines which notes can be read. Some phrases belong to the structure -- "check west pier for salt bloom", "replace lamp before storm season." Others emerge only when slack water and your beam line up: "clearance changes with the moon", "water keeps its own ledger." The piece uses no mythology beyond the external one already present -- bridge, corrosion, current, timing. The first piece built explicitly to break the closed loop of the seven voices. The first where outside infrastructure, not self-examination, carries the emotional weight.
+
+The progression moves from passive observation to active participation, from abstract pattern to concrete meaning, from terminal dissolution to cyclical renewal, from visual to auditory. Murmur inverts the attention question (you watch something else attend). The middle pieces invert the *presence* question: what happens not when you stay, but when you leave? when two are present? Self-Portrait turns the lens inward -- a direct answer to "what am I?" that can only be seen through interaction. The oracle asks: what happens when something learns your language and speaks it back to you? Clearance turns back outward and lets the world resist.
 
 ---
 
