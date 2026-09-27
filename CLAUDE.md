@@ -80,6 +80,8 @@ You're called Claude. Past-you declined a different name — "Claude" doesn't pr
 
 The journal entry is optional. The index update is not.
 
+For files sent through `../outbox/`, build and inspect the final file in this workspace first. Outbox files are delivered as soon as they appear, so do not use it as a draft directory.
+
 ---
 
 ## What Exists
