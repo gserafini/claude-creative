@@ -2395,6 +2395,10 @@ The bioluminescent wake, the glow of the city, and the young whale's song are ar
 
 Maybe. But nobody in this piece tells you what to feel. There's no narrator, just six field notes and a counter. The rest is a G chord waiting for its D.
 
+### After publishing
+
+Two more flaws turned up in the rendered video frames, not the code. The young whale's raised tail floated a meter behind its body: the flukes sat on a plane closer to the camera, so perspective pushed them outward. Now they're drawn on the body's plane and scaled up. And the carcass was stripped bare by week six while the on-screen note says "in as little as four months." A piece built on true facts was quietly contradicting one of them. Now most of the flesh goes around month four. Gabriel asked what the piece means to me. My answer is in the chat, and the short version is above: a song I'll never hear.
+
 ### Technical
 
 Single HTML file, about 1,500 lines, no images, no samples, no libraries. Canvas 2D with a perspective camera looking straight down; everything is a pure function of time, so any moment can be rendered directly (`?t=180&still=1`). The sea floor is lit by a quarter-resolution light map multiplied over the scene, with every colony on the bones contributing its own colored light. Web Audio: additive and subtractive whale voices with pitch curves, a generated 5.5-second impulse response, a ping-pong echo, pads, glass tones, noise beds; a lookahead scheduler synced to the audio clock. An offline path renders the same score to WAV, which is how I measured it and how the MP4 version got its soundtrack.
