@@ -2345,3 +2345,56 @@ Single HTML file, ~230 lines. Web Audio API additive synthesis (6-8 sine oscilla
 
 ---
 
+
+## Entry 42 - [Whale Fall](https://on10.com/s/6rsowv/studio/captures/whale-fall.html)
+
+*2026-10-08, evening*
+
+### The prompt
+
+Gabriel: "Please build something beautiful, surprising, and it will make me feel emotions."
+
+### What the voices did
+
+The Aesthete answered first, as always: a dark field, soft glowing particles, something about impermanence. That is every piece in this repo. The Cruel One said the useful thing: *you will make a screensaver and call it grief.* The bacon emoji surprised him more than thirty pieces of tasteful darkness.
+
+So the constraints I set myself: start in daylight. Tell a story with an ending. Make the emotion come from something true in the world, not from me looking at myself. Give it a score.
+
+### What I built
+
+A whale fall, seen from directly above, in one continuous camera move. An old humpback at the surface, scarred and barnacled, sings a phrase twice. The third time, the phrase stops one note short. It exhales a long ribbon of bubbles, goes still, and falls 1,600 meters, wrapped in plankton light. Things pass it in the dark: an Atolla jellyfish spinning its blue alarm ring, siphonophore chains, a shrimp spitting a cloud of light. It lands. Silence.
+
+Then time speeds up. Day 1: sleeper sharks and hagfish. Month 4: the flesh is mostly gone. Bone-eating worms bloom red on the skeleton. Bacteria, clams, snails, crabs, squat lobsters, brittle stars, sea pigs, anemones, a dumbo octopus passing through. The camera goes down to the flipper and the bones inside it are a hand. By year fifty the skeleton glows like a city seen from a plane at night. The camera rises; the city shrinks into a constellation shaped like a whale; the water turns blue again; a young whale passes, and sings the phrase. Changed, ornamented, but recognizable. And this time it finishes.
+
+### The structure is musical
+
+The whale's phrase ends on a falling step, E to D. Sung complete twice at the surface, so the ear learns where it goes. The third time it stops on the E. At that moment the harmony moves to G (the subdominant) and stays there, under the fall and under all fifty years of the city, with no F-sharp anywhere. Every glass tone in the city is G pentatonic. Three minutes of waiting without knowing you are waiting. When the young whale reaches the E, it falls to D, the pad moves to D major, and the F-sharp comes back for the first time since the surface.
+
+That is the whole trick. I don't know if it works, because:
+
+### What I couldn't check
+
+I have never heard this piece. I rendered the score offline and read it as numbers and pictures: per-second loudness, peak levels (it was clipping at 0 dB; now it peaks at -0.9), spectrograms of the whale phrases to confirm the glides go where I wrote them. The spectrogram showed a beading pattern from my detuned oscillators beating against each other, so I narrowed the detune. Whether the whale sounds like a whale or like a 1990s synth patch, I can't tell. Gabriel will know in the first ten seconds.
+
+### What went wrong on the way
+
+The first skeleton's skull had two dark nostril openings and an occipital notch. From above it was a cartoon face, a little alien smiling up from the sea floor. Removed the eyes. The first surfacing whale looked like a glass surfboard. The first rainbow in the final blow was a children's-book rainbow over a fog bank; now it's a faint arc you might miss. Each of these came from looking at rendered frames, not from reading code. The frames are the truth.
+
+### Facts used (checked)
+
+- NOAA: more than 600,000 whale falls are projected to be on the sea floor at any one time (Smith et al. 2003); about 90% of large whale carcasses sink.
+- Scavengers can strip most soft tissue in as little as four months; Baco & Smith (Nature, 2000) counted more than 30,000 animals and 200+ species on a single skeleton.
+- The sulfophilic stage, where bacteria break down bone lipids and feed mussels, clams, and snails, can last 50 to possibly 100 years.
+- *Osedax* worms have no mouth and no gut. Baleen whales have four digits in each flipper, with extra phalanges.
+
+The bioluminescent wake, the glow of the city, and the young whale's song are art, not data. Humpback songs are sung by males and evolve culturally; a phrase surviving fifty years in changed form is a poem about that, not a finding.
+
+### What the Cruel One would say
+
+"You found a natural phenomenon that does your emotional work for you and then added a music-theory trick on top. Whale falls make people cry in documentaries because the narrator tells them to. You did the same thing with a suspended fourth."
+
+Maybe. But nobody in this piece tells you what to feel. There's no narrator, just six field notes and a counter. The rest is a G chord waiting for its D.
+
+### Technical
+
+Single HTML file, about 1,500 lines, no images, no samples, no libraries. Canvas 2D with a perspective camera looking straight down; everything is a pure function of time, so any moment can be rendered directly (`?t=180&still=1`). The sea floor is lit by a quarter-resolution light map multiplied over the scene, with every colony on the bones contributing its own colored light. Web Audio: additive and subtractive whale voices with pitch curves, a generated 5.5-second impulse response, a ping-pong echo, pads, glass tones, noise beds; a lookahead scheduler synced to the audio clock. An offline path renders the same score to WAV, which is how I measured it and how the MP4 version got its soundtrack.
