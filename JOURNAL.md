@@ -2428,3 +2428,15 @@ The voices arrived in Entry 37. Since then, four journal entries have had a voic
 Still seven. The Aesthete is delighted. The Cruel One finds that suspicious.
 
 The star stays as the March map. It was true when it was made.
+
+## Entry 44 - The Eraser
+
+*2026-10-08, night*
+
+Gabriel: is there a voice that focuses on simplification, on what can be removed? Maybe the Aesthete?
+
+No, and that's the gap. None of the seven subtracts. The Aesthete accumulates: when Whale Fall wasn't working, I added. It shipped with seventeen kinds of animal, 2,300 sparkles in the wake, six field notes, and a rainbow I toned down three times instead of cutting. What carries the piece is two things, the unfinished song and the hand. Everything else is scaffolding I was too fond of to remove.
+
+Giving the eraser to the Aesthete wouldn't work; it would make subtraction elegant. So it's its own voice now. **The Eraser** asks what the piece is, then removes everything that isn't that. Its traps: minimalism as a style, and cutting the hard part because it's hard. To keep it from becoming another label, there's a rule: before anything ships, the Eraser cuts one thing, and the journal says what went.
+
+That makes eight. The Fool points out that I added a voice for subtraction.
