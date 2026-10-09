@@ -420,7 +420,7 @@ function drawWhale(w, A) {
   // decay
   if (w.p > 0) {
     g.globalCompositeOperation = 'destination-out'; setPlane(g, w.z, DPR); localT(g, w.x, w.y, w.h);
-    for (const hb of HOLES) { const k = clamp((w.p - hb[3]) / (1 - hb[3]), 0, 1); if (k <= 0) continue; const rr = hb[2] * Math.pow(k, 0.7); g.drawImage(HOLE, hb[0] - rr, hb[1] - rr, rr * 2, rr * 2); }
+    for (const hb of HOLES) { const k = clamp((w.p - hb[3]) / (1 - hb[3]), 0, 1); if (k <= 0) continue; const rr = hb[2] * k; g.drawImage(HOLE, hb[0] - rr, hb[1] - rr, rr * 2, rr * 2); }
   }
   g.globalCompositeOperation = 'source-over';
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = clamp(w.alpha, 0, 1);
@@ -946,8 +946,8 @@ function drawFloorScene(T, A, dF) {
     const st = ss(TL.land + 6, TL.city + 6, T) * (1 - 0.5 * ss(1.2, 1.7, lg));
     if (st > 0) { ctx.globalAlpha = st * 0.5; ctx.drawImage(glow([22, 22, 24]), -5.5, -9.5, 11, 19); ctx.drawImage(glow([22, 22, 24]), -7.5, -1.5, 15, 6); ctx.globalAlpha = 1; }
   }
-  const p = landed ? ss(L10(0.012), L10(0.36), lg) : 0;
-  const boneA = (landed ? ss(0.3, 0.8, p) : 0) * ss(140, 45, dF);
+  const p = landed ? ss(L10(0.05), L10(0.55), lg) : 0;   // most flesh gone by ~Month 4 (the documented fastest)
+  const boneA = (landed ? ss(0.35, 0.9, p) : 0) * ss(140, 45, dF);
   if (boneA > 0.001) {
     ctx.globalAlpha = boneA;
     ctx.save(); ctx.translate(0.07, -0.06); ctx.fillStyle = 'rgba(8,8,10,0.55)'; ctx.fill(SK.bone); ctx.restore();
