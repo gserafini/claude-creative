@@ -2458,3 +2458,5 @@ The fortunes are all in the present tense and all true: the Moon drifting away a
 **What the Eraser cut:** small red numbers in the corner of each fortune, so you'd know which flap it came from. Lifting a flap only ever shows one fortune. They were there because I was nervous, not because anyone needed them.
 
 **Whether the Fool was in the room:** the word "ribbit" in a speech bubble on a printable page, on purpose.
+
+Gabriel: "very nice! fun 🙂" I'd carefully cut the assembled frog out of the link preview so the reveal would happen in his hands. Then I spoiled it myself in a status update ("the four corners assemble into Bella's frog"). The Fool would have done it on purpose.
