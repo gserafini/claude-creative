@@ -147,7 +147,8 @@ const CK = () => [
 let cityD, cityFX, cityFY;
 const riseZ = spline([[240, FLOOR - 24], [244, FLOOR - 42], [247.5, FLOOR - 95], [250.5, FLOOR - 250], [253.5, 700], [256.2, 230], [258.6, 110], [261.5, 27], [264, 12.5], [266.5, 4.2], [268.5, -0.3], [269.6, -8], [271.3, -12.5], [276, -15], [282, -17.5], [292, -22], [306, -30]]);
 const ywZs = spline([[248, 175], [262, 42], [266, 24], [269, 13], [271.3, 0.65], [276, 1.1], [279.2, 1.5]]);
-function ywZ(T) { return T < TL.fluke ? ywZs(T) : lerp(1.5, 32, ss(TL.fluke, TL.fluke + 11, T)); }
+function ywZ(T) { return T < TL.fluke ? ywZs(T) : T < TL.fluke + 2.6 ? lerp(1.5, 3.5, ss(TL.fluke, TL.fluke + 2.6, T)) : lerp(3.5, 30, ss(TL.fluke + 2.6, TL.fluke + 9, T)); }
+function flukeUp(T) { const t = T - TL.fluke; return t < 0.6 ? 0 : ss(0.6, 2.4, t) * (1 - ss(3.4, 5.2, t)); }
 
 /* ================================================================ canvas */
 const cv = document.getElementById('c'); const ctx = cv.getContext('2d');
@@ -364,6 +365,7 @@ function drawWhale(w, A) {
   const g = WL.g, L = w.L;
   g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; g.clearRect(0, 0, WL.c.width, WL.c.height);
   const s = setPlane(g, w.z, DPR); localT(g, w.x, w.y, w.h);
+  if (w.pitch) { const ty = -0.365 * L; g.translate(0, ty); g.scale(1, Math.cos(w.pitch)); g.translate(0, -ty); }
   const sh = buildWhale(L, w.ph, w.amp, w.flip, w.chord, w.young ? 0.2 : 1);
   w._sh = sh;
   const bc = mixc(DEEP, w.young ? YNG_BODY : OLD_BODY, w.light), fc = mixc(DEEP, w.young ? YNG_FLIP : OLD_FLIP, w.light * 0.97), hc = w.young ? YNG_HI : OLD_HI;
@@ -371,7 +373,7 @@ function drawWhale(w, A) {
   g.fillStyle = css(dark); g.fill(sh.flL); g.fill(sh.flR);
   g.fillStyle = css(w.p ? mixc(fc, [40, 40, 42], w.p) : fc, 0.94); g.fill(sh.flL); g.fill(sh.flR);
   g.strokeStyle = css(mixc(fc, [255, 255, 255], 0.5), 0.4 * w.light * (w.p ? 1 - w.p : 1)); g.lineWidth = 0.01 * L; g.stroke(sh.flL); g.stroke(sh.flR);
-  g.fillStyle = css(dark); g.fill(sh.body); g.fill(sh.flukes);
+  g.fillStyle = css(dark); g.fill(sh.body); if (!w.noFlukes) g.fill(sh.flukes);
   g.globalCompositeOperation = 'source-atop';
   g.lineCap = 'round'; g.lineJoin = 'round';
   // skin mottling (moves with the whale)
@@ -609,6 +611,7 @@ function sceneState(T, A) {
   yw.h = yh; yw.x = y0[0] + Math.sin(yh) * ysp * tt; yw.y = y0[1] + Math.cos(yh) * ysp * tt;
   yw.z = ywZ(T); yw.amp = 1 - 0.7 * ss(TL.fluke, TL.fluke + 3, T); yw.ph = A * TAU * 0.27 + 1.3; yw.flip = 0.62 + 0.07 * Math.sin(yw.ph + 0.7) * yw.amp;
   yw.chord = 0.8 + 0.2 * Math.cos(yw.ph) * yw.amp; yw.p = 0;
+  yw.pitch = T > TL.fluke ? 1.25 * ss(TL.fluke, TL.fluke + 3, T) : 0; yw.noFlukes = T > TL.fluke + 0.6 && T < TL.fluke + 6;
   // camera
   let z, fx, fy, rot = 0;
   if (T < 39.4) z = lerp(-20, -15, sm(T / 39.4));
@@ -624,7 +627,7 @@ function sceneState(T, A) {
     if (T > 251) {
       const k = ss(251, 259, T);
       let tx = yw.x + Math.sin(yh) * 1.2, ty = yw.y + Math.cos(yh) * 1.2;
-      if (T > TL.fluke) { const hold = ss(TL.fluke, TL.fluke + 4, T); const tail = flukePos(yw, TL.fluke + 3.6); tx = lerp(tx, tail[0], hold); ty = lerp(ty, tail[1], hold); }
+      if (T > TL.fluke) { const hold = ss(TL.fluke - 0.5, TL.fluke + 2.5, T); const tail = flukePos(yw, TL.fluke + 3.6); tx = lerp(tx, tail[0], hold); ty = lerp(ty, tail[1], hold); }
       fx = lerp(fx, tx, k); fy = lerp(fy, ty, k);
     }
     if (T < TL.rise + 12) rot = lerp(0, SK_POS.h - 0.12, ss(TL.land, TL.city + 18, T));
@@ -726,7 +729,7 @@ function drawAbove(T, A) {
   // fluke print
   if (T > TL.fluke + 3) {
     const k = ss(TL.fluke + 3, TL.fluke + 5, T) * (1 - ss(TL.fluke + 14, TL.fluke + 30, T));
-    if (k > 0.005) { const fp = flukePos(YW, TL.fluke + 3.6); setPlane(ctx, 0, DPR); localT(ctx, fp[0], fp[1], YW.h); ctx.fillStyle = css(c0, 0.55 * k); ctx.beginPath(); ctx.ellipse(0, 0, 2.4, 3.6, 0, 0, TAU); ctx.fill(); ctx.strokeStyle = css([170, 220, 230], 0.16 * k); ctx.lineWidth = 0.12; ctx.stroke(); ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
+    if (k > 0.005) { const fp = flukePos(YW, TL.fluke + 3.6); setPlane(ctx, 0, DPR); localT(ctx, fp[0], fp[1] , YW.h); ctx.scale(1, 1.5); const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, 2.6); gr.addColorStop(0, css(mixc(c0, [20, 90, 120], 0.25), 0.7 * k)); gr.addColorStop(0.7, css(c0, 0.5 * k)); gr.addColorStop(1, css(c0, 0)); ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(0, 0, 2.6, 0, TAU); ctx.fill(); ctx.setTransform(DPR, 0, 0, DPR, 0, 0); }
   }
   // sun glint haze + glitter
   const gx = W * 0.66, gy = H * 0.3, sig = Math.min(W, H) * 0.55;
@@ -779,23 +782,21 @@ function drawBlow(T, tb, w, rainbow) {
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.drawImage(ML.c, 0, 0); ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 }
 function drawRaisedFlukes(T, A) {
-  const t = T - TL.fluke; if (t < 0.6 || t > 5.2) return;
-  const up = ss(0.6, 2.4, t) * (1 - ss(3.4, 5.2, t));
-  const fp = flukePos(YW, Math.min(T, TL.fluke + 3.6)), h = YW.h;
-  const z = -3.2 * up, L = YW.L;
-  setPlane(ctx, z, DPR); localT(ctx, fp[0], fp[1], h);
-  const chord = lerp(0.9, 0.22, up), spread = 1;
-  const pts = flukePts([0, 0], 0, -1, L, chord, 0.2, spread);
-  const p = new Path2D(); smoothClosed(p, pts);
-  ctx.globalAlpha = clamp(up * 1.4, 0, 1);
-  ctx.fillStyle = css([28, 36, 46]); ctx.fill(p);
-  ctx.strokeStyle = css([200, 230, 240], 0.45); ctx.lineWidth = 0.05; ctx.stroke(p);
-  // cascading water
-  ctx.fillStyle = 'rgba(235,248,252,0.75)';
-  for (let i = 0; i < 70; i++) { const ph = (t * 0.9 + hash(i + 77)) % 1, lat = (hash(i + 5) * 2 - 1) * 0.16 * L, back = 0.12 * L * chord + ph * 0.6; const rr = 0.03 + 0.04 * hash(i + 9); ctx.globalAlpha = (1 - ph) * up * 0.8; ctx.beginPath(); ctx.arc(lat, -back, rr, 0, TAU); ctx.fill(); }
+  const t = T - TL.fluke; if (t < 0.6 || t > 6) return;
+  const up = flukeUp(T), out = ss(0.6, 1.4, t) * (1 - ss(4.4, 5.6, t));
+  if (out <= 0.003) return;
+  const fp = flukePos(YW, Math.min(T, TL.fluke + 3.6)), L = YW.L;
+  setPlane(ctx, YW.z, DPR); localT(ctx, fp[0], fp[1], YW.h);
+  const k = 1 + 0.3 * up; ctx.scale(k, k);
+  const chord = lerp(0.85, 0.24, up);
+  const p = new Path2D(); smoothClosed(p, flukePts([0, 0.005 * L], 0, -1, L, chord, 0.2, 1));
+  ctx.globalAlpha = out;
+  ctx.fillStyle = css(mixc([40, 66, 82], [26, 34, 44], ss(0.6, 1.6, t))); ctx.fill(p);
+  ctx.strokeStyle = css([210, 236, 244], 0.35 * up); ctx.lineWidth = 0.05; ctx.stroke(p);
+  ctx.fillStyle = 'rgba(235,248,252,0.8)';
+  for (let i = 0; i < 70; i++) { const ph = (t * 0.9 + hash(i + 77)) % 1, lat = (hash(i + 5) * 2 - 1) * 0.16 * L, back = 0.12 * L * chord + ph * 0.7; const rr = 0.03 + 0.04 * hash(i + 9); ctx.globalAlpha = (1 - ph) * up * 0.8 * out; ctx.beginPath(); ctx.arc(lat, -back, rr, 0, TAU); ctx.fill(); }
   ctx.globalAlpha = 1; ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 }
-
 /* ================================================================ drawing: below */
 function drawBelow(T, A, vz) {
   const [c0, c1] = bgAt(cam.z);
