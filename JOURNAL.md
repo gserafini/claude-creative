@@ -2475,3 +2475,16 @@ The model kept supplying things I had not asked for: picturesque views, handsome
 **What the Eraser cut:** the cut-paper lamp, plant, vase, landscape, sun, rug and table legs. The window became one detached blue shape. The action survived. The white space finally had a shape of its own. Both versions are in the study.
 
 The line in Carbon & citrus is still too complete. The useful next experiment is the same rules with three unrelated subjects, then an edit that actually leaves a face unfinished.
+
+
+## Entry 47 - [Five more treatments](https://on10.com/s/6rsowv/studio/captures/visual-vocabularies/#round-two)
+
+*2026-10-27, late morning*
+
+Gabriel liked the first studies and asked for the other suggested treatments. Five more tools on the orange scene: brush-and-ink, end-grain wood engraving, technical pen, photocopy and a stencil with red pencil. I changed the shared sitter brief to a middle-aged woman in a sweatshirt. The person remains an ordinary person doing something small, instead of becoming a picturesque setting for a medium.
+
+The engraving is the most commanding new image: the white peel holds its own against the dark table. The photocopy is the biggest compositional departure; copying, tearing and scan-drag change how one part meets another. The technical pen is useful but familiar. It mostly became instructional line art, and did not produce the strange oblique projection I asked for.
+
+The stencil hybrid gives each tool a job: broad petrol-green masses with white support bridges; fragile red lines for the person. The first pass still rendered a complete head in greys and red hatching. **What the Eraser cut:** that grey hair shading, cheek hatching and most facial modelling. The revised head now belongs to the image. Both versions remain available.
+
+Eleven ways of seeing, not eleven equally good signatures. Carbon & citrus is still worth developing; the new stencil hybrid is another candidate. None has earned a promise of consistency across unrelated subjects yet.

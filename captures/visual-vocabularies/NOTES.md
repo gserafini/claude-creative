@@ -1,4 +1,4 @@
-# One orange. Six ways of seeing.
+# One orange. Eleven ways of seeing.
 
 27 October 2026. Initial visual vocabulary study requested by Gabriel.
 
@@ -37,3 +37,24 @@ A first image-readiness check waited for every image, including the lazy-loaded 
 - [x] Tested gallery at widths 1440, 768, 390 and 320 pixels: six studies, 13 image elements loaded, no horizontal overflow. Prompt and before/after disclosures work. No console errors after the comparison favicon fix.
 - [x] Inspected the 1200 × 630 preview, desktop and phone screenshots. The comparison sheet fits the preview without clipping.
 - [x] Verified the live page in a fresh anonymous browser context: HTTP 200, all 13 image elements loaded, six prompt records, working study navigation and disclosure, preview HTTP 200, one studio-index listing and zero console errors. Existing public visibility was preserved.
+
+
+## Round two: five more treatments
+
+Gabriel asked to continue with the other suggested treatments: brush-and-ink, end-grain wood engraving, technical pen, photocopy and a stencil hybrid. All five are now represented by studies 07–11. The shared sitter brief changes to a contemporary middle-aged woman with short greying hair and a plain sweatshirt. This remains a scene comparison, not an identity-locked portrait series.
+
+Wood engraving is the most commanding new image. Photocopy changes the composition most. Industrial stencil + red pencil is the most promising new hybrid. Technical pen is clear and useful for explanation, but the result is familiar instructional line art and does not achieve the strange oblique projection requested. Brushwork gives strong black masses but still over-completes the face and window.
+
+The Eraser removed grey hair shading, cheek hatching and most facial modelling from study 11. The original remains in its before/after disclosure; the simplified revision is the primary image.
+
+All new images are 1254 × 1254 pixels. Exact round-two generation and edit prompts are in [prompts-round-two.json](prompts-round-two.json); the combined set in [prompts.json](prompts.json) now holds eleven studies. The original six-study sheet stays at [proof.html](proof.html). The second sheet is [proof-two.html](proof-two.html), and [proof-all.html](proof-all.html) compares all eleven.
+
+Additional material reference: [National Portrait Gallery: Wood engraving](https://www.npg.org.uk/collections/explore/glossary-of-art-terms/wood-engraving.php).
+
+### Round-two verification
+
+- [x] Generate and visually inspect all five new studies and the stencil revision.
+- [x] Parse modified HTML and JSON after writing.
+- [x] Tested eleven-study gallery at widths 1440, 768, 390 and 320: all 24 image elements loaded, no horizontal overflow, working round-two navigation, prompt disclosure and stencil before/after. Both new sheets fit tablet and phone widths. Zero console errors.
+- [x] Inspected both 1200 × 630 preview images and the updated phone screenshot; both sheets fit without clipping.
+- [x] Verified the live page anonymously: HTTP 200, eleven studies, all 24 image elements loaded, five new thumbnail destinations, eleven combined and five round-two prompt records, working stencil before/after, all three sheets and previews HTTP 200, one updated studio listing, zero console errors. Public visibility was preserved.

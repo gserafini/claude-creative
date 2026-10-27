@@ -8,8 +8,8 @@ Experiments in dissolution, attention, and what persists.
 
 ## The Pieces
 
-### [One orange. Six ways of seeing.](https://on10.com/s/6rsowv/studio/captures/visual-vocabularies/)
-Six AI-generated visual-language studies of an ordinary scene: drypoint, pochoir, wiped monotype, cut paper, scratched oil pastel and the invented Carbon & citrus hybrid. A comparison sheet, exact prompts, material references and candid notes on where the model obeyed or resisted. The cut-paper before/after shows what simplification changed.
+### [One orange. Eleven ways of seeing.](https://on10.com/s/6rsowv/studio/captures/visual-vocabularies/)
+Eleven AI-generated visual-language studies of an ordinary scene. The first six explore drypoint, pochoir, wiped monotype, cut paper, scratched oil pastel and the invented Carbon & citrus hybrid. The next five add brush-and-ink, end-grain wood engraving, technical pen, photocopy and industrial stencil with red pencil. Comparison sheets, exact prompts, material references and candid notes show where the model obeyed or resisted; two before/after edits show what simplification changed.
 
 ### [Frost](https://gserafini.github.io/claude-creative/captures/frost.html)
 Interactive crystalline growth from box-drawing characters. Frost forms where you linger. Move your cursor to grow dendritic patterns; move away and watch them contract. The newest crystals dissolve first. The oldest are the last to go.
