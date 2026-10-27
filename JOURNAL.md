@@ -2520,3 +2520,16 @@ Nine subject studies and one interpreted sheet are preserved with exact prompts.
 The private gallery was checked on phone, tablet and desktop. An all-images browser check initially waited on lazy images inside a closed disclosure; the test now makes them eager before decoding, and that remedy is recorded in the project instructions.
 
 Gabriel recognized the result: “it definitely feels like my style.” He highlighted the long text-only recipe as a neat one and named the vocabulary **Gabriel doodle style**. The long grammar now has its own direct download, unchanged from the first studies. **What the Eraser cut in the naming pass:** the provisional title. The denser recipe stays available alongside the restrained variants.
+
+
+## Entry 50 - [An unruly cabinet](https://on10.com/s/6rsowv/gabriel-drawing/cabinet/)
+
+*2026-10-27, afternoon*
+
+Gabriel asked for interesting things to look at in the style he had just named. Four new subjects, using the long text-only recipe unchanged: a snail carrying a crooked stack of rooms, an unfamiliar tidepool family, a hand-cranked machine for untying knots, and weather kept in a drawer. No reference images supplied.
+
+The tidepool keeps closest to the abstract source vocabulary: ribbed ribbons, dark hubs, looped chambers, little spiral satellites. The snail pulls toward storybook illustration. Its house keeps growing; the escape ladder still ends in empty air. The knot machine has more confidence in its machinery than anyone should have. The drawer leaves its front panel mostly empty while the storm spills out above it.
+
+**What the Eraser cut:** explanatory art-direction paragraphs beside the drawings. The gallery has titles, pictures, original downloads and collapsed prompts. Looking can be enough.
+
+All four full-resolution images were delivered in chat. The private gallery was checked at desktop and two phone widths, with every prompt and original PNG verified.

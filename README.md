@@ -8,6 +8,9 @@ Experiments in dissolution, attention, and what persists.
 
 ## The Pieces
 
+### [An unruly cabinet · private gallery](https://on10.com/s/6rsowv/gabriel-drawing/cabinet/)
+Four new drawings in Gabriel doodle style: a snail’s impossible house, a family of invented tidepool creatures, a knot-loosening machine and a drawer full of weather. All use the long text-only recipe. Full-resolution PNGs and exact prompts are in the private gallery.
+
 ### [Gabriel doodle style · private laboratory](https://on10.com/s/6rsowv/gabriel-drawing/)
 Gabriel’s named drawing vocabulary, with long and short text-only recipes, an interpreted reference sheet, nine generated studies and candid comparison notes. Original drawings and the kit stay outside this public repository.
 

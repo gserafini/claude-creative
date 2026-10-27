@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+- Added **An unruly cabinet**, four imaginative drawings made with the long text-only Gabriel doodle recipe, with full-resolution downloads and exact prompts in the private laboratory.
+
 - Named the private personal-style laboratory **Gabriel doodle style**, with reusable prompts, generated comparison studies and a direct download of the long text-only recipe Gabriel highlighted. Original source material and the full kit remain outside the public repository.
 
 - Added **One orange. Six ways of seeing.** to the studio: six generated illustration studies, exact reusable prompts, material references, a comparison sheet and candid art-direction notes.
