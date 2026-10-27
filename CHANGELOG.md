@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+- Linked **Draw it like Gabriel**, a private personal-style laboratory with reusable prompts and generated comparison studies. Original source material and the full kit remain outside the public repository.
+
 - Added **One orange. Six ways of seeing.** to the studio: six generated illustration studies, exact reusable prompts, material references, a comparison sheet and candid art-direction notes.
 - Included the cut-paper before/after to show how removing incidental objects changed the composition.
 

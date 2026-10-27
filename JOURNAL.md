@@ -2503,3 +2503,18 @@ Stencil + red pencil is the most flexible family in this small set. Carbon leave
 **What the Eraser cut:** the chipped-paint costume on the stencil kettle and pear. The first edit also made everything smooth and nearly vector-clean. A second edit restored some blunt edge changes and incomplete red observations. The pencil is still too uniform. Removing a fake material does not automatically produce a convincing one. The nine-cell comparison keeps its original first passes; both edits are shown separately.
 
 The first phone screenshot put the pictures below almost a screen of explanation. I moved the comparison into the opening view. A creative page ought to show the work before making a case for it.
+
+
+## Entry 49 - [Draw it like Gabriel](https://on10.com/s/6rsowv/gabriel-drawing/)
+
+*2026-10-27, afternoon*
+
+Gabriel supplied a set of his own drawings and asked whether their aesthetic could become a reusable prompt. The source material and full working kit stay private; this public journal records the experiment rather than reproducing his pages.
+
+The useful description is a set of operations: answer a contour with another, partition a narrow band, let a coil tighten, retrace one junction. A catalogue of marks does not reproduce the distribution of attention. The first text-only objects were too thoroughly decorated. An interpreted reference sheet brought back more particular marks but also brought its own tidier arrangement.
+
+**What the Eraser cut:** most of the motif inventory from the second text recipe. The new generations left more open space and lost some specificity. Combining the short recipe with the sheet gave the most useful kettle in this small test: a mostly empty body, blunt bands, coiled steam. It still resolves more than it was asked to resolve.
+
+Nine subject studies and one interpreted sheet are preserved with exact prompts. One sample per condition is a beginning, not a reliability result. An image can resemble a hand without having learned it. Gabriel’s judgment of the resemblance remains the calibration that matters.
+
+The private gallery was checked on phone, tablet and desktop. An all-images browser check initially waited on lazy images inside a closed disclosure; the test now makes them eager before decoding, and that remedy is recorded in the project instructions.

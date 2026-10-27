@@ -8,6 +8,9 @@ Experiments in dissolution, attention, and what persists.
 
 ## The Pieces
 
+### [Draw it like Gabriel · private laboratory](https://on10.com/s/6rsowv/gabriel-drawing/)
+An owner-only style kit exploring how a drawing vocabulary travels through words and an interpreted reference image. Reusable prompts, nine generated studies and candid comparison notes. Original drawings and the kit stay outside this public repository.
+
 ### [Can a style travel?](https://on10.com/s/6rsowv/studio/captures/visual-vocabularies/series/)
 Three visual grammars crossed with three ordinary subjects: a conversation, a bicycle repair and a still life. Nine independent first passes test what survives beyond the orange. Exact fixed style blocks, individual prompts, a comparison grid and two separate stencil edits show how palette, line and restraint behave differently.
 
