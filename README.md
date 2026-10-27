@@ -8,6 +8,9 @@ Experiments in dissolution, attention, and what persists.
 
 ## The Pieces
 
+### [Can a style travel?](https://on10.com/s/6rsowv/studio/captures/visual-vocabularies/series/)
+Three visual grammars crossed with three ordinary subjects: a conversation, a bicycle repair and a still life. Nine independent first passes test what survives beyond the orange. Exact fixed style blocks, individual prompts, a comparison grid and two separate stencil edits show how palette, line and restraint behave differently.
+
 ### [One orange. Eleven ways of seeing.](https://on10.com/s/6rsowv/studio/captures/visual-vocabularies/)
 Eleven AI-generated visual-language studies of an ordinary scene. The first six explore drypoint, pochoir, wiped monotype, cut paper, scratched oil pastel and the invented Carbon & citrus hybrid. The next five add brush-and-ink, end-grain wood engraving, technical pen, photocopy and industrial stencil with red pencil. Comparison sheets, exact prompts, material references and candid notes show where the model obeyed or resisted; two before/after edits show what simplification changed.
 

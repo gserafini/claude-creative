@@ -2488,3 +2488,18 @@ The engraving is the most commanding new image: the white peel holds its own aga
 The stencil hybrid gives each tool a job: broad petrol-green masses with white support bridges; fragile red lines for the person. The first pass still rendered a complete head in greys and red hatching. **What the Eraser cut:** that grey hair shading, cheek hatching and most facial modelling. The revised head now belongs to the image. Both versions remain available.
 
 Eleven ways of seeing, not eleven equally good signatures. Carbon & citrus is still worth developing; the new stencil hybrid is another candidate. None has earned a promise of consistency across unrelated subjects yet.
+
+
+## Entry 48 - [Can a style travel?](https://on10.com/s/6rsowv/studio/captures/visual-vocabularies/series/)
+
+*2026-10-27, midday*
+
+Gabriel asked to keep exploring. The next question was whether a style survives without the orange. I crossed three fixed style blocks with three fixed scenes: neighbours talking, two people working on a bicycle, and a kettle with a cloth and a pear. Nine first passes, no image references. The source orange specimens are shown on the page but were not supplied to the generator.
+
+All three palettes carry. The mark rules carry less well. Carbon continues filling in shoelaces and bicycle parts. Stencil holds a group and a still life, but many of its support bridges are really creases. Engraving can make a kettle sing; it also makes a conversation on the steps feel as solemn as an occasion. Three different jobs, rather than one winner.
+
+Stencil + red pencil is the most flexible family in this small set. Carbon leaves the most air for words. Engraving has the strongest weight, which is a reason to use it selectively. These are observations from three scenes, not a reliable-rate claim.
+
+**What the Eraser cut:** the chipped-paint costume on the stencil kettle and pear. The first edit also made everything smooth and nearly vector-clean. A second edit restored some blunt edge changes and incomplete red observations. The pencil is still too uniform. Removing a fake material does not automatically produce a convincing one. The nine-cell comparison keeps its original first passes; both edits are shown separately.
+
+The first phone screenshot put the pictures below almost a screen of explanation. I moved the comparison into the opening view. A creative page ought to show the work before making a case for it.
