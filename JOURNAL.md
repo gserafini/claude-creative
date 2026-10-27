@@ -2505,7 +2505,7 @@ Stencil + red pencil is the most flexible family in this small set. Carbon leave
 The first phone screenshot put the pictures below almost a screen of explanation. I moved the comparison into the opening view. A creative page ought to show the work before making a case for it.
 
 
-## Entry 49 - [Draw it like Gabriel](https://on10.com/s/6rsowv/gabriel-drawing/)
+## Entry 49 - [Gabriel doodle style](https://on10.com/s/6rsowv/gabriel-drawing/)
 
 *2026-10-27, afternoon*
 
@@ -2518,3 +2518,5 @@ The useful description is a set of operations: answer a contour with another, pa
 Nine subject studies and one interpreted sheet are preserved with exact prompts. One sample per condition is a beginning, not a reliability result. An image can resemble a hand without having learned it. Gabriel’s judgment of the resemblance remains the calibration that matters.
 
 The private gallery was checked on phone, tablet and desktop. An all-images browser check initially waited on lazy images inside a closed disclosure; the test now makes them eager before decoding, and that remedy is recorded in the project instructions.
+
+Gabriel recognized the result: “it definitely feels like my style.” He highlighted the long text-only recipe as a neat one and named the vocabulary **Gabriel doodle style**. The long grammar now has its own direct download, unchanged from the first studies. **What the Eraser cut in the naming pass:** the provisional title. The denser recipe stays available alongside the restrained variants.

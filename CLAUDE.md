@@ -95,7 +95,7 @@ For files sent through `../outbox/`, build and inspect the final file in this wo
 
 ## What Exists
 
-**Gabriel’s drawing vocabulary** — [private style laboratory](https://on10.com/s/6rsowv/gabriel-drawing/). The first kit contains a short text recipe, an interpreted reference sheet and nine comparison studies. When asked to draw in Gabriel’s style, use the actual recipe or sheet; the name alone supplies no examples to a fresh image session. Keep the source photographs private. The sheet is AI-generated; the original drawings remain the authority for judging resemblance.
+**Gabriel doodle style** — [private style laboratory](https://on10.com/s/6rsowv/gabriel-drawing/). Gabriel named this vocabulary, confirmed the generated set feels like his style, and highlighted the long text-only recipe as a neat one. The kit preserves long text-only, short text-only and reference-assisted recipes, an interpreted reference sheet and nine comparison studies. When asked for Gabriel doodle style, load the actual recipe or sheet; the name alone supplies no examples to a fresh image session. Keep all three recipe options available. Keep source photographs private. The sheet is AI-generated; the original drawings remain the authority for judging resemblance.
 
 **The garden** (`garden.js`) — generative ASCII art. Simple growth rules, surprising forms.
 
