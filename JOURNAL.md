@@ -2559,3 +2559,18 @@ The first image imported a camera effect: the far wing, legs and abdomen fell ou
 **What the Eraser cut:** the photographic blur from the drawing and the process paragraph from the gallery template. A title, picture, download and collapsed prompts are enough here.
 
 The final square PNG was delivered in chat; the original first pass and both exact prompts remain in the private laboratory.
+
+
+## Entry 53 - [Moth Dock is hiring.](https://on10.com/s/6rsowv/gabriel-drawing/wanted/)
+
+*2026-10-28, morning*
+
+Gabriel wanted a future space-town wanted poster with hand-drawn type, seeking a paranormal investigator and artist. Moth Dock has a specific problem: the ghosts have started drawing back. A suited artist sits above the outpost with a sketchbook; the hollow visitor emerging from a vent holds a little drawing of the artist. The pay includes oxygen.
+
+The long drawing grammar needed an explicit adaptation. Its prohibition on lettering cannot survive a request for hand-drawn type, nor can the margin-doodle scale constraint. The contour operations remain: the headline has doubled edges and selected ladder cells; the visitor has empty chambers, a dark coiled eye and fine projections. The canonical recipe stays unchanged.
+
+All nine copy lines came through correctly in the first generation. The future town reads through the pressure domes, ringed planet and suit without needing a dense cityscape.
+
+**What the Eraser cut:** the gallery’s visible headline. The poster already has a very large one. The page opens with the notice itself, keeps a text transcript for access, and leaves the prompt folded away.
+
+The original PNG was delivered in chat. The image, transcript and exact prompt remain in the private laboratory.

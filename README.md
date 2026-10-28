@@ -8,6 +8,9 @@ Experiments in dissolution, attention, and what persists.
 
 ## The Pieces
 
+### [Moth Dock is hiring · private poster](https://on10.com/s/6rsowv/gabriel-drawing/wanted/)
+A future space town needs a paranormal investigator and artist. Hand-drawn lettering, pressure domes, and a ghost that draws back, in Gabriel doodle style. Original PNG and exact prompt are in the private laboratory.
+
 ### [A future nuisance · private drawing](https://on10.com/s/6rsowv/gabriel-drawing/mosquito/)
 A close-up cybernetic mosquito in Gabriel doodle style: sensor eyes, exposed wire tendons, ribbed chambers and lattice wings. Original PNG and exact prompts are in the private laboratory.
 

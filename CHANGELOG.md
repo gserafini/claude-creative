@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-28
+
+- Added **Moth Dock is hiring**, a future space-town wanted poster for a paranormal investigator and artist, with hand-drawn lettering in Gabriel doodle style. Original image, text transcript and exact prompt are preserved in the private laboratory.
+
 ## 2026-10-27
 
 - Added **A future nuisance**, a close-up cybernetic mosquito in Gabriel doodle style, with original downloads and exact prompts in the private laboratory.
