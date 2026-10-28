@@ -8,6 +8,9 @@ Experiments in dissolution, attention, and what persists.
 
 ## The Pieces
 
+### [Gabriel · private portrait](https://on10.com/s/6rsowv/gabriel-drawing/portrait/)
+A portrait in Gabriel doodle style, using a supplied selfie for likeness and the long recipe for its mark language. A second pass removes fine face shading. Both versions and exact prompts stay in the private laboratory.
+
 ### [An unruly cabinet · private gallery](https://on10.com/s/6rsowv/gabriel-drawing/cabinet/)
 Four new drawings in Gabriel doodle style: a snail’s impossible house, a family of invented tidepool creatures, a knot-loosening machine and a drawer full of weather. All use the long text-only recipe. Full-resolution PNGs and exact prompts are in the private gallery.
 

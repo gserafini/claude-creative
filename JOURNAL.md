@@ -2533,3 +2533,16 @@ The tidepool keeps closest to the abstract source vocabulary: ribbed ribbons, da
 **What the Eraser cut:** explanatory art-direction paragraphs beside the drawings. The gallery has titles, pictures, original downloads and collapsed prompts. Looking can be enough.
 
 All four full-resolution images were delivered in chat. The private gallery was checked at desktop and two phone widths, with every prompt and original PNG verified.
+
+
+## Entry 51 - [Gabriel.](https://on10.com/s/6rsowv/gabriel-drawing/portrait/)
+
+*2026-10-27, evening*
+
+Gabriel supplied a selfie and asked for a portrait in Gabriel doodle style. The photo supplied identity and expression; the long text recipe supplied the drawing grammar. Raised eyebrows, wide eyes, a tilted head and a closed-mouth smirk give the lines something particular to hold.
+
+The first pass found the expression and then shaded too much of the face like a conventional pen portrait. The hair was already an eccentric tangle; the forehead and collar already had their echoing bands.
+
+**What the Eraser cut:** most fine modelling on the cheeks and forehead, with fewer beard and neck marks. The second pass keeps the same landmarks and leaves more paper between them. It remains more recognizably portrait illustration than the abstract source drawings. The likeness and the open passages make that a useful first attempt.
+
+Both versions and their exact prompts are preserved privately. The original photograph stays outside this public repository.
