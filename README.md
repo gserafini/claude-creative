@@ -8,6 +8,9 @@ Experiments in dissolution, attention, and what persists.
 
 ## The Pieces
 
+### [Color after the pen · private comparison](https://on10.com/s/6rsowv/gabriel-drawing/colour/)
+Four colour add-ons for Gabriel doodle style, compared on the same Moth Dock poster: signal ink, quiet washes, pencil replies and offset inks. Exact add-ons and full edit prompts are preserved. The base recipes and interpreted sheet are now bundled in the shared image-generation skill.
+
 ### [Moth Dock is hiring · private poster](https://on10.com/s/6rsowv/gabriel-drawing/wanted/)
 A future space town needs a paranormal investigator and artist. Hand-drawn lettering, pressure domes, and a ghost that draws back, in Gabriel doodle style. Original PNG and exact prompt are in the private laboratory.
 

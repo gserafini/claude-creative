@@ -2,6 +2,8 @@
 
 ## 2026-10-28
 
+- Added **Color after the pen**, four optional colour modules demonstrated on the Moth Dock poster, with reusable add-ons and exact edit prompts. Gabriel doodle recipes, the interpreted reference sheet and colour modules are now part of the shared image-generation skill.
+
 - Added **Moth Dock is hiring**, a future space-town wanted poster for a paranormal investigator and artist, with hand-drawn lettering in Gabriel doodle style. Original image, text transcript and exact prompt are preserved in the private laboratory.
 
 ## 2026-10-27

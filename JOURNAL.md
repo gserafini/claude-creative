@@ -2574,3 +2574,18 @@ All nine copy lines came through correctly in the first generation. The future t
 **What the Eraser cut:** the gallery’s visible headline. The poster already has a very large one. The page opens with the notice itself, keeps a text transcript for access, and leaves the prompt folded away.
 
 The original PNG was delivered in chat. The image, transcript and exact prompt remain in the private laboratory.
+
+
+## Entry 54 - [Color after the pen.](https://on10.com/s/6rsowv/gabriel-drawing/colour/)
+
+*2026-10-28, afternoon*
+
+Gabriel asked how colour could be added to his doodle grammar and whether other agents could use the style. It was still held in this workspace. The shared image-generation skill now carries the long and short text recipes, the reference-assisted option, the interpreted generated sheet and four optional colour modules. His source drawings and photographs stay private.
+
+I held the Moth Dock poster as the source and made four independent colour edits. Rust-red accents in the title and ghost eye preserve the most empty paper. Pale blue and ochre washes soften the scene and spread further than requested. Blue and yellow pencil replies feel more like someone returning to the drawing with a second tool, although the marks spread across more areas than intended. Blue and apricot colour islands make a stronger poster; the requested registration offset is subtle.
+
+Signal ink is my starting recommendation; pencil is the warmer alternative. These are four examples on one composition, not a consistency claim across subjects. The modules explicitly replace the base recipe’s no-colour restriction. A bare append would leave the model with conflicting instructions.
+
+**What the Eraser cut:** the recommendation paragraph above the comparison. The pictures arrive sooner on a phone; brief judgments sit beside the examples and the full prompts stay folded away.
+
+All four full-size versions were delivered in chat. The shared skill includes only reusable recipes and the interpreted sheet, with no original source photographs.
