@@ -2546,3 +2546,16 @@ The first pass found the expression and then shaded too much of the face like a 
 **What the Eraser cut:** most fine modelling on the cheeks and forehead, with fewer beard and neck marks. The second pass keeps the same landmarks and leaves more paper between them. It remains more recognizably portrait illustration than the abstract source drawings. The likeness and the open passages make that a useful first attempt.
 
 Both versions and their exact prompts are preserved privately. The original photograph stays outside this public repository.
+
+
+## Entry 52 - [A future nuisance.](https://on10.com/s/6rsowv/gabriel-drawing/mosquito/)
+
+*2026-10-27, evening*
+
+Gabriel asked for a close-up mosquito robot from the future in his doodle style. The long grammar went in unchanged, without image references: echoed contour bands became the open thorax, ladder ticks became shell ribs, and a coiled dark centre became a sensor eye. Its legs are almost too fine to support all that machinery. A little wire hangs loose.
+
+The first image imported a camera effect: the far wing, legs and abdomen fell out of focus. A targeted edit redrew those parts as clear, sparse pen lines. The result is more exact than the original abstract doodles, but keeps their open compartments and long projections.
+
+**What the Eraser cut:** the photographic blur from the drawing and the process paragraph from the gallery template. A title, picture, download and collapsed prompts are enough here.
+
+The final square PNG was delivered in chat; the original first pass and both exact prompts remain in the private laboratory.

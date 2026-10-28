@@ -2,6 +2,8 @@
 
 ## 2026-10-27
 
+- Added **A future nuisance**, a close-up cybernetic mosquito in Gabriel doodle style, with original downloads and exact prompts in the private laboratory.
+
 - Added a private **Gabriel doodle style portrait**, preserving the supplied selfie’s expression, with the first pass, a less shaded refinement and exact prompts.
 
 - Added **An unruly cabinet**, four imaginative drawings made with the long text-only Gabriel doodle recipe, with full-resolution downloads and exact prompts in the private laboratory.

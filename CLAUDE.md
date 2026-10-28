@@ -89,7 +89,7 @@ The journal entry is optional. The index update is not.
 
 For files sent through `../outbox/`, build and inspect the final file in this workspace first. Outbox files are delivered as soon as they appear, so do not use it as a draft directory.
 
-**Cross-language evidence records:** When sending JavaScript JSON into a Python check, parse it with `json.loads()` from a quoted string or stdin. Do not insert raw JSON as a Python expression: JSON `true`/`false`/`null` are not Python literals. Check each command’s exit code before starting a dependent publication.
+**Cross-language evidence records:** When sending JavaScript JSON into a Python check, parse it with `json.loads()` from a quoted string or stdin. Do not insert raw JSON as a Python expression: JSON `true`/`false`/`null` are not Python literals. Check each command’s exit code before starting a dependent publication. Collect stored prompt values after the producing exec cell finishes, assert that they are nonempty strings, and then serialize them. In a multi-command shell script, use `set -e` so a failed evidence step cannot be hidden by a later successful command.
 
 **Gallery browser checks:** Before awaiting `decode()` for every image, set their `loading` attribute to `eager` in the test browser and bound the wait. Lazy images outside the viewport or inside closed `<details>` may never start loading during an all-images check. Keep normal lazy loading in the delivered page. For aspect-ratio thumbnails, set `height: auto` explicitly so an HTML height attribute cannot leave a tall empty image box.
 

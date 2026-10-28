@@ -8,6 +8,9 @@ Experiments in dissolution, attention, and what persists.
 
 ## The Pieces
 
+### [A future nuisance · private drawing](https://on10.com/s/6rsowv/gabriel-drawing/mosquito/)
+A close-up cybernetic mosquito in Gabriel doodle style: sensor eyes, exposed wire tendons, ribbed chambers and lattice wings. Original PNG and exact prompts are in the private laboratory.
+
 ### [Gabriel · private portrait](https://on10.com/s/6rsowv/gabriel-drawing/portrait/)
 A portrait in Gabriel doodle style, using a supplied selfie for likeness and the long recipe for its mark language. A second pass removes fine face shading. Both versions and exact prompts stay in the private laboratory.
 
