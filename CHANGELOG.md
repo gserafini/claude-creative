@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-29
+
+- Added **Mushrooms all the way down**, a square monochrome fractal mushroom mandala in Gabriel doodle style. The private laboratory preserves the original PNG, a more shaded first pass and both exact prompts.
+
 ## 2026-10-28
 
 - Added **Color after the pen**, four optional colour modules demonstrated on the Moth Dock poster, with reusable add-ons and exact edit prompts. Gabriel doodle recipes, the interpreted reference sheet and colour modules are now part of the shared image-generation skill.

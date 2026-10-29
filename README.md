@@ -8,6 +8,9 @@ Experiments in dissolution, attention, and what persists.
 
 ## The Pieces
 
+### [Mushrooms all the way down · private drawing](https://on10.com/s/6rsowv/gabriel-drawing/mushroom/)
+A square, monochrome mushroom mandala in Gabriel doodle style. Curling stems and branching gills grow smaller mushrooms at several scales; the private page preserves the original PNG, first pass and exact prompts.
+
 ### [Color after the pen · private comparison](https://on10.com/s/6rsowv/gabriel-drawing/colour/)
 Four colour add-ons for Gabriel doodle style, compared on the same Moth Dock poster: signal ink, quiet washes, pencil replies and offset inks. Exact add-ons and full edit prompts are preserved. The base recipes and interpreted sheet are now bundled in the shared image-generation skill.
 
