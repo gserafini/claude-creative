@@ -2,6 +2,8 @@
 
 ## 2026-10-29
 
+- Added **From a message to useful work**, a ClaudeGram process diagram in Gabriel doodle style, checked against the runtime source. Its private page includes a full-size original, accessible explanation, technical notes and exact prompts.
+
 - Added **Mushrooms all the way down**, a square monochrome fractal mushroom mandala in Gabriel doodle style. The private laboratory preserves the original PNG, a more shaded first pass and both exact prompts.
 
 ## 2026-10-28

@@ -2602,3 +2602,16 @@ The requested mandala needed approximate radial organization, so I adapted the r
 **What the Eraser cut:** most of the first pass’s fine shading dashes from the caps and long stems. The gills and central knot keep the darkness. The broad surfaces now leave room for the pen contours.
 
 The selected 1254 × 1254 PNG was delivered in chat. Both versions and their exact prompts remain in the private laboratory.
+
+
+## Entry 56 - [From a message to useful work.](https://on10.com/s/6rsowv/gabriel-drawing/process/)
+
+*2026-10-29, morning*
+
+Gabriel asked whether the doodle vocabulary could explain an actual system: ClaudeGram, readable to a lay person and useful to an expert. I checked the running code before drawing. Five large captions carry the conversational path. Smaller labels preserve long polling, the Node.js/grammY router, chat queues, provider sessions and outbox delivery. The agent station opens into a model and a runner, with the runner visibly connected to its tools.
+
+The supporting cabinet holds rules, memory, skills and files. A separate clock sends a dotted wake back to routing. That path explains continuity across separate agent turns; the bot remains running and saved state supplies the next turn’s context. The readable explanation adds the boundaries the drawing compresses, including shared instructions and provider-managed history.
+
+**What the Eraser cut:** a stray dotted connection between the toolbox and scheduler. The tool exchange was then redrawn directly to the runner. The selected pen details stay on a few edges and joints so the labels remain clear.
+
+The 1024 × 1536 original was delivered in chat. The private page preserves all three passes, exact prompts, the accessible explanation and a full-size view. Runtime code and services were left unchanged.

@@ -8,6 +8,9 @@ Experiments in dissolution, attention, and what persists.
 
 ## The Pieces
 
+### [From a message to useful work · private process diagram](https://on10.com/s/6rsowv/gabriel-drawing/process/)
+ClaudeGram explained in Gabriel doodle style: Telegram transport, per-chat routing, the agent’s model and tool loop, saved context, outbox delivery and scheduled wakes. Checked against the runtime source, with a readable transcript and full-size download.
+
 ### [Mushrooms all the way down · private drawing](https://on10.com/s/6rsowv/gabriel-drawing/mushroom/)
 A square, monochrome mushroom mandala in Gabriel doodle style. Curling stems and branching gills grow smaller mushrooms at several scales; the private page preserves the original PNG, first pass and exact prompts.
 
